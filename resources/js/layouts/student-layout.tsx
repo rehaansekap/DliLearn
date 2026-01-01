@@ -1,7 +1,8 @@
+import type { User } from '@/types';
 import { PropsWithChildren } from 'react';
 
 interface StudentLayoutProps {
-    user: any;
+    user: User;
     header?: React.ReactNode;
     fullWidth?: boolean;
 }
