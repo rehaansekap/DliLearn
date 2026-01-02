@@ -1,6 +1,7 @@
 import StudentLayout from '@/layouts/student-layout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { route } from 'ziggy-js';
 
 export default function Show({
     auth,

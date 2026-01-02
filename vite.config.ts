@@ -2,6 +2,8 @@ import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
+// import ziggy from 'laravel-vite-plugin/ziggy';
+
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -11,6 +13,7 @@ export default defineConfig({
             ssr: 'resources/js/ssr.tsx',
             refresh: true,
         }),
+        // ziggy(),
         react({
             babel: {
                 plugins: ['babel-plugin-react-compiler'],
