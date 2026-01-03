@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Mission;
 use App\Models\Submission;
+use App\Models\Reflection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -19,30 +20,40 @@ class MissionController extends Controller
 
         $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
 
-        if (!$groupMember) {
-            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
+        if ($groupMember) {
+            $progress = DB::table('group_progress')
+                ->where('group_id', $groupMember->group_id)
+                ->where('mission_id', $mission->id)
+                ->first();
+
+            $currentStep = $progress ? $progress->current_step : 1;
+
+            $myGroupMembers = DB::table('group_members')
+                ->join('users', 'group_members.user_id', '=', 'users.id')
+                ->where('group_members.group_id', $groupMember->group_id)
+                ->select('users.id as user_id', 'users.name', 'group_members.role', 'users.username', 'users.avatar')
+                ->get();
+
+            $currentUserRole = $groupMember->role;
+        } else {
+            $progress = null;
+            $currentStep = 1;
+            $myGroupMembers = collect();
+            $currentUserRole = null;
         }
 
-        $progress = DB::table('group_progress')
-            ->where('group_id', $groupMember->group_id)
+        $myReflection = Reflection::where('user_id', $user->id)
             ->where('mission_id', $mission->id)
-            ->first();
-
-        $currentStep = $progress ? $progress->current_step : 1;
-
-        $myGroupMembers = DB::table('group_members')
-            ->join('users', 'group_members.user_id', '=', 'users.id')
-            ->where('group_members.group_id', $groupMember->group_id)
-            ->select('users.id as user_id', 'users.name', 'group_members.role', 'users.username', 'users.avatar')
-            ->get();
+            ->value('content');
 
         return Inertia::render('student/mission/show', [
             'mission' => $mission,
             'currentStep' => $currentStep,
             'unlockedStep' => $currentStep,
             'groupMembers' => $myGroupMembers,
-            'currentUserRole' => $groupMember->role,
+            'currentUserRole' => $currentUserRole,
             'lkpdUrl' => asset('assets/template_lkpd.pdf'),
+            'reflection' => $myReflection,
         ]);
     }
     public function submitReflection(Request $request, $slug)
@@ -50,32 +61,50 @@ class MissionController extends Controller
         $request->validate(['reflection' => 'required|string|min:10']);
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
+
         $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
 
-        DB::transaction(function () use ($request, $mission, $groupMember) {
-            Submission::updateOrCreate(
-                ['group_id' => $groupMember->group_id, 'mission_id' => $mission->id],
-                ['reflection_answer' => $request->reflection]
+        DB::transaction(function () use ($request, $mission, $groupMember, $user) {
+            Reflection::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'mission_id' => $mission->id,
+                ],
+                [
+                    'content' => $request->reflection,
+                ]
             );
 
-            $progress = DB::table('group_progress')
-                ->where('group_id', $groupMember->group_id)
-                ->where('mission_id', $mission->id)
-                ->first();
+            if ($groupMember) {
+                $progress = DB::table('group_progress')
+                    ->where('group_id', $groupMember->group_id)
+                    ->where('mission_id', $mission->id)
+                    ->first();
 
-            if (!$progress) {
-                DB::table('group_progress')->insert([
-                    'group_id' => $groupMember->group_id,
-                    'mission_id' => $mission->id,
-                    'current_step' => 2,
-                    'status' => 'in_progress'
-                ]);
-            } elseif ($progress->current_step < 2) {
-                DB::table('group_progress')->where('id', $progress->id)->update(['current_step' => 2]);
+                if (!$progress) {
+                    DB::table('group_progress')->insert([
+                        'group_id' => $groupMember->group_id,
+                        'mission_id' => $mission->id,
+                        'current_step' => 2,
+                        'status' => 'in_progress',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } elseif ($progress->current_step < 2) {
+                    DB::table('group_progress')
+                        ->where('id', $progress->id)
+                        ->update(['current_step' => 2, 'updated_at' => now()]);
+                }
             }
         });
 
-        return redirect()->back()->with('success', 'Refleksi tersimpan! Tahap 2 terbuka.');
+        session()->flash('group_exists', (bool) $groupMember);
+
+        if ($groupMember) {
+            return redirect()->back()->with('success', 'Refleksi tersimpan! Tahap 2 terbuka.');
+        }
+
+        return redirect()->back()->with('success', 'Refleksi tersimpan! Menunggu pembentukan kelompok oleh Guru.');
     }
     public function updateRole(Request $request, $slug)
     {

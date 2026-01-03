@@ -12,11 +12,14 @@ export default function Show({
     groupMembers,
     currentUserRole,
     lkpdUrl,
+    reflection,
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
     const collaborationLink = mission.collab_url;
 
-    const { data, setData, post, processing } = useForm({ reflection: '' });
+    const { data, setData, post, processing } = useForm({
+        reflection: reflection || '',
+    });
     const isButtonEnabled = data.reflection.length > 10;
 
     const [codeLanguage, setCodeLanguage] = useState('javascript');
@@ -30,7 +33,16 @@ export default function Show({
     const handleSubmitReflection = (e) => {
         e.preventDefault();
         post(route('mission.reflection', mission.slug), {
-            onSuccess: () => setActiveTab(2),
+            onSuccess: (page) => {
+                const groupExists = page.props?.flash?.group_exists ?? false;
+                if (groupExists) {
+                    setActiveTab(2);
+                } else {
+                    setGroupMissingNotice(
+                        'Refleksi tersimpan. Guru belum membuat kelompok untuk misi ini — tunggu pemberitahuan atau hubungi Guru.',
+                    );
+                }
+            },
         });
     };
 
@@ -291,6 +303,12 @@ export default function Show({
                                                 {mission.case_narrative}
                                             </p>
                                         </div>
+                                        {!groupMissingNotice ? null : (
+                                            <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-4 text-yellow-800">
+                                                {groupMissingNotice}
+                                            </div>
+                                        )}
+
                                         {unlockedStep > 1 ? (
                                             <div className="rounded border border-green-200 bg-green-50 p-4 text-green-800">
                                                 ✅ Kamu sudah menyelesaikan
@@ -309,7 +327,7 @@ export default function Show({
                                                 </label>
                                                 <textarea
                                                     className="mb-2 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                    rows="3"
+                                                    rows={3}
                                                     value={data.reflection}
                                                     onChange={(e) =>
                                                         setData(
@@ -318,7 +336,7 @@ export default function Show({
                                                         )
                                                     }
                                                     placeholder="Apa inti masalahnya?"
-                                                ></textarea>
+                                                />
                                                 <div className="text-right">
                                                     <button
                                                         type="submit"
