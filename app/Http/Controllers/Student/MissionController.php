@@ -188,4 +188,60 @@ class MissionController extends Controller
 
         return redirect()->back()->with('success', 'Eksperimen selesai! Lanjut ke tahap berikutnya.');
     }
+
+    public function submitPhase4(Request $request, $slug)
+    {
+        $mission = Mission::where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+
+        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+
+        if (!$groupMember) {
+            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
+        }
+
+        if ($groupMember->role !== 'Ketua') {
+            abort(403, 'Hanya Ketua Kelompok yang dapat mengumpulkan tugas akhir!');
+        }
+
+        $request->validate([
+            'file_flowchart' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'code_final' => 'required|string|min:10',
+        ]);
+
+        DB::transaction(function () use ($request, $mission, $groupMember) {
+
+            $filePath = null;
+            if ($request->hasFile('file_flowchart')) {
+                $file = $request->file('file_flowchart');
+                $fileName = time() . '_' . $groupMember->group_id . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('submissions', $fileName, 'public');
+            }
+
+            Submission::updateOrCreate(
+                [
+                    'group_id' => $groupMember->group_id,
+                    'mission_id' => $mission->id,
+                ],
+                [
+                    'file_path' => $filePath,
+                    'code_answer' => $request->code_final,
+                    'is_final' => true,
+                    'submitted_at' => now(),
+                ]
+            );
+
+            DB::table('group_progress')
+                ->where('group_id', $groupMember->group_id)
+                ->where('mission_id', $mission->id)
+                ->where('current_step', 4)
+                ->update([
+                    'current_step' => 5,
+                    'status' => 'completed',
+                    'updated_at' => now(),
+                ]);
+        });
+
+        return redirect()->back()->with('success', 'Tugas akhir berhasil dikumpulkan! Misi selesai.');
+    }
 }

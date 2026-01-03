@@ -147,7 +147,6 @@ class DatabaseSeeder extends Seeder
             $sub = Submission::create([
                 'group_id' => $group->id,
                 'mission_id' => $misi1->id,
-                'reflection_answer' => 'Masalah utamanya adalah tarif yang berbeda setelah jam pertama.',
                 'file_path' => 'uploads/dummy-flowchart.pdf',
                 'code_answer' => "if (jam <= 1) { bayar = 5000; } else { bayar = 5000 + (jam-1)*3000; }",
                 'is_final' => true,
@@ -208,7 +207,6 @@ class DatabaseSeeder extends Seeder
                 Submission::create([
                     'group_id' => $group->id,
                     'mission_id' => $misi1->id,
-                    'reflection_answer' => 'Susah pak, pusing logikanya.',
                     'file_path' => 'uploads/tugas-tkj.jpg',
                     'code_answer' => "if (jam > 1) { bayar mahal } else { murah }",
                     'is_final' => true,

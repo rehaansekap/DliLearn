@@ -16,6 +16,9 @@ export default function Show({
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
     const collaborationLink = mission.collab_url;
+    const [groupMissingNotice, setGroupMissingNotice] = useState<string | null>(
+        null,
+    );
 
     const { data, setData, post, processing } = useForm({
         reflection: reflection || '',
@@ -26,9 +29,45 @@ export default function Show({
     const [codeValue, setCodeValue] = useState(
         '// Tulis kode eksperimenmu di sini\nconsole.log("Hello World!");',
     );
+
     const [terminalOutput, setTerminalOutput] = useState('');
     const [hasRunCode, setHasRunCode] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
+
+    const [finalCode, setFinalCode] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
+
+    const handleSubmitPhase4 = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!selectedFile || finalCode.trim().length < 10) {
+            alert('Pastikan file dan source code telah diisi dengan lengkap!');
+            return;
+        }
+
+        setIsSubmittingPhase4(true);
+
+        const formData = new FormData();
+        formData.append('file_flowchart', selectedFile);
+        formData.append('code_final', finalCode);
+
+        router.post(route('mission.submit-phase-4', mission.slug), formData, {
+            forceFormData: true,
+            onSuccess: () => {
+                setIsSubmittingPhase4(false);
+                setActiveTab(5);
+            },
+            onError: (errors) => {
+                setIsSubmittingPhase4(false);
+                console.error('Error submitting:', errors);
+            },
+        });
+    };
+
+    const handleRefreshStatus = () => {
+        router.reload({ only: ['currentStep', 'unlockedStep'] });
+    };
 
     const handleSubmitReflection = (e) => {
         e.preventDefault();
@@ -222,7 +261,7 @@ export default function Show({
             <Head title={mission.title} />
 
             <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2/3 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-6 md:flex-row">
                         <div className="w-full md:w-1/4">
                             <div className="sticky top-4 overflow-hidden bg-white p-4 shadow-sm sm:rounded-lg">
@@ -787,7 +826,209 @@ export default function Show({
                                     </div>
                                 )}
 
-                                {activeTab > 3 && (
+                                {activeTab === 4 && (
+                                    <div className="animate-fade-in">
+                                        <div className="mb-6 border-b pb-4">
+                                            <span className="rounded bg-orange-100 px-2 py-1 text-xs font-bold text-orange-800 uppercase">
+                                                Tahap 4
+                                            </span>
+                                            <h1 className="mt-2 text-2xl font-bold text-gray-900">
+                                                Penyajian Hasil
+                                            </h1>
+                                            <p className="mt-1 text-gray-500">
+                                                {currentUserRole === 'Ketua'
+                                                    ? 'Kumpulkan hasil kerja kelompok: flowchart dan source code final.'
+                                                    : 'Menunggu Ketua kelompok mengumpulkan tugas akhir.'}
+                                            </p>
+                                        </div>
+
+                                        {currentUserRole === 'Ketua' ? (
+                                            <div className="space-y-6">
+                                                <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="rounded-full bg-blue-100 p-2">
+                                                            <span className="text-2xl">
+                                                                👑
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-blue-900">
+                                                                Instruksi untuk
+                                                                Ketua
+                                                            </h3>
+                                                            <p className="text-sm text-blue-700">
+                                                                Sebagai ketua
+                                                                kelompok, Anda
+                                                                bertanggung
+                                                                jawab
+                                                                mengumpulkan
+                                                                hasil akhir tim.
+                                                                Pastikan semua
+                                                                file sudah
+                                                                lengkap sebelum
+                                                                submit.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <form
+                                                    onSubmit={
+                                                        handleSubmitPhase4
+                                                    }
+                                                    className="space-y-6"
+                                                >
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                                                            Upload
+                                                            Flowchart/Poster
+                                                            <span className="text-red-500">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <div className="flex items-center gap-3">
+                                                            <input
+                                                                type="file"
+                                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                                onChange={(e) =>
+                                                                    setSelectedFile(
+                                                                        e.target
+                                                                            .files?.[0] ||
+                                                                            null,
+                                                                    )
+                                                                }
+                                                                className="block w-full rounded-lg border border-gray-300 text-sm file:mr-4 file:rounded-l-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                                                                disabled={
+                                                                    isSubmittingPhase4
+                                                                }
+                                                            />
+                                                        </div>
+                                                        {selectedFile && (
+                                                            <p className="mt-2 text-sm text-green-600">
+                                                                ✓ File dipilih:{' '}
+                                                                {
+                                                                    selectedFile.name
+                                                                }
+                                                            </p>
+                                                        )}
+                                                        <p className="mt-1 text-xs text-gray-500">
+                                                            Format: PDF, JPG,
+                                                            JPEG, PNG (Max 10MB)
+                                                        </p>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                                                            Source Code Final
+                                                            <span className="text-red-500">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <textarea
+                                                            value={finalCode}
+                                                            onChange={(e) =>
+                                                                setFinalCode(
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            rows={12}
+                                                            placeholder="Tulis atau paste source code final kelompok di sini..."
+                                                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-4 font-mono text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                            disabled={
+                                                                isSubmittingPhase4
+                                                            }
+                                                        />
+                                                        <p className="mt-1 text-xs text-gray-500">
+                                                            Minimal 10 karakter
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-700">
+                                                                Siap untuk
+                                                                dikumpulkan?
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">
+                                                                Pastikan semua
+                                                                data sudah benar
+                                                                sebelum submit
+                                                            </p>
+                                                        </div>
+                                                        <button
+                                                            type="submit"
+                                                            disabled={
+                                                                !selectedFile ||
+                                                                finalCode.trim()
+                                                                    .length <
+                                                                    10 ||
+                                                                isSubmittingPhase4
+                                                            }
+                                                            className={`rounded-lg px-6 py-3 font-bold shadow-lg transition-all ${
+                                                                !selectedFile ||
+                                                                finalCode.trim()
+                                                                    .length <
+                                                                    10 ||
+                                                                isSubmittingPhase4
+                                                                    ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                                                                    : 'bg-green-600 text-white hover:scale-105 hover:bg-green-700'
+                                                            }`}
+                                                        >
+                                                            {isSubmittingPhase4
+                                                                ? '⏳ Mengirim...'
+                                                                : '🚀 Kirim Tugas Akhir'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        ) : (
+                                            <div className="flex min-h-[400px] flex-col items-center justify-center space-y-6 text-center">
+                                                <div className="rounded-full bg-yellow-50 p-6">
+                                                    <span className="text-6xl">
+                                                        ⏳
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h3 className="mb-2 text-xl font-bold text-gray-800">
+                                                        Menunggu Ketua
+                                                        Mengumpulkan Tugas
+                                                    </h3>
+                                                    <p className="max-w-md text-gray-600">
+                                                        Hanya ketua kelompok
+                                                        yang dapat mengumpulkan
+                                                        tugas akhir. Pastikan
+                                                        koordinasi dengan ketua
+                                                        sudah selesai.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={
+                                                        handleRefreshStatus
+                                                    }
+                                                    className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                                                >
+                                                    <svg
+                                                        className="h-5 w-5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth="2"
+                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                        />
+                                                    </svg>
+                                                    Refresh Status
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 5 && (
                                     <div className="py-20 text-center">
                                         <h3 className="text-xl font-bold text-gray-400">
                                             Konten Tahap {activeTab} Belum

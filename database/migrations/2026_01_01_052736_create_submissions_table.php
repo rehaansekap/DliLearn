@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('group_id')->constrained()->onDelete('cascade');
             $table->foreignId('mission_id')->constrained()->onDelete('cascade');
 
-            $table->text('reflection_answer')->nullable();
             $table->string('file_path')->nullable();
             $table->longText('code_answer')->nullable();
 

@@ -14,7 +14,7 @@ export default function Dashboard({ auth, missions, userXp, userLevel }) {
             <Head title="Dashboard Siswa" />
 
             <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2/3 sm:px-6 lg:px-8">
                     <div className="mb-8 rounded-lg bg-white p-6 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
