@@ -123,4 +123,40 @@ class MissionController extends Controller
 
         return redirect()->back()->with('success', 'Organisasi selesai! Lanjut ke Penyelidikan.');
     }
+
+    public function savePhase3(Request $request, $slug)
+    {
+        $request->validate([
+            'code_attempt' => 'required|string',
+            'language' => 'required|string|in:javascript,python,php',
+        ]);
+
+        $mission = Mission::where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+
+        if (!$groupMember) {
+            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
+        }
+
+        DB::transaction(function () use ($request, $mission, $groupMember) {
+            Submission::updateOrCreate(
+                [
+                    'group_id' => $groupMember->group_id,
+                    'mission_id' => $mission->id
+                ],
+                [
+                    'code_answer' => $request->code_attempt,
+                ]
+            );
+
+            DB::table('group_progress')
+                ->where('group_id', $groupMember->group_id)
+                ->where('mission_id', $mission->id)
+                ->where('current_step', 3)
+                ->update(['current_step' => 4]);
+        });
+
+        return redirect()->back()->with('success', 'Eksperimen selesai! Lanjut ke tahap berikutnya.');
+    }
 }

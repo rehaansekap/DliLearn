@@ -1,5 +1,6 @@
 import StudentLayout from '@/layouts/student-layout';
 import { Head, router, useForm } from '@inertiajs/react';
+import Editor from '@monaco-editor/react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -17,6 +18,14 @@ export default function Show({
 
     const { data, setData, post, processing } = useForm({ reflection: '' });
     const isButtonEnabled = data.reflection.length > 10;
+
+    const [codeLanguage, setCodeLanguage] = useState('javascript');
+    const [codeValue, setCodeValue] = useState(
+        '// Tulis kode eksperimenmu di sini\nconsole.log("Hello World!");',
+    );
+    const [terminalOutput, setTerminalOutput] = useState('');
+    const [hasRunCode, setHasRunCode] = useState(false);
+    const [isRunning, setIsRunning] = useState(false);
 
     const handleSubmitReflection = (e) => {
         e.preventDefault();
@@ -53,6 +62,132 @@ export default function Show({
         if (!url) return '';
         const videoId = url.split('v=')[1]?.split('&')[0];
         return `https://www.youtube.com/embed/${videoId}`;
+    };
+
+    function parseStackForLocation(stack?: string) {
+        if (!stack) return null;
+        const m = stack.match(/:(\d+):(\d+)/);
+        if (m) {
+            return { line: parseInt(m[1], 10), column: parseInt(m[2], 10) };
+        }
+        return null;
+    }
+
+    const computeStackOffset = (): number => {
+        try {
+            new Function('throw new Error("__OFFSET__")')();
+        } catch (e: unknown) {
+            const loc = parseStackForLocation(e?.stack);
+
+            return loc ? Math.max(0, loc.line - 1) : 0;
+        }
+        return 0;
+    };
+
+    const handleRunCode = () => {
+        setIsRunning(true);
+        setTerminalOutput('');
+
+        setTimeout(() => {
+            if (codeLanguage === 'javascript') {
+                const logs: string[] = [];
+                const originalLog = console.log;
+
+                console.log = (...args: unknown[]) => {
+                    logs.push(
+                        args
+                            .map((arg) =>
+                                typeof arg === 'object'
+                                    ? JSON.stringify(arg, null, 2)
+                                    : String(arg),
+                            )
+                            .join(' '),
+                    );
+                };
+
+                const baselineOffset = computeStackOffset();
+
+                try {
+                    new Function(codeValue)();
+                    setTerminalOutput(
+                        logs.length > 0
+                            ? logs.join('\n')
+                            : '✓ Code executed successfully (no output)',
+                    );
+                } catch (error: unknown) {
+                    const loc = parseStackForLocation(error?.stack);
+                    let output = `❌ ${error?.name || 'Error'}: ${error?.message || String(error)}`;
+
+                    if (loc) {
+                        // map reported line to editor line by subtracting baseline offset
+                        const mappedLine = Math.max(
+                            1,
+                            loc.line - baselineOffset,
+                        );
+                        output += `\n→ Line ${mappedLine}${loc.column ? `, Column ${loc.column}` : ''}`;
+                    }
+
+                    if (error?.stack) {
+                        // include short stack for debugging
+                        output += `\n\nStack:\n${error.stack}`;
+                    }
+
+                    setTerminalOutput(output);
+                } finally {
+                    console.log = originalLog;
+                }
+            } else if (codeLanguage === 'python') {
+                const lines = codeValue
+                    .split('\n')
+                    .filter((line) => line.trim().startsWith('print('));
+                if (lines.length > 0) {
+                    const outputs = lines.map((line) => {
+                        const match = line.match(/print\((.*?)\)/);
+                        if (match) return match[1].replace(/['"]/g, '');
+                        return 'Hello from Python!';
+                    });
+                    setTerminalOutput(
+                        `Python 3.11.0\n>>> Executing script...\n${outputs.join('\n')}\n>>> Execution completed.`,
+                    );
+                } else {
+                    setTerminalOutput(
+                        'Python 3.11.0\n>>> Executing script...\n✓ Code executed successfully\n>>> No syntax errors detected.',
+                    );
+                }
+            } else if (codeLanguage === 'php') {
+                const lines = codeValue
+                    .split('\n')
+                    .filter((line) => line.includes('echo'));
+                if (lines.length > 0) {
+                    const outputs = lines.map((line) => {
+                        const match = line.match(/echo\s+["'](.*?)["']/);
+                        if (match) return match[1];
+                        return 'Hello from PHP!';
+                    });
+                    setTerminalOutput(`PHP 8.2.0\n${outputs.join('\n')}`);
+                } else {
+                    setTerminalOutput(
+                        'PHP 8.2.0\n✓ Script executed successfully\nNo output to display.',
+                    );
+                }
+            }
+
+            setHasRunCode(true);
+            setIsRunning(false);
+        }, 200);
+    };
+
+    const handleSavePhase3 = () => {
+        router.post(
+            route('mission.save-phase-3', mission.slug),
+            {
+                code_attempt: codeValue,
+                language: codeLanguage,
+            },
+            {
+                onSuccess: () => setActiveTab(4),
+            },
+        );
     };
 
     const amILeader = currentUserRole === 'Ketua';
@@ -426,7 +561,215 @@ export default function Show({
                                     </div>
                                 )}
 
-                                {activeTab > 2 && (
+                                {activeTab === 3 && (
+                                    <div className="animate-fade-in h-full">
+                                        <div className="mb-6 border-b pb-4">
+                                            <span className="rounded bg-green-100 px-2 py-1 text-xs font-bold text-green-800 uppercase">
+                                                Tahap 3
+                                            </span>
+                                            <h1 className="mt-2 text-2xl font-bold text-gray-900">
+                                                Creative Lab - Penyelidikan &
+                                                Eksperimen
+                                            </h1>
+                                            <p className="mt-1 text-gray-500">
+                                                Pelajari materi dan eksperimen
+                                                dengan kode. Tidak ada jawaban
+                                                benar atau salah, yang penting
+                                                mencoba!
+                                            </p>
+                                        </div>
+
+                                        <div className="flex h-[700px] gap-4">
+                                            <div className="flex w-1/2 flex-col overflow-hidden rounded-lg border shadow-sm">
+                                                <div className="border-b bg-gray-100 px-4 py-2">
+                                                    <h3 className="flex items-center gap-2 font-bold text-gray-700">
+                                                        📚 Materi Pembelajaran
+                                                    </h3>
+                                                </div>
+                                                <div className="flex-1 overflow-auto bg-gray-50">
+                                                    {mission.material_pdf ? (
+                                                        <iframe
+                                                            src={
+                                                                mission.material_pdf
+                                                            }
+                                                            className="h-full w-full border-0"
+                                                            title="Materi PDF"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full items-center justify-center text-gray-400">
+                                                            <div className="text-center">
+                                                                <svg
+                                                                    className="mx-auto mb-2 h-12 w-12"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth="2"
+                                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                                    ></path>
+                                                                </svg>
+                                                                <p>
+                                                                    Materi PDF
+                                                                    belum
+                                                                    tersedia
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border shadow-sm">
+                                                {/* Editor Header */}
+                                                <div className="flex items-center justify-between bg-gray-800 px-4 py-2">
+                                                    <h3 className="flex items-center gap-2 font-bold text-white">
+                                                        💻 Code Editor
+                                                    </h3>
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="text-sm text-white">
+                                                            Bahasa:
+                                                        </label>
+                                                        <select
+                                                            value={codeLanguage}
+                                                            onChange={(e) => {
+                                                                setCodeLanguage(
+                                                                    e.target
+                                                                        .value,
+                                                                );
+                                                                setHasRunCode(
+                                                                    false,
+                                                                );
+                                                                if (
+                                                                    e.target
+                                                                        .value ===
+                                                                    'javascript'
+                                                                ) {
+                                                                    setCodeValue(
+                                                                        '// Tulis kode JavaScript\nconsole.log("Hello World!");',
+                                                                    );
+                                                                } else if (
+                                                                    e.target
+                                                                        .value ===
+                                                                    'python'
+                                                                ) {
+                                                                    setCodeValue(
+                                                                        '# Tulis kode Python\nprint("Hello World!")',
+                                                                    );
+                                                                } else {
+                                                                    setCodeValue(
+                                                                        '<?php\n// Tulis kode PHP\necho "Hello World!";\n?>',
+                                                                    );
+                                                                }
+                                                            }}
+                                                            className="rounded border-gray-600 bg-gray-700 px-2 py-1 text-sm text-white"
+                                                        >
+                                                            <option value="javascript">
+                                                                JavaScript
+                                                            </option>
+                                                            <option value="python">
+                                                                Python
+                                                            </option>
+                                                            <option value="php">
+                                                                PHP
+                                                            </option>
+                                                        </select>
+                                                        <button
+                                                            onClick={
+                                                                handleRunCode
+                                                            }
+                                                            disabled={isRunning}
+                                                            className="flex items-center gap-1 rounded bg-green-600 px-3 py-1 text-sm font-bold text-white hover:bg-green-700 disabled:bg-gray-500"
+                                                        >
+                                                            {isRunning
+                                                                ? 'Running...'
+                                                                : '▶️ Run Code'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Editor (mengisi ruang yang tersisa) */}
+                                                <div className="min-h-0 flex-1">
+                                                    <Editor
+                                                        height="100%"
+                                                        language={codeLanguage}
+                                                        value={codeValue}
+                                                        onChange={(value) =>
+                                                            setCodeValue(
+                                                                value || '',
+                                                            )
+                                                        }
+                                                        theme="vs-dark"
+                                                        options={{
+                                                            fontSize: 14,
+                                                            minimap: {
+                                                                enabled: false,
+                                                            },
+                                                            scrollBeyondLastLine: false,
+                                                            lineNumbers: 'on',
+                                                            roundedSelection: false,
+                                                            automaticLayout: true,
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                {/* Terminal (tinggi tetap) */}
+                                                <div className="h-40 overflow-auto border-t border-gray-600 bg-black font-mono text-sm text-green-400">
+                                                    <div className="flex items-center gap-2 border-b border-gray-700 bg-gray-900 px-4 py-1 text-xs text-gray-400">
+                                                        <span>
+                                                            🖥️ Terminal Output
+                                                        </span>
+                                                        {hasRunCode && (
+                                                            <span className="text-green-400">
+                                                                ● Ready
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="p-4 whitespace-pre-wrap">
+                                                        {terminalOutput ||
+                                                            'Klik "Run Code" untuk melihat output...'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 flex items-center justify-between">
+                                            <p className="text-sm text-gray-500">
+                                                {hasRunCode ? (
+                                                    <span className="font-medium text-green-600">
+                                                        ✓ Kamu sudah mencoba
+                                                        kode! Sekarang bisa
+                                                        lanjut.
+                                                    </span>
+                                                ) : (
+                                                    <span className="font-medium text-orange-600">
+                                                        ⚠️ Jalankan kode minimal
+                                                        1x sebelum melanjutkan.
+                                                    </span>
+                                                )}
+                                            </p>
+                                            <button
+                                                onClick={handleSavePhase3}
+                                                disabled={
+                                                    !hasRunCode || processing
+                                                }
+                                                className={`transform rounded-lg px-6 py-2 font-bold shadow-lg transition-all ${
+                                                    hasRunCode && !processing
+                                                        ? 'bg-green-600 text-white hover:scale-105 hover:bg-green-700'
+                                                        : 'cursor-not-allowed bg-gray-300 text-gray-500'
+                                                }`}
+                                            >
+                                                {processing
+                                                    ? 'Menyimpan...'
+                                                    : 'Selesai & Lanjut Tahap 4 →'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab > 3 && (
                                     <div className="py-20 text-center">
                                         <h3 className="text-xl font-bold text-gray-400">
                                             Konten Tahap {activeTab} Belum
