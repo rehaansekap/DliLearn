@@ -3,72 +3,65 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\Mission\SavePhase3Request;
+use App\Http\Requests\Student\Mission\StoreReflectionRequest;
+use App\Http\Requests\Student\Mission\SubmitFeedbackRequest;
+use App\Http\Requests\Student\Mission\SubmitFinalReflectionRequest;
+use App\Http\Requests\Student\Mission\SubmitPhase4Request;
+use App\Http\Requests\Student\Mission\UpdateRoleRequest;
 use App\Models\Mission;
 use App\Models\Submission;
-use App\Models\Reflection;
-use App\Models\User;
+use App\Services\Mission\FeedbackService;
+use App\Services\Mission\GroupService;
+use App\Services\Mission\ProgressService;
+use App\Services\Mission\ReflectionService;
+use App\Services\Mission\RewardService;
+use App\Services\Mission\SubmissionService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Inertia\Inertia;
 
 class MissionController extends Controller
 {
+    public function __construct(
+        protected GroupService $groupService,
+        protected ProgressService $progressService,
+        protected ReflectionService $reflectionService,
+        protected SubmissionService $submissionService,
+        protected FeedbackService $feedbackService,
+        protected RewardService $rewardService,
+    ) {}
+
     public function show($slug)
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         if ($groupMember) {
-            $progress = DB::table('group_progress')
-                ->where('group_id', $groupMember->group_id)
-                ->where('mission_id', $mission->id)
-                ->first();
-
+            $progress = $this->progressService->getGroupProgress($groupMember->group_id, $mission->id);
             $currentStep = $progress ? $progress->current_step : 1;
-
-            $myGroupMembers = DB::table('group_members')
-                ->join('users', 'group_members.user_id', '=', 'users.id')
-                ->where('group_members.group_id', $groupMember->group_id)
-                ->select('users.id as user_id', 'users.name', 'group_members.role', 'users.username', 'users.avatar')
-                ->get();
-
+            $myGroupMembers = $this->groupService->getGroupMembers($groupMember->group_id);
             $currentUserRole = $groupMember->role;
         } else {
-            $progress = null;
             $currentStep = 1;
             $myGroupMembers = collect();
             $currentUserRole = null;
         }
 
-        $myReflection = Reflection::where('user_id', $user->id)
-            ->where('mission_id', $mission->id)
-            ->value('content');
+        $myReflection = $this->reflectionService->getUserReflection($user->id, $mission->id);
+        $initialReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'initial');
+        $finalReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
+        $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
 
-        $gallerySubmissions = Submission::where('mission_id', $mission->id)
-            ->where('is_final', true)
-            ->with(['group:id,name,group_code'])
-            ->withCount(['likes', 'feedbacks'])
-            ->get()
-            ->map(function ($submission) use ($user) {
-                return [
-                    'id' => $submission->id,
-                    'group_name' => $submission->group->name ?? 'Unknown Group',
-                    'group_code' => $submission->group->group_code ?? '',
-                    'file_path' => $submission->file_path ? asset('storage/' . $submission->file_path) : null,
-                    'code_answer' => $submission->code_answer,
-                    'submitted_at' => $submission->submitted_at ? Carbon::parse($submission->submitted_at)->format('d M Y H:i') : null,
-                    'likes_count' => $submission->likes_count,
-                    'feedbacks_count' => $submission->feedbacks_count,
-                    'is_liked_by_me' => DB::table('likes')
-                        ->where('submission_id', $submission->id)
-                        ->where('user_id', $user->id)
-                        ->exists(),
-                ];
-            });
+        $groupHasSubmitted = false;
+        if ($groupMember) {
+            $groupHasSubmitted = Submission::where('group_id', $groupMember->group_id)
+                ->where('mission_id', $mission->id)
+                ->where('is_final', true)
+                ->exists();
+        }
 
         return Inertia::render('student/mission/show', [
             'mission' => $mission,
@@ -78,48 +71,24 @@ class MissionController extends Controller
             'currentUserRole' => $currentUserRole,
             'lkpdUrl' => asset('assets/template_lkpd.pdf'),
             'reflection' => $myReflection,
+            'initialReflection' => $initialReflection,
+            'finalReflection' => $finalReflection,
             'gallerySubmissions' => $gallerySubmissions,
+            'groupHasSubmitted' => $groupHasSubmitted,
         ]);
     }
-    public function submitReflection(Request $request, $slug)
+
+    public function submitReflection(StoreReflectionRequest $request, $slug)
     {
-        $request->validate(['reflection' => 'required|string|min:10']);
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         DB::transaction(function () use ($request, $mission, $groupMember, $user) {
-            Reflection::updateOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'mission_id' => $mission->id,
-                ],
-                [
-                    'content' => $request->reflection,
-                ]
-            );
+            $this->reflectionService->saveReflection($user->id, $mission->id, $request->validated()['reflection']);
 
             if ($groupMember) {
-                $progress = DB::table('group_progress')
-                    ->where('group_id', $groupMember->group_id)
-                    ->where('mission_id', $mission->id)
-                    ->first();
-
-                if (!$progress) {
-                    DB::table('group_progress')->insert([
-                        'group_id' => $groupMember->group_id,
-                        'mission_id' => $mission->id,
-                        'current_step' => 2,
-                        'status' => 'in_progress',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                } elseif ($progress->current_step < 2) {
-                    DB::table('group_progress')
-                        ->where('id', $progress->id)
-                        ->update(['current_step' => 2, 'updated_at' => now()]);
-                }
+                $this->progressService->updateGroupProgress($groupMember->group_id, $mission->id, 2);
             }
         });
 
@@ -131,34 +100,23 @@ class MissionController extends Controller
 
         return redirect()->back()->with('success', 'Refleksi tersimpan! Menunggu pembentukan kelompok oleh Guru.');
     }
-    public function updateRole(Request $request, $slug)
-    {
-        $request->validate([
-            'target_user_id' => 'required|exists:users,id',
-            'role' => 'required|string|in:Coder,Designer,Notulis,Anggota'
-        ]);
 
+    public function updateRole(UpdateRoleRequest $request, $slug)
+    {
         $user = Auth::user();
 
-        $myRole = DB::table('group_members')
-            ->where('user_id', $user->id)
-            ->value('role');
-
-        if ($myRole !== 'Ketua') {
+        if (!$this->groupService->isUserLeader($user->id)) {
             abort(403, 'Hanya Ketua Kelompok yang boleh mengubah peran anggota!');
         }
 
-        $targetRole = DB::table('group_members')
-            ->where('user_id', $request->target_user_id)
-            ->value('role');
+        $validated = $request->validated();
+        $targetRole = $this->groupService->getMemberRole($validated['target_user_id']);
 
         if ($targetRole === 'Ketua') {
             return redirect()->back()->with('error', 'Peran Ketua tidak bisa diubah di sini. Hubungi Guru.');
         }
 
-        DB::table('group_members')
-            ->where('user_id', $request->target_user_id)
-            ->update(['role' => $request->role]);
+        $this->groupService->updateMemberRole($validated['target_user_id'], $validated['role']);
 
         return redirect()->back()->with('success', 'Peran anggota berhasil diperbarui!');
     }
@@ -167,59 +125,38 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
-        DB::table('group_progress')
-            ->where('group_id', $groupMember->group_id)
-            ->where('mission_id', $mission->id)
-            ->where('current_step', 2)
-            ->update(['current_step' => 3]);
+        $this->progressService->advanceGroupStep($groupMember->group_id, $mission->id, 2, 3);
 
         return redirect()->back()->with('success', 'Organisasi selesai! Lanjut ke Penyelidikan.');
     }
 
-    public function savePhase3(Request $request, $slug)
+    public function savePhase3(SavePhase3Request $request, $slug)
     {
-        $request->validate([
-            'code_attempt' => 'required|string',
-            'language' => 'required|string|in:javascript,python,php',
-        ]);
-
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         if (!$groupMember) {
             return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
         }
 
-        DB::transaction(function () use ($request, $mission, $groupMember) {
-            Submission::updateOrCreate(
-                [
-                    'group_id' => $groupMember->group_id,
-                    'mission_id' => $mission->id
-                ],
-                [
-                    'code_answer' => $request->code_attempt,
-                ]
-            );
+        $validated = $request->validated();
 
-            DB::table('group_progress')
-                ->where('group_id', $groupMember->group_id)
-                ->where('mission_id', $mission->id)
-                ->where('current_step', 3)
-                ->update(['current_step' => 4]);
+        DB::transaction(function () use ($validated, $mission, $groupMember) {
+            $this->submissionService->saveCodeAttempt($groupMember->group_id, $mission->id, $validated['code_attempt']);
+            $this->progressService->advanceGroupStep($groupMember->group_id, $mission->id, 3, 4);
         });
 
         return redirect()->back()->with('success', 'Eksperimen selesai! Lanjut ke tahap berikutnya.');
     }
 
-    public function submitPhase4(Request $request, $slug)
+    public function submitPhase4(SubmitPhase4Request $request, $slug)
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         if (!$groupMember) {
             return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
@@ -229,42 +166,28 @@ class MissionController extends Controller
             abort(403, 'Hanya Ketua Kelompok yang dapat mengumpulkan tugas akhir!');
         }
 
-        $request->validate([
-            'file_flowchart' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'code_final' => 'required|string|min:10',
-        ]);
+        $existing = Submission::where('group_id', $groupMember->group_id)
+            ->where('mission_id', $mission->id)
+            ->where('is_final', true)
+            ->first();
 
-        DB::transaction(function () use ($request, $mission, $groupMember) {
+        if ($existing) {
+            return redirect()->back()->with('error', 'Tugas akhir sudah dikumpulkan oleh kelompok ini. Ketua tidak dapat mengirim ulang.');
+        }
 
-            $filePath = null;
-            if ($request->hasFile('file_flowchart')) {
-                $file = $request->file('file_flowchart');
-                $fileName = time() . '_' . $groupMember->group_id . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('submissions', $fileName, 'public');
-            }
+        $validated = $request->validated();
 
-            Submission::updateOrCreate(
-                [
-                    'group_id' => $groupMember->group_id,
-                    'mission_id' => $mission->id,
-                ],
-                [
-                    'file_path' => $filePath,
-                    'code_answer' => $request->code_final,
-                    'is_final' => true,
-                    'submitted_at' => now(),
-                ]
+        DB::transaction(function () use ($request, $validated, $mission, $groupMember) {
+            $filePath = $this->submissionService->handleFileUpload($request, $groupMember->group_id);
+
+            $this->submissionService->saveFinalSubmission(
+                $groupMember->group_id,
+                $mission->id,
+                $filePath,
+                $validated['code_final']
             );
 
-            DB::table('group_progress')
-                ->where('group_id', $groupMember->group_id)
-                ->where('mission_id', $mission->id)
-                ->where('current_step', 4)
-                ->update([
-                    'current_step' => 5,
-                    'status' => 'completed',
-                    'updated_at' => now(),
-                ]);
+            $this->progressService->completeGroupMission($groupMember->group_id, $mission->id);
         });
 
         return redirect()->back()->with('success', 'Tugas akhir berhasil dikumpulkan! Misi selesai.');
@@ -274,127 +197,65 @@ class MissionController extends Controller
     {
         $user = Auth::user();
         $submission = Submission::findOrFail($submissionId);
-
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         if (!$groupMember) {
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
         }
 
-        $progress = DB::table('group_progress')
-            ->where('group_id', $groupMember->group_id)
-            ->where('mission_id', $submission->mission_id)
-            ->first();
-
-        if (!$progress || $progress->current_step < 5) {
+        if (!$this->progressService->canInteractWithGallery($groupMember->group_id, $submission->mission_id)) {
             return redirect()->back()->with('error', 'Anda harus menyelesaikan semua tahap untuk memberikan like!');
         }
 
-        $existingLike = DB::table('likes')
-            ->where('submission_id', $submissionId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if ($existingLike) {
-            DB::table('likes')->where('id', $existingLike->id)->delete();
-            $message = 'Like dihapus';
-        } else {
-            DB::table('likes')->insert([
-                'submission_id' => $submissionId,
-                'user_id' => $user->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $message = 'Like ditambahkan';
-        }
+        $message = $this->submissionService->toggleSubmissionLike($submissionId, $user->id);
 
         return redirect()->back()->with('success', $message);
     }
 
-    public function submitFeedback(Request $request, $submissionId)
+    public function submitFeedback(SubmitFeedbackRequest $request, $submissionId)
     {
-        $request->validate([
-            'message' => 'required|string|min:5|max:500',
-        ]);
-
         $user = Auth::user();
         $submission = Submission::findOrFail($submissionId);
-
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         if (!$groupMember) {
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
         }
 
-        $progress = DB::table('group_progress')
-            ->where('group_id', $groupMember->group_id)
-            ->where('mission_id', $submission->mission_id)
-            ->first();
-
-        if (!$progress || $progress->current_step < 5) {
+        if (!$this->progressService->canInteractWithGallery($groupMember->group_id, $submission->mission_id)) {
             return redirect()->back()->with('error', 'Anda harus menyelesaikan semua tahap untuk memberikan feedback!');
         }
 
-        DB::table('feedbacks')->insert([
-            'submission_id' => $submissionId,
-            'user_id' => $user->id,
-            'message' => $request->message,
-            'type' => 'peer_review',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $validated = $request->validated();
+
+        $this->feedbackService->storeFeedback($submissionId, $user->id, $validated['message']);
 
         return redirect()->back()->with('success', 'Feedback berhasil dikirim!');
     }
 
     public function getFeedbacks($submissionId)
     {
-        $feedbacks = DB::table('feedbacks')
-            ->join('users', 'feedbacks.user_id', '=', 'users.id')
-            ->where('feedbacks.submission_id', $submissionId)
-            ->select('feedbacks.*', 'users.name as user_name', 'users.avatar')
-            ->orderBy('feedbacks.created_at', 'desc')
-            ->get();
+        $feedbacks = $this->feedbackService->getFeedbacks($submissionId);
 
         return response()->json($feedbacks);
     }
 
-    public function submitFinalReflection(Request $request, $slug)
+    public function submitFinalReflection(SubmitFinalReflectionRequest $request, $slug)
     {
-        $request->validate([
-            'final_reflection' => 'required|string|min:20',
-        ]);
-
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
         if (!$groupMember) {
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
         }
 
-        DB::transaction(function () use ($request, $mission, $groupMember, $user) {
-            Reflection::create([
-                'user_id' => $user->id,
-                'mission_id' => $mission->id,
-                'content' => $request->final_reflection,
-            ]);
+        $validated = $request->validated();
 
-            DB::table('group_progress')
-                ->where('group_id', $groupMember->group_id)
-                ->where('mission_id', $mission->id)
-                ->update([
-                    'status' => 'completed',
-                    'updated_at' => now(),
-                ]);
-
-            User::where('id', $user->id)->increment('xp', 100);
-
-            $freshUser = User::find($user->id);
-            $newLevel = floor($freshUser->xp / 300) + 1;
-            if ($newLevel > $freshUser->level) {
-                $freshUser->update(['level' => $newLevel]);
-            }
+        DB::transaction(function () use ($validated, $mission, $groupMember, $user) {
+            $this->reflectionService->saveFinalReflection($user->id, $mission->id, $validated['final_reflection']);
+            $this->progressService->markGroupMissionCompleted($groupMember->group_id, $mission->id);
+            $this->rewardService->awardUserXp($user->id, 100);
         });
 
         return redirect()->route('dashboard')->with('success', 'Selamat! Misi berhasil diselesaikan. +100 XP!');

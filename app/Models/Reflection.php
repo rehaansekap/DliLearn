@@ -13,5 +13,6 @@ class Reflection extends Model
         'user_id',
         'mission_id',
         'content',
+        'type',
     ];
 }

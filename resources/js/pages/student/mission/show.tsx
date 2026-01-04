@@ -11,8 +11,10 @@ export default function Show({
     unlockedStep,
     groupMembers,
     currentUserRole,
+    groupHasSubmitted = false,
     lkpdUrl,
-    reflection,
+    initialReflection = '',
+    finalReflection: initialFinalReflection = '',
     gallerySubmissions,
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
@@ -22,7 +24,7 @@ export default function Show({
     );
 
     const { data, setData, post, processing } = useForm({
-        reflection: reflection || '',
+        reflection: initialReflection || '',
     });
     const isButtonEnabled = data.reflection.length > 10;
 
@@ -43,7 +45,9 @@ export default function Show({
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState('');
     const [submissionFeedbacks, setSubmissionFeedbacks] = useState([]);
-    const [finalReflection, setFinalReflection] = useState('');
+    const [finalReflection, setFinalReflection] = useState(
+        initialFinalReflection || '',
+    );
 
     const handleLike = (submissionId) => {
         router.post(
@@ -243,7 +247,6 @@ export default function Show({
                     let output = `❌ ${error?.name || 'Error'}: ${error?.message || String(error)}`;
 
                     if (loc) {
-                        // map reported line to editor line by subtracting baseline offset
                         const mappedLine = Math.max(
                             1,
                             loc.line - baselineOffset,
@@ -252,7 +255,6 @@ export default function Show({
                     }
 
                     if (error?.stack) {
-                        // include short stack for debugging
                         output += `\n\nStack:\n${error.stack}`;
                     }
 
@@ -403,6 +405,7 @@ export default function Show({
                                                     src={getEmbedUrl(
                                                         mission.video_url,
                                                     )}
+                                                    title={`Video pengantar: ${mission.title}`}
                                                     allowFullScreen
                                                 ></iframe>
                                             </div>
@@ -560,11 +563,7 @@ export default function Show({
                                                                 </div>
                                                             ) : (
                                                                 <select
-                                                                    className={`rounded-md border-gray-300 bg-white text-sm focus:border-indigo-500 focus:ring-indigo-500 ${
-                                                                        !amILeader
-                                                                            ? 'cursor-not-allowed bg-gray-100 text-gray-500'
-                                                                            : ''
-                                                                    }`}
+                                                                    aria-label={`Ubah role untuk ${member.name}`}
                                                                     value={
                                                                         member.role ||
                                                                         'Member'
@@ -763,6 +762,7 @@ export default function Show({
                                                             Bahasa:
                                                         </label>
                                                         <select
+                                                            aria-label={`Pilih bahasa pemrograman`}
                                                             value={codeLanguage}
                                                             onChange={(e) => {
                                                                 setCodeLanguage(
@@ -951,6 +951,15 @@ export default function Show({
                                                     }
                                                     className="space-y-6"
                                                 >
+                                                    {groupHasSubmitted && (
+                                                        <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                                                            ✅ Kelompok Anda
+                                                            sudah mengumpulkan
+                                                            tugas akhir. Ketua
+                                                            tidak bisa mengirim
+                                                            ulang.
+                                                        </div>
+                                                    )}
                                                     <div>
                                                         <label className="mb-2 block text-sm font-medium text-gray-700">
                                                             Upload
@@ -961,6 +970,7 @@ export default function Show({
                                                         </label>
                                                         <div className="flex items-center gap-3">
                                                             <input
+                                                                id="file_flowchart"
                                                                 type="file"
                                                                 accept=".pdf,.jpg,.jpeg,.png"
                                                                 onChange={(e) =>
@@ -972,8 +982,10 @@ export default function Show({
                                                                 }
                                                                 className="block w-full rounded-lg border border-gray-300 text-sm file:mr-4 file:rounded-l-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
                                                                 disabled={
+                                                                    groupHasSubmitted ||
                                                                     isSubmittingPhase4
                                                                 }
+                                                                aria-label="Upload flowchart atau poster"
                                                             />
                                                         </div>
                                                         {selectedFile && (
@@ -998,6 +1010,7 @@ export default function Show({
                                                             </span>
                                                         </label>
                                                         <textarea
+                                                            id="code_final"
                                                             value={finalCode}
                                                             onChange={(e) =>
                                                                 setFinalCode(
@@ -1011,6 +1024,7 @@ export default function Show({
                                                             disabled={
                                                                 isSubmittingPhase4
                                                             }
+                                                            aria-label="Source code final kelompok"
                                                         />
                                                         <p className="mt-1 text-xs text-gray-500">
                                                             Minimal 10 karakter
@@ -1032,6 +1046,7 @@ export default function Show({
                                                         <button
                                                             type="submit"
                                                             disabled={
+                                                                groupHasSubmitted ||
                                                                 !selectedFile ||
                                                                 finalCode.trim()
                                                                     .length <
@@ -1039,13 +1054,14 @@ export default function Show({
                                                                 isSubmittingPhase4
                                                             }
                                                             className={`rounded-lg px-6 py-3 font-bold shadow-lg transition-all ${
+                                                                groupHasSubmitted ||
                                                                 !selectedFile ||
                                                                 finalCode.trim()
                                                                     .length <
                                                                     10 ||
                                                                 isSubmittingPhase4
                                                                     ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                                                                    : 'bg-green-600 text-white hover:scale-105 hover:bg-green-700'
+                                                                    : 'bg-blue-600 text-white hover:bg-blue-700'
                                                             }`}
                                                         >
                                                             {isSubmittingPhase4
