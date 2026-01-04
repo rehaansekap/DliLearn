@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Submission extends Model
+class GroupMember extends Model
 {
     use HasFactory;
+
+    protected $table = 'group_members';
     protected $guarded = [];
 
     public function group()
@@ -15,13 +17,8 @@ class Submission extends Model
         return $this->belongsTo(Group::class);
     }
 
-    public function likes()
+    public function user()
     {
-        return $this->hasMany(Like::class);
-    }
-
-    public function feedbacks()
-    {
-        return $this->hasMany(Feedback::class);
+        return $this->belongsTo(User::class);
     }
 }

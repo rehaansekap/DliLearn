@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Mission;
 use App\Models\Submission;
 use App\Models\Reflection;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class MissionController extends Controller
 {
@@ -46,6 +48,28 @@ class MissionController extends Controller
             ->where('mission_id', $mission->id)
             ->value('content');
 
+        $gallerySubmissions = Submission::where('mission_id', $mission->id)
+            ->where('is_final', true)
+            ->with(['group:id,name,group_code'])
+            ->withCount(['likes', 'feedbacks'])
+            ->get()
+            ->map(function ($submission) use ($user) {
+                return [
+                    'id' => $submission->id,
+                    'group_name' => $submission->group->name ?? 'Unknown Group',
+                    'group_code' => $submission->group->group_code ?? '',
+                    'file_path' => $submission->file_path ? asset('storage/' . $submission->file_path) : null,
+                    'code_answer' => $submission->code_answer,
+                    'submitted_at' => $submission->submitted_at ? Carbon::parse($submission->submitted_at)->format('d M Y H:i') : null,
+                    'likes_count' => $submission->likes_count,
+                    'feedbacks_count' => $submission->feedbacks_count,
+                    'is_liked_by_me' => DB::table('likes')
+                        ->where('submission_id', $submission->id)
+                        ->where('user_id', $user->id)
+                        ->exists(),
+                ];
+            });
+
         return Inertia::render('student/mission/show', [
             'mission' => $mission,
             'currentStep' => $currentStep,
@@ -54,6 +78,7 @@ class MissionController extends Controller
             'currentUserRole' => $currentUserRole,
             'lkpdUrl' => asset('assets/template_lkpd.pdf'),
             'reflection' => $myReflection,
+            'gallerySubmissions' => $gallerySubmissions,
         ]);
     }
     public function submitReflection(Request $request, $slug)
@@ -243,5 +268,135 @@ class MissionController extends Controller
         });
 
         return redirect()->back()->with('success', 'Tugas akhir berhasil dikumpulkan! Misi selesai.');
+    }
+
+    public function toggleLike(Request $request, $submissionId)
+    {
+        $user = Auth::user();
+        $submission = Submission::findOrFail($submissionId);
+
+        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+
+        if (!$groupMember) {
+            return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
+        }
+
+        $progress = DB::table('group_progress')
+            ->where('group_id', $groupMember->group_id)
+            ->where('mission_id', $submission->mission_id)
+            ->first();
+
+        if (!$progress || $progress->current_step < 5) {
+            return redirect()->back()->with('error', 'Anda harus menyelesaikan semua tahap untuk memberikan like!');
+        }
+
+        $existingLike = DB::table('likes')
+            ->where('submission_id', $submissionId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existingLike) {
+            DB::table('likes')->where('id', $existingLike->id)->delete();
+            $message = 'Like dihapus';
+        } else {
+            DB::table('likes')->insert([
+                'submission_id' => $submissionId,
+                'user_id' => $user->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $message = 'Like ditambahkan';
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function submitFeedback(Request $request, $submissionId)
+    {
+        $request->validate([
+            'message' => 'required|string|min:5|max:500',
+        ]);
+
+        $user = Auth::user();
+        $submission = Submission::findOrFail($submissionId);
+
+        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+
+        if (!$groupMember) {
+            return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
+        }
+
+        $progress = DB::table('group_progress')
+            ->where('group_id', $groupMember->group_id)
+            ->where('mission_id', $submission->mission_id)
+            ->first();
+
+        if (!$progress || $progress->current_step < 5) {
+            return redirect()->back()->with('error', 'Anda harus menyelesaikan semua tahap untuk memberikan feedback!');
+        }
+
+        DB::table('feedbacks')->insert([
+            'submission_id' => $submissionId,
+            'user_id' => $user->id,
+            'message' => $request->message,
+            'type' => 'peer_review',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Feedback berhasil dikirim!');
+    }
+
+    public function getFeedbacks($submissionId)
+    {
+        $feedbacks = DB::table('feedbacks')
+            ->join('users', 'feedbacks.user_id', '=', 'users.id')
+            ->where('feedbacks.submission_id', $submissionId)
+            ->select('feedbacks.*', 'users.name as user_name', 'users.avatar')
+            ->orderBy('feedbacks.created_at', 'desc')
+            ->get();
+
+        return response()->json($feedbacks);
+    }
+
+    public function submitFinalReflection(Request $request, $slug)
+    {
+        $request->validate([
+            'final_reflection' => 'required|string|min:20',
+        ]);
+
+        $mission = Mission::where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+        $groupMember = DB::table('group_members')->where('user_id', $user->id)->first();
+
+        if (!$groupMember) {
+            return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
+        }
+
+        DB::transaction(function () use ($request, $mission, $groupMember, $user) {
+            Reflection::create([
+                'user_id' => $user->id,
+                'mission_id' => $mission->id,
+                'content' => $request->final_reflection,
+            ]);
+
+            DB::table('group_progress')
+                ->where('group_id', $groupMember->group_id)
+                ->where('mission_id', $mission->id)
+                ->update([
+                    'status' => 'completed',
+                    'updated_at' => now(),
+                ]);
+
+            User::where('id', $user->id)->increment('xp', 100);
+
+            $freshUser = User::find($user->id);
+            $newLevel = floor($freshUser->xp / 300) + 1;
+            if ($newLevel > $freshUser->level) {
+                $freshUser->update(['level' => $newLevel]);
+            }
+        });
+
+        return redirect()->route('dashboard')->with('success', 'Selamat! Misi berhasil diselesaikan. +100 XP!');
     }
 }

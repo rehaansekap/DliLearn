@@ -13,6 +13,7 @@ export default function Show({
     currentUserRole,
     lkpdUrl,
     reflection,
+    gallerySubmissions,
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
     const collaborationLink = mission.collab_url;
@@ -37,6 +38,78 @@ export default function Show({
     const [finalCode, setFinalCode] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
+
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState('');
+    const [submissionFeedbacks, setSubmissionFeedbacks] = useState([]);
+    const [finalReflection, setFinalReflection] = useState('');
+
+    const handleLike = (submissionId) => {
+        router.post(
+            route('mission.like', submissionId),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {},
+            },
+        );
+    };
+
+    const handleOpenDetail = async (submission) => {
+        setSelectedSubmission(submission);
+        setShowDetailModal(true);
+
+        // Fetch feedbacks
+        try {
+            const response = await fetch(
+                route('mission.get-feedbacks', submission.id),
+            );
+            const data = await response.json();
+            setSubmissionFeedbacks(data);
+        } catch (error) {
+            console.error('Error fetching feedbacks:', error);
+        }
+    };
+
+    const handleSubmitFeedback = (e) => {
+        e.preventDefault();
+
+        if (feedbackMessage.trim().length < 5) {
+            alert('Feedback minimal 5 karakter!');
+            return;
+        }
+
+        router.post(
+            route('mission.feedback', selectedSubmission.id),
+            { message: feedbackMessage },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setFeedbackMessage('');
+                    // Refresh feedbacks
+                    handleOpenDetail(selectedSubmission);
+                },
+            },
+        );
+    };
+
+    const handleFinishMission = (e) => {
+        e.preventDefault();
+
+        if (finalReflection.trim().length < 20) {
+            alert('Refleksi akhir minimal 20 karakter!');
+            return;
+        }
+
+        router.post(
+            route('mission.finish', mission.slug),
+            { final_reflection: finalReflection },
+            {
+                onSuccess: () => {},
+            },
+        );
+    };
 
     const handleSubmitPhase4 = (e: React.FormEvent) => {
         e.preventDefault();
@@ -1029,14 +1102,160 @@ export default function Show({
                                 )}
 
                                 {activeTab === 5 && (
-                                    <div className="py-20 text-center">
-                                        <h3 className="text-xl font-bold text-gray-400">
-                                            Konten Tahap {activeTab} Belum
-                                            Dibuat
-                                        </h3>
-                                        <p className="text-gray-400">
-                                            Silakan ikuti panduan selanjutnya.
-                                        </p>
+                                    <div className="animate-fade-in">
+                                        <div className="mb-6 border-b pb-4">
+                                            <span className="rounded bg-purple-100 px-2 py-1 text-xs font-bold text-purple-800 uppercase">
+                                                Tahap 5
+                                            </span>
+                                            <h1 className="mt-2 text-2xl font-bold text-gray-900">
+                                                Galeri Kelas & Evaluasi
+                                            </h1>
+                                            <p className="mt-1 text-gray-500">
+                                                Lihat hasil karya kelompok lain,
+                                                berikan apresiasi dan masukan
+                                                konstruktif.
+                                            </p>
+                                        </div>
+
+                                        {/* Gallery Grid */}
+                                        <div className="mb-8">
+                                            <h3 className="mb-4 text-lg font-bold text-gray-800">
+                                                🎨 Galeri Karya Kelas
+                                            </h3>
+                                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                                {gallerySubmissions.map(
+                                                    (submission) => (
+                                                        <div
+                                                            key={submission.id}
+                                                            className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
+                                                        >
+                                                            <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+                                                                {submission.file_path ? (
+                                                                    <img
+                                                                        src={
+                                                                            submission.file_path
+                                                                        }
+                                                                        alt={
+                                                                            submission.group_name
+                                                                        }
+                                                                        className="h-full w-full object-contain"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="flex h-full items-center justify-center">
+                                                                        <svg
+                                                                            className="h-16 w-16 text-gray-400"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth="2"
+                                                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="p-4">
+                                                                <h4 className="mb-2 font-bold text-gray-800">
+                                                                    {
+                                                                        submission.group_name
+                                                                    }
+                                                                </h4>
+                                                                <div className="mb-3 flex items-center gap-4 text-sm text-gray-600">
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleLike(
+                                                                                submission.id,
+                                                                            )
+                                                                        }
+                                                                        className="flex items-center gap-1 hover:text-red-500"
+                                                                    >
+                                                                        <span
+                                                                            className={
+                                                                                submission.is_liked_by_me
+                                                                                    ? 'text-red-500'
+                                                                                    : ''
+                                                                            }
+                                                                        >
+                                                                            {submission.is_liked_by_me
+                                                                                ? '❤️'
+                                                                                : '🤍'}
+                                                                        </span>
+                                                                        <span>
+                                                                            {
+                                                                                submission.likes_count
+                                                                            }
+                                                                        </span>
+                                                                    </button>
+                                                                    <span className="flex items-center gap-1">
+                                                                        💬{' '}
+                                                                        {
+                                                                            submission.feedbacks_count
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleOpenDetail(
+                                                                            submission,
+                                                                        )
+                                                                    }
+                                                                    className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+                                                                >
+                                                                    Lihat Detail
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Final Reflection */}
+                                        <div className="mt-8 rounded-xl border border-gray-200 bg-gradient-to-br from-yellow-50 to-orange-50 p-6">
+                                            <h3 className="mb-4 text-lg font-bold text-gray-800">
+                                                📝 Refleksi Penutup
+                                            </h3>
+                                            <p className="mb-4 text-sm text-gray-600">
+                                                Tuliskan pelajaran paling
+                                                berharga yang kamu dapatkan dari
+                                                misi ini.
+                                            </p>
+                                            <form
+                                                onSubmit={handleFinishMission}
+                                            >
+                                                <textarea
+                                                    value={finalReflection}
+                                                    onChange={(e) =>
+                                                        setFinalReflection(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    rows={6}
+                                                    placeholder="Apa yang sudah kamu pelajari? Apa yang ingin kamu perbaiki di misi berikutnya?"
+                                                    className="mb-4 w-full rounded-lg border border-gray-300 p-4 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    required
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={
+                                                        finalReflection.trim()
+                                                            .length < 20
+                                                    }
+                                                    className={`w-full rounded-lg px-6 py-3 font-bold text-white shadow-lg transition-all ${
+                                                        finalReflection.trim()
+                                                            .length >= 20
+                                                            ? 'bg-green-600 hover:scale-105 hover:bg-green-700'
+                                                            : 'cursor-not-allowed bg-gray-300'
+                                                    }`}
+                                                >
+                                                    🎉 Selesaikan Misi
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -1044,6 +1263,133 @@ export default function Show({
                     </div>
                 </div>
             </div>
+
+            {/* Detail Modal */}
+            {showDetailModal && selectedSubmission && (
+                <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
+                    <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl">
+                        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-6">
+                            <h3 className="text-xl font-bold text-gray-800">
+                                Karya: {selectedSubmission.group_name}
+                            </h3>
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                className="rounded-full p-2 hover:bg-gray-100"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {/* Image Preview */}
+                            {selectedSubmission.file_path && (
+                                <div className="mb-6">
+                                    <h4 className="mb-2 font-bold text-gray-700">
+                                        Flowchart/Poster
+                                    </h4>
+                                    <img
+                                        src={selectedSubmission.file_path}
+                                        alt="Flowchart"
+                                        className="w-full rounded-lg border"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Source Code */}
+                            <div className="mb-6">
+                                <h4 className="mb-2 font-bold text-gray-700">
+                                    Source Code
+                                </h4>
+                                <pre className="overflow-x-auto rounded-lg border bg-gray-50 p-4 text-sm">
+                                    <code>
+                                        {selectedSubmission.code_answer ||
+                                            'Tidak ada kode'}
+                                    </code>
+                                </pre>
+                            </div>
+
+                            {/* Like Button */}
+                            <div className="mb-6">
+                                <button
+                                    onClick={() =>
+                                        handleLike(selectedSubmission.id)
+                                    }
+                                    className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 hover:bg-gray-50"
+                                >
+                                    <span
+                                        className={`text-2xl ${selectedSubmission.is_liked_by_me ? 'text-red-500' : ''}`}
+                                    >
+                                        {selectedSubmission.is_liked_by_me
+                                            ? '❤️'
+                                            : '🤍'}
+                                    </span>
+                                    <span className="font-medium">
+                                        {selectedSubmission.likes_count} Likes
+                                    </span>
+                                </button>
+                            </div>
+
+                            {/* Feedbacks */}
+                            <div className="mb-6">
+                                <h4 className="mb-3 font-bold text-gray-700">
+                                    Komentar ({submissionFeedbacks.length})
+                                </h4>
+                                <div className="mb-4 max-h-60 space-y-3 overflow-y-auto">
+                                    {submissionFeedbacks.map((feedback) => (
+                                        <div
+                                            key={feedback.id}
+                                            className="rounded-lg border bg-gray-50 p-3"
+                                        >
+                                            <div className="mb-1 flex items-center gap-2">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-600">
+                                                    {feedback.user_name.charAt(
+                                                        0,
+                                                    )}
+                                                </div>
+                                                <span className="font-medium text-gray-800">
+                                                    {feedback.user_name}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-600">
+                                                {feedback.message}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Feedback Form */}
+                                <form
+                                    onSubmit={handleSubmitFeedback}
+                                    className="space-y-3"
+                                >
+                                    <textarea
+                                        value={feedbackMessage}
+                                        onChange={(e) =>
+                                            setFeedbackMessage(e.target.value)
+                                        }
+                                        rows={3}
+                                        placeholder="Berikan masukan konstruktif untuk kelompok ini..."
+                                        className="w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={
+                                            feedbackMessage.trim().length < 5
+                                        }
+                                        className={`w-full rounded-lg px-4 py-2 font-bold text-white ${
+                                            feedbackMessage.trim().length >= 5
+                                                ? 'bg-blue-600 hover:bg-blue-700'
+                                                : 'cursor-not-allowed bg-gray-300'
+                                        }`}
+                                    >
+                                        Kirim Komentar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </StudentLayout>
     );
 }
