@@ -8,7 +8,7 @@ interface StudentLayoutProps {
 }
 
 export default function StudentLayout({
-    user,
+    // user,
     header,
     fullWidth = false,
     children,
@@ -16,7 +16,7 @@ export default function StudentLayout({
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Navigation Bar */}
-            <nav className="border-b border-gray-200 bg-white">
+            {/* <nav className="border-b border-gray-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex items-center">
@@ -27,7 +27,7 @@ export default function StudentLayout({
                         </div>
                     </div>
                 </div>
-            </nav>
+            </nav> */}
 
             {/* Page Header */}
             {header && (

@@ -14,27 +14,38 @@ class SubmissionService
      */
     public function getGallerySubmissions(int $missionId, int $userId)
     {
-        return Submission::where('mission_id', $missionId)
-            ->where('is_final', true)
-            ->with(['group:id,name,group_code'])
-            ->withCount(['likes', 'feedbacks'])
-            ->get()
-            ->map(function ($submission) use ($userId) {
-                return [
-                    'id' => $submission->id,
-                    'group_name' => $submission->group->name ?? 'Unknown Group',
-                    'group_code' => $submission->group->group_code ?? '',
-                    'file_path' => $submission->file_path ? asset('storage/' . $submission->file_path) : null,
-                    'code_answer' => $submission->code_answer,
-                    'submitted_at' => $submission->submitted_at ? Carbon::parse($submission->submitted_at)->format('d M Y H:i') : null,
-                    'likes_count' => $submission->likes_count,
-                    'feedbacks_count' => $submission->feedbacks_count,
-                    'is_liked_by_me' => DB::table('likes')
-                        ->where('submission_id', $submission->id)
-                        ->where('user_id', $userId)
-                        ->exists(),
-                ];
-            });
+        $submissions = DB::table('submissions')
+            ->join('groups', 'submissions.group_id', '=', 'groups.id')
+            ->where('submissions.mission_id', $missionId)
+            ->where('submissions.is_final', true)
+            ->select(
+                'submissions.id',
+                'groups.name as group_name',
+                'groups.group_code',
+                'submissions.file_path',
+                'submissions.code_answer',
+                'submissions.submitted_at',
+                DB::raw('(SELECT COUNT(*) FROM likes WHERE likes.submission_id = submissions.id) as likes_count'),
+                DB::raw('(SELECT COUNT(*) FROM feedbacks WHERE feedbacks.submission_id = submissions.id) as feedbacks_count')
+            )
+            ->get();
+
+        return $submissions->map(function ($submission) use ($userId) {
+            return [
+                'id' => $submission->id,
+                'group_name' => $submission->group_name,
+                'group_code' => $submission->group_code,
+                'file_path' => $submission->file_path,
+                'code_answer' => $submission->code_answer,
+                'submitted_at' => $submission->submitted_at,
+                'likes_count' => $submission->likes_count,
+                'feedbacks_count' => $submission->feedbacks_count,
+                'is_liked_by_me' => DB::table('likes')
+                    ->where('submission_id', $submission->id)
+                    ->where('user_id', $userId)
+                    ->exists(),
+            ];
+        });
     }
 
     /**

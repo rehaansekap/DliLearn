@@ -60,10 +60,9 @@ class ProgressService
         DB::table('group_progress')
             ->where('group_id', $groupId)
             ->where('mission_id', $missionId)
-            ->where('current_step', 4)
             ->update([
                 'current_step' => 5,
-                'status' => 'completed',
+                'status' => 'in_progress',
                 'updated_at' => now(),
             ]);
     }

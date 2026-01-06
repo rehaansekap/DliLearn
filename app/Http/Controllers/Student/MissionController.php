@@ -56,11 +56,39 @@ class MissionController extends Controller
         $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
 
         $groupHasSubmitted = false;
+        $groupStatus = $progress ? $progress->status : null;
+
         if ($groupMember) {
             $groupHasSubmitted = Submission::where('group_id', $groupMember->group_id)
                 ->where('mission_id', $mission->id)
                 ->where('is_final', true)
                 ->exists();
+        }
+
+        $allSubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
+
+        $myGroupCode = null;
+        if ($groupMember) {
+            $myGroup = DB::table('groups')->where('id', $groupMember->group_id)->first();
+            $myGroupCode = $myGroup ? $myGroup->group_code : null;
+        }
+
+        $unreviewedSubmissions = [];
+        if ($groupMember && $groupMember->role === 'Ketua') {
+            foreach ($allSubmissions as $submission) {
+                if ($submission['group_code'] === $myGroupCode) continue;
+                $hasFeedback = DB::table('feedbacks')
+                    ->where('submission_id', $submission['id'])
+                    ->where('user_id', $user->id)
+                    ->exists();
+                if (!$hasFeedback) {
+                    $unreviewedSubmissions[] = [
+                        'id' => $submission['id'],
+                        'group_name' => $submission['group_name'],
+                        'group_code' => $submission['group_code'],
+                    ];
+                }
+            }
         }
 
         return Inertia::render('student/mission/show', [
@@ -75,6 +103,8 @@ class MissionController extends Controller
             'finalReflection' => $finalReflection,
             'gallerySubmissions' => $gallerySubmissions,
             'groupHasSubmitted' => $groupHasSubmitted,
+            'groupStatus' => $groupStatus,
+            'unreviewedSubmissions' => $unreviewedSubmissions,
         ]);
     }
 
@@ -254,8 +284,21 @@ class MissionController extends Controller
 
         DB::transaction(function () use ($validated, $mission, $groupMember, $user) {
             $this->reflectionService->saveFinalReflection($user->id, $mission->id, $validated['final_reflection']);
-            $this->progressService->markGroupMissionCompleted($groupMember->group_id, $mission->id);
-            $this->rewardService->awardUserXp($user->id, 100);
+
+            $groupMembers = $this->groupService->getGroupMembers($groupMember->group_id);
+            $memberIds = $groupMembers->pluck('user_id')->toArray();
+
+            $submittedCount = \App\Models\Reflection::whereIn('user_id', $memberIds)
+                ->where('mission_id', $mission->id)
+                ->where('type', 'final')
+                ->count();
+
+            if ($submittedCount === count($memberIds)) {
+                $this->progressService->markGroupMissionCompleted($groupMember->group_id, $mission->id);
+                foreach ($memberIds as $memberId) {
+                    $this->rewardService->awardUserXp($memberId, 100);
+                }
+            }
         });
 
         return redirect()->route('dashboard')->with('success', 'Selamat! Misi berhasil diselesaikan. +100 XP!');
