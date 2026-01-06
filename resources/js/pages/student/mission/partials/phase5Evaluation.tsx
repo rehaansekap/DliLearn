@@ -253,23 +253,24 @@ export default function Phase5Evaluation({
 
                             {/* Like Button */}
                             <button
+                                type="button"
                                 onClick={() =>
                                     amILeader && handleLike(submission.id)
                                 }
                                 disabled={!amILeader}
                                 className={cn(
                                     'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold transition-all duration-200',
-                                    submission.has_user_liked
-                                        ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30 hover:from-red-600 hover:to-pink-600'
+                                    submission.is_liked_by_me
+                                        ? 'border-2 border-pink-400 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30 hover:border-neutral-100'
                                         : 'border-2 border-slate-300 bg-white text-slate-700 hover:border-red-400 hover:bg-red-50',
                                     !amILeader &&
                                         'cursor-not-allowed opacity-60',
                                 )}
                             >
                                 <span className="text-xl">
-                                    {submission.has_user_liked ? '❤️' : '🤍'}
+                                    {submission.is_liked_by_me ? '🤍' : '❤️'}
                                 </span>
-                                <span>{submission.likes_count} Likes</span>
+                                <span>{submission.likes_count} Likes </span>
                             </button>
                         </div>
                     </div>
