@@ -84,18 +84,18 @@ export default function Phase2Organization({
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4 px-2 sm:space-y-8 sm:px-0">
             {/* Header Section */}
-            <div className="overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 p-6 shadow-lg">
-                <div className="flex items-start gap-4">
-                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-2xl shadow-lg">
+            <div className="overflow-hidden rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 p-4 shadow sm:rounded-2xl sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-xl shadow sm:h-14 sm:w-14 sm:rounded-2xl sm:text-2xl">
                         👥
                     </div>
                     <div className="flex-1">
-                        <h3 className="mb-2 text-2xl font-black text-slate-800">
+                        <h3 className="mb-1 text-lg font-black text-slate-800 sm:mb-2 sm:text-2xl">
                             Organisasi Tim
                         </h3>
-                        <p className="text-slate-600">
+                        <p className="text-sm text-slate-600 sm:text-base">
                             Koordinasikan peran setiap anggota untuk
                             memaksimalkan kolaborasi tim. Ketua kelompok bisa
                             mengatur peran semua anggota.
@@ -106,15 +106,15 @@ export default function Phase2Organization({
 
             {/* Your Role Badge */}
             <div className="flex items-center justify-center">
-                <div className="inline-flex items-center gap-3 rounded-2xl border-2 border-indigo-200 bg-white px-6 py-4 shadow-lg">
-                    <span className="text-2xl">
+                <div className="inline-flex items-center gap-3 rounded-2xl border-2 border-indigo-200 bg-white px-4 py-3 shadow-lg sm:px-6 sm:py-4">
+                    <span className="text-xl sm:text-2xl">
                         {ROLE_ICONS[currentUserRole] || '👤'}
                     </span>
                     <div>
                         <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
                             Peranmu
                         </p>
-                        <p className="text-xl font-bold text-indigo-600">
+                        <p className="text-lg font-bold text-indigo-600 sm:text-xl">
                             {currentUserRole || 'Belum Ada'}
                         </p>
                     </div>
@@ -122,7 +122,7 @@ export default function Phase2Organization({
             </div>
 
             {/* Team Members Grid */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                 {groupMembers.map((member) => {
                     const isLeader = member.role === 'Ketua';
                     const isEditing = editingUserId === member.user_id;
@@ -148,19 +148,22 @@ export default function Phase2Organization({
                                 {/* Avatar */}
                                 <div className="mb-4 flex justify-center">
                                     <div className="relative">
-                                        <div className="flex h-15 w-15 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 text-white shadow-md">
-                                            <span className="text-xl font-bold">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 text-white shadow-md sm:h-15 sm:w-15">
+                                            <span className="text-lg font-bold sm:text-xl">
                                                 {(member.name || '?').charAt(0)}
                                             </span>
                                         </div>
                                         <div
                                             className={cn(
-                                                'text-md absolute -right-2 -bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br shadow-lg',
+                                                'text-md absolute -right-2 -bottom-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br shadow-lg sm:h-7 sm:w-7',
                                                 ROLE_COLORS[member.role] ||
                                                     'from-slate-400 to-slate-500',
                                             )}
                                         >
-                                            {ROLE_ICONS[member.role] || '👤'}
+                                            <span className="text-base sm:text-lg">
+                                                {ROLE_ICONS[member.role] ||
+                                                    '👤'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -242,16 +245,19 @@ export default function Phase2Organization({
                 })}
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg">
-                <div className="flex items-center justify-between border-b border-emerald-200 bg-gradient-to-r from-emerald-400 to-teal-400 px-6 py-4">
+            {/* Kolaborasi Tim */}
+            <div className="mt-4 overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow sm:mt-8 sm:rounded-2xl">
+                <div className="flex flex-col items-start justify-between gap-2 border-b border-emerald-200 bg-gradient-to-r from-emerald-400 to-teal-400 px-4 py-3 sm:flex-row sm:items-center sm:px-6 sm:py-4">
                     <div className="flex items-center gap-2 text-white">
-                        <span className="text-2xl">🔗</span>
-                        <h3 className="text-lg font-bold">Kolaborasi Tim</h3>
+                        <span className="text-xl sm:text-2xl">🔗</span>
+                        <h3 className="text-base font-bold sm:text-lg">
+                            Kolaborasi Tim
+                        </h3>
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowCollab((s) => !s)}
-                        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                        className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-700 sm:text-sm"
                         aria-expanded={showCollab}
                     >
                         {showCollab ? 'Tutup' : 'Buka'} Workspace
@@ -350,10 +356,10 @@ export default function Phase2Organization({
 
             {/* Complete Button */}
             {amILeader && (
-                <div className="flex justify-center">
+                <div className="mt-4 flex justify-center">
                     <button
                         onClick={onCompleteStep}
-                        className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-4 font-bold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl active:scale-[0.98]"
+                        className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 font-bold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl active:scale-[0.98] sm:w-auto sm:px-8 sm:py-4"
                     >
                         <span className="relative z-10 flex items-center gap-2">
                             <span className="text-xl">✅</span>

@@ -69,18 +69,18 @@ export default function Phase3CreativeLab({
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 px-2 sm:space-y-6 sm:px-0">
             {/* Header Section */}
-            <div className="overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 p-6 shadow-lg">
-                <div className="flex items-start gap-4">
-                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-2xl shadow-lg">
+            <div className="overflow-hidden rounded-xl border border-cyan-200 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 p-4 shadow sm:rounded-2xl sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-xl shadow sm:h-14 sm:w-14 sm:rounded-2xl sm:text-2xl">
                         💡
                     </div>
                     <div className="flex-1">
-                        <h3 className="mb-2 text-2xl font-black text-slate-800">
+                        <h3 className="mb-1 text-lg font-black text-slate-800 sm:mb-2 sm:text-2xl">
                             Creative Lab - Eksperimen Kode
                         </h3>
-                        <p className="text-slate-600">
+                        <p className="text-sm text-slate-600 sm:text-base">
                             Eksperimen dengan berbagai pendekatan dan algoritma.
                             Jangan takut mencoba! Ini adalah tempat untuk
                             belajar dari kesalahan.
@@ -90,18 +90,18 @@ export default function Phase3CreativeLab({
             </div>
 
             {/* Material PDF Section */}
-            <div className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 shadow-lg">
-                <div className="flex items-center justify-between border-b border-violet-200 bg-gradient-to-r from-violet-400 to-purple-400 px-6 py-4">
+            <div className="overflow-hidden rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 shadow sm:rounded-2xl">
+                <div className="flex items-center justify-between border-b border-violet-200 bg-gradient-to-r from-violet-400 to-purple-400 px-4 py-3 sm:px-6 sm:py-4">
                     <div className="flex items-center gap-2 text-white">
-                        <span className="text-2xl">📚</span>
-                        <h3 className="text-lg font-bold">
+                        <span className="text-xl sm:text-2xl">📚</span>
+                        <h3 className="text-base font-bold sm:text-lg">
                             Materi Pembelajaran
                         </h3>
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowPdfViewer((s) => !s)}
-                        className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+                        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 sm:py-2 sm:text-sm"
                         aria-expanded={showPdfViewer}
                     >
                         {showPdfViewer ? 'Tutup' : 'Buka'} Viewer
@@ -207,30 +207,29 @@ export default function Phase3CreativeLab({
             </div>
 
             {/* Code Editor Section */}
-            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
+            <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl sm:rounded-2xl">
                 {/* Editor Header */}
-                <div className="flex items-center justify-between border-b border-slate-700 bg-slate-800 px-6 py-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex gap-2">
-                            <div className="h-3 w-3 rounded-full bg-red-500" />
-                            <div className="h-3 w-3 rounded-full bg-yellow-500" />
-                            <div className="h-3 w-3 rounded-full bg-green-500" />
+                <div className="flex flex-col items-start justify-between gap-2 border-b border-slate-700 bg-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:px-6 sm:py-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="flex gap-1 sm:gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full bg-red-500 sm:h-3 sm:w-3" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-yellow-500 sm:h-3 sm:w-3" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 sm:h-3 sm:w-3" />
                         </div>
-                        <span className="text-sm font-medium text-slate-300">
+                        <span className="text-xs font-medium text-slate-300 sm:text-sm">
                             💻 Code Editor
                         </span>
                     </div>
-
                     {/* Language Selector */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2">
                         {LANGUAGES.map((lang) => (
                             <button
                                 key={lang.value}
                                 onClick={() => handleLanguageChange(lang.value)}
                                 className={cn(
-                                    'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200',
+                                    'flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-all duration-200 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm',
                                     codeLanguage === lang.value
-                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50'
+                                        ? 'bg-indigo-600 text-white shadow'
                                         : 'bg-slate-700 text-slate-300 hover:bg-slate-600',
                                 )}
                             >
@@ -240,17 +239,17 @@ export default function Phase3CreativeLab({
                         ))}
                     </div>
                 </div>
-
                 {/* Monaco Editor */}
                 <div className="relative">
                     <Editor
-                        height="400px"
+                        height="220px"
+                        className="sm:!h-[400px]"
                         language={codeLanguage}
                         value={codeValue}
                         onChange={(value) => setCodeValue(value || '')}
                         theme="vs-dark"
                         options={{
-                            fontSize: 14,
+                            fontSize: 13,
                             minimap: { enabled: false },
                             lineNumbers: 'on',
                             scrollBeyondLastLine: false,
@@ -260,14 +259,13 @@ export default function Phase3CreativeLab({
                         }}
                     />
                 </div>
-
                 {/* Action Buttons */}
-                <div className="flex items-center gap-3 border-t border-slate-700 bg-slate-800 px-6 py-4">
+                <div className="flex flex-col items-stretch gap-2 border-t border-slate-700 bg-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-6 sm:py-4">
                     <button
                         onClick={handleRunCode}
                         disabled={isRunning}
                         className={cn(
-                            'flex items-center gap-2 rounded-xl px-6 py-3 font-bold shadow-lg transition-all duration-200',
+                            'flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 font-bold shadow transition-all duration-200 sm:px-6 sm:py-3',
                             isRunning
                                 ? 'cursor-not-allowed bg-slate-600 text-slate-400'
                                 : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:scale-[1.02] hover:from-green-600 hover:to-emerald-600 hover:shadow-xl active:scale-[0.98]',
@@ -303,12 +301,11 @@ export default function Phase3CreativeLab({
                             </>
                         )}
                     </button>
-
                     <button
                         onClick={handleSaveCode}
                         disabled={!hasRunCode}
                         className={cn(
-                            'flex items-center gap-2 rounded-xl px-6 py-3 font-bold shadow-lg transition-all duration-200',
+                            'flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 font-bold shadow transition-all duration-200 sm:px-6 sm:py-3',
                             !hasRunCode
                                 ? 'cursor-not-allowed bg-slate-600 text-slate-400'
                                 : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl active:scale-[0.98]',
@@ -323,20 +320,20 @@ export default function Phase3CreativeLab({
             </div>
 
             {/* Terminal Output */}
-            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
-                <div className="flex items-center gap-3 border-b border-slate-700 bg-slate-800 px-6 py-4">
+            <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl sm:rounded-2xl">
+                <div className="flex items-center gap-2 border-b border-slate-700 bg-slate-800 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4">
                     <span className="text-xl">🖥️</span>
-                    <span className="text-sm font-medium text-slate-300">
+                    <span className="text-xs font-medium text-slate-300 sm:text-sm">
                         Terminal Output
                     </span>
                 </div>
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                     {terminalOutput ? (
-                        <pre className="overflow-x-auto text-sm text-green-400">
+                        <pre className="overflow-x-auto text-xs text-green-400 sm:text-sm">
                             {terminalOutput}
                         </pre>
                     ) : (
-                        <p className="text-slate-500">
+                        <p className="text-xs text-slate-500 sm:text-sm">
                             Output akan muncul di sini setelah kamu menjalankan
                             kode...
                         </p>
@@ -345,16 +342,16 @@ export default function Phase3CreativeLab({
             </div>
 
             {/* Tips Section */}
-            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-6 shadow-lg">
-                <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-amber-500 text-2xl shadow-lg">
+            <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-4 shadow sm:rounded-2xl sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-500 text-xl shadow sm:h-12 sm:w-12 sm:text-2xl">
                         🔥
                     </div>
                     <div>
-                        <h4 className="mb-2 font-bold text-amber-900">
+                        <h4 className="mb-1 text-sm font-bold text-amber-900 sm:mb-2 sm:text-base">
                             Tips Coding:
                         </h4>
-                        <ul className="space-y-1 text-sm text-amber-800">
+                        <ul className="space-y-1 text-xs text-amber-800 sm:text-sm">
                             <li className="flex items-start gap-2">
                                 <span className="text-amber-600">→</span>
                                 <span>

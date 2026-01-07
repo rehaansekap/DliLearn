@@ -157,18 +157,18 @@ export default function Phase5Evaluation({
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 px-2 sm:space-y-8 sm:px-0">
             {/* Header Section */}
-            <div className="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 p-6 shadow-lg">
+            <div className="overflow-hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 p-4 shadow-lg sm:rounded-2xl sm:p-6">
                 <div className="flex items-start gap-4">
-                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-2xl shadow-lg">
+                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-xl shadow-lg sm:rounded-2xl sm:text-2xl">
                         ⭐
                     </div>
                     <div className="flex-1">
-                        <h3 className="mb-2 text-2xl font-black text-slate-800">
+                        <h3 className="mb-1 text-lg font-black text-slate-800 sm:mb-2 sm:text-2xl">
                             Evaluasi & Galeri Karya
                         </h3>
-                        <p className="text-slate-700">
+                        <p className="text-sm leading-relaxed whitespace-pre-line text-slate-700 sm:text-base">
                             Lihat karya teman-temanmu, berikan apresiasi dengan
                             like, dan bagikan feedback konstruktif untuk saling
                             belajar!
@@ -178,12 +178,12 @@ export default function Phase5Evaluation({
             </div>
 
             {/* Gallery Grid - Masonry Style */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {gallerySubmissions.map((submission) => (
                     <div
                         key={submission.id}
                         className={cn(
-                            'group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-indigo-300 hover:shadow-2xl',
+                            'group relative overflow-hidden rounded-xl border-2 border-slate-200 bg-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-indigo-300 hover:shadow-2xl sm:rounded-2xl',
                         )}
                     >
                         {/* Preview Image/Code */}
@@ -225,7 +225,7 @@ export default function Phase5Evaluation({
                         </div>
 
                         {/* Card Info */}
-                        <div className="p-4">
+                        <div className="p-3 sm:p-4">
                             <div className="mb-3 flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 text-white shadow-md">
                                     <span className="font-bold">
@@ -235,7 +235,7 @@ export default function Phase5Evaluation({
                                     </span>
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="font-bold text-slate-800">
+                                    <h4 className="text-sm font-bold text-slate-800 sm:text-base">
                                         {submission.group_name}
                                     </h4>
                                     <p className="text-xs text-slate-500">
@@ -258,7 +258,7 @@ export default function Phase5Evaluation({
                                 }
                                 disabled={!amILeader}
                                 className={cn(
-                                    'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold transition-all duration-200',
+                                    'flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 font-bold transition-all duration-200',
                                     submission.is_liked_by_me
                                         ? 'border-2 border-pink-400 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30 hover:border-neutral-100'
                                         : 'border-2 border-slate-300 bg-white text-slate-700 hover:border-red-400 hover:bg-red-50',
@@ -278,14 +278,14 @@ export default function Phase5Evaluation({
 
             {/* Empty State */}
             {gallerySubmissions.length === 0 && (
-                <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-                    <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-200">
-                        <span className="text-4xl">📭</span>
+                <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center sm:rounded-2xl sm:p-12">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
+                        <span className="text-3xl">📭</span>
                     </div>
                     <h4 className="mb-2 text-lg font-bold text-slate-700">
                         Belum Ada Karya
                     </h4>
-                    <p className="text-slate-500">
+                    <p className="text-sm text-slate-500">
                         Jadilah yang pertama menyelesaikan misi ini!
                     </p>
                 </div>
@@ -294,20 +294,20 @@ export default function Phase5Evaluation({
             {/* Final Reflection Section */}
             {submittedPreviously ? (
                 groupStatus === 'completed' ? (
-                    <div className="overflow-hidden rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg">
-                        <div className="p-12 text-center">
+                    <div className="overflow-hidden rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg sm:rounded-2xl">
+                        <div className="p-8 text-center sm:p-12">
                             <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg">
                                 <span className="text-5xl">✅</span>
                             </div>
-                            <h3 className="mb-3 text-2xl font-bold text-slate-800">
+                            <h3 className="mb-3 text-lg font-bold text-slate-800 sm:text-2xl">
                                 Misi Telah Diselesaikan
                             </h3>
-                            <p className="mx-auto max-w-2xl text-slate-700">
+                            <p className="mx-auto max-w-2xl text-sm text-slate-700 sm:text-base">
                                 Refleksi akhir kelompok telah dikumpulkan.
                                 Berikut adalah ringkasan refleksi akhir:
                             </p>
 
-                            <div className="mx-auto mt-6 max-w-3xl rounded-lg border border-slate-200 bg-white p-6 text-left shadow-sm">
+                            <div className="mx-auto mt-6 max-w-3xl rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm sm:p-6">
                                 <pre className="text-sm whitespace-pre-wrap text-slate-800">
                                     {initialFinalReflection &&
                                     initialFinalReflection.length > 0
@@ -329,21 +329,21 @@ export default function Phase5Evaluation({
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-hidden rounded-2xl border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-lg">
-                        <div className="p-12 text-center">
+                    <div className="overflow-hidden rounded-xl border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-lg sm:rounded-2xl">
+                        <div className="p-8 text-center sm:p-12">
                             <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 shadow-lg">
                                 <span className="text-5xl">⏳</span>
                             </div>
-                            <h3 className="mb-3 text-2xl font-bold text-slate-800">
+                            <h3 className="mb-3 text-lg font-bold text-slate-800 sm:text-2xl">
                                 Menunggu Anggota Lain
                             </h3>
-                            <p className="mx-auto max-w-2xl text-slate-700">
+                            <p className="mx-auto max-w-2xl text-sm text-slate-700 sm:text-base">
                                 Refleksi akhir kamu sudah dikumpulkan.
                                 <br />
                                 Menunggu anggota lain menyelesaikan refleksi
                                 akhir mereka sebelum misi dinyatakan selesai.
                             </p>
-                            <div className="mx-auto mt-6 max-w-3xl rounded-lg border border-slate-200 bg-white p-6 text-left shadow-sm">
+                            <div className="mx-auto mt-6 max-w-3xl rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm sm:p-6">
                                 <pre className="text-sm whitespace-pre-wrap text-slate-800">
                                     {initialFinalReflection &&
                                     initialFinalReflection.length > 0
@@ -365,12 +365,12 @@ export default function Phase5Evaluation({
                     </div>
                 )
             ) : (
-                <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-white shadow-lg">
-                    <div className="border-b border-indigo-200 bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
+                <div className="overflow-hidden rounded-xl border border-indigo-200 bg-white shadow-lg sm:rounded-2xl">
+                    <div className="border-b border-indigo-200 bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-3 sm:px-6 sm:py-4">
                         <div className="flex items-center gap-3">
                             <span className="text-2xl">📝</span>
                             <div>
-                                <h3 className="text-lg font-bold text-white">
+                                <h3 className="text-base font-bold text-white sm:text-lg">
                                     Refleksi Akhir
                                 </h3>
                                 <p className="text-sm text-indigo-100">
@@ -382,7 +382,7 @@ export default function Phase5Evaluation({
 
                     <form
                         onSubmit={handleSubmitFinalReflection}
-                        className="p-6"
+                        className="p-4 sm:p-6"
                     >
                         <div className="space-y-4">
                             <div>

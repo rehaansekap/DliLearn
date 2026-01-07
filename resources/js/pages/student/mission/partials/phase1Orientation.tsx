@@ -58,32 +58,32 @@ export default function Phase1Orientation({
     const videoId = getYouTubeId(mission.video_url);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4 px-2 sm:space-y-8 sm:px-0">
             {/* Case Narrative Section */}
-            <div className="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg">
-                <div className="border-b border-amber-200 bg-gradient-to-r from-amber-400 to-orange-400 px-6 py-4">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">📖</span>
-                        <h3 className="text-lg font-bold text-white">
+            <div className="overflow-hidden rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg sm:rounded-2xl">
+                <div className="border-b border-amber-200 bg-gradient-to-r from-amber-400 to-orange-400 px-3 py-2 sm:px-6 sm:py-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <span className="text-lg sm:text-xl">📖</span>
+                        <h3 className="text-sm font-bold text-white sm:text-xl">
                             Deskripsi Kasus
                         </h3>
                     </div>
                 </div>
-                <div className="p-6">
-                    <p className="text-base leading-relaxed whitespace-pre-line text-slate-700">
+                <div className="p-3 sm:p-6">
+                    <p className="text-sm leading-relaxed whitespace-pre-line text-slate-700 sm:text-base">
                         {mission.case_narrative}
                     </p>
                 </div>
             </div>
 
-            {/* Video Section - Bioskop Mini */}
-            <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 shadow-2xl">
-                <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 shadow-lg shadow-red-500/50">
-                        <span className="text-xl">🎬</span>
+            {/* Video Section */}
+            <div className="overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-4 shadow-2xl sm:rounded-2xl sm:p-8">
+                <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 shadow-lg shadow-red-500/50 sm:h-14 sm:w-14">
+                        <span className="text-xl sm:text-2xl">🎬</span>
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className="text-lg font-bold text-white sm:text-xl">
                             Briefing Video
                         </h3>
                         <p className="text-sm text-slate-300">
@@ -144,16 +144,16 @@ export default function Phase1Orientation({
             </div>
 
             {/* Tips Section */}
-            <div className="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50 p-6 shadow-lg">
-                <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-teal-500 text-2xl shadow-lg">
+            <div className="rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50 p-4 shadow-lg sm:rounded-2xl sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-teal-500 text-xl shadow sm:h-12 sm:w-12 sm:text-2xl">
                         💡
                     </div>
                     <div>
-                        <h4 className="mb-2 font-bold text-teal-900">
+                        <h4 className="mb-1 font-bold text-teal-900 sm:mb-2 sm:text-base">
                             Tips untuk Refleksi yang Baik:
                         </h4>
-                        <ul className="space-y-1 text-sm text-teal-800">
+                        <ul className="space-y-1 text-xs text-teal-800 sm:text-sm">
                             <li className="flex items-start gap-2">
                                 <span className="text-teal-600">→</span>
                                 <span>
@@ -207,8 +207,8 @@ export default function Phase1Orientation({
                                         Terima kasih — refleksi awal sudah
                                         dikumpulkan.
                                     </p>
-                                    <div className="mx-auto mt-4 max-w-3xl rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm">
-                                        <pre className="text-sm whitespace-pre-wrap text-slate-800">
+                                    <div className="mx-auto mt-4 w-full max-w-full rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm">
+                                        <pre className="text-sm break-words whitespace-pre-wrap text-slate-800">
                                             {reflection && reflection.length > 0
                                                 ? reflection
                                                 : 'Refleksi tidak tersedia.'}
