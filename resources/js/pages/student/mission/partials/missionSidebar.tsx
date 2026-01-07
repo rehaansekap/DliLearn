@@ -27,7 +27,6 @@ export default function MissionSidebar({
     activeTab,
     unlockedStep,
     onTabChange,
-    hasSubmittedInitial,
     groupStatus,
 }: MissionSidebarProps) {
     const isMobile = useIsMobile();
@@ -57,16 +56,6 @@ export default function MissionSidebar({
                             item.step < unlockedStep || isMissionCompleted;
 
                         const isLocked = item.step > unlockedStep;
-
-                        console.log(
-                            item.step,
-                            isActive,
-                            isLocked,
-                            isCompleted,
-                            isMissionCompleted,
-                            hasSubmittedInitial,
-                            groupStatus,
-                        );
 
                         return (
                             <button
