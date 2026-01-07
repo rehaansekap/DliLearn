@@ -179,12 +179,11 @@ export default function Phase5Evaluation({
 
             {/* Gallery Grid - Masonry Style */}
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {gallerySubmissions.map((submission, index) => (
+                {gallerySubmissions.map((submission) => (
                     <div
                         key={submission.id}
                         className={cn(
                             'group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-indigo-300 hover:shadow-2xl',
-                            index % 3 === 0 && 'lg:row-span-2',
                         )}
                     >
                         {/* Preview Image/Code */}
