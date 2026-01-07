@@ -34,7 +34,9 @@ export default function MissionSidebar({
     return (
         <div
             className={cn(
-                isMobile ? 'h-full w-full' : 'sticky top-4 h-full w-full',
+                isMobile
+                    ? 'relative z-0 h-full w-full'
+                    : 'sticky top-35 h-full w-full',
                 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg md:w-1/4',
             )}
         >
