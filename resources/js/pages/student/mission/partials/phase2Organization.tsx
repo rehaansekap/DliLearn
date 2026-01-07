@@ -58,13 +58,6 @@ export default function Phase2Organization({
         setEditingUserId(null);
     };
 
-    const getAvatarUrl = (avatar?: string) => {
-        if (!avatar)
-            return `https://ui-avatars.com/api/?name=User&background=random`;
-        if (avatar.startsWith('http')) return avatar;
-        return `/storage/avatars/${avatar}`;
-    };
-
     const getEmbedUrl = (url?: string) => {
         if (!url) return '';
         try {
