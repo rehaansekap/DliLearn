@@ -155,14 +155,14 @@ export default function Phase2Organization({
                                 {/* Avatar */}
                                 <div className="mb-4 flex justify-center">
                                     <div className="relative">
-                                        <img
-                                            src={getAvatarUrl(member.avatar)}
-                                            alt={member.name}
-                                            className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-lg ring-2 ring-slate-200"
-                                        />
+                                        <div className="flex h-15 w-15 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 text-white shadow-md">
+                                            <span className="text-xl font-bold">
+                                                {(member.name || '?').charAt(0)}
+                                            </span>
+                                        </div>
                                         <div
                                             className={cn(
-                                                'absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg',
+                                                'text-md absolute -right-2 -bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br shadow-lg',
                                                 ROLE_COLORS[member.role] ||
                                                     'from-slate-400 to-slate-500',
                                             )}
