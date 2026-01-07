@@ -287,13 +287,13 @@ export default function Phase2Organization({
                                     return (
                                         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                                             <div className="aspect-video w-full">
-                                                {/* <iframe
+                                                <iframe
                                                     src={embedUrl}
                                                     title="FigJam / Miro Workspace"
                                                     className="h-full w-full"
                                                     frameBorder="0"
                                                     allow="clipboard-read clipboard-write; fullscreen; accelerometer; gyroscope; picture-in-picture; geolocation; camera; microphone"
-                                                /> */}
+                                                />
                                             </div>
                                         </div>
                                     );
