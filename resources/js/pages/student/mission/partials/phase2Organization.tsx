@@ -49,6 +49,7 @@ export default function Phase2Organization({
     onNext,
 }: Phase2OrganizationProps) {
     const [editingUserId, setEditingUserId] = useState<number | null>(null);
+    const [showCollab, setShowCollab] = useState<boolean>(false);
     const alreadyPastStep2 =
         typeof groupCurrentStep === 'number' && groupCurrentStep > 2;
 
@@ -62,6 +63,31 @@ export default function Phase2Organization({
             return `https://ui-avatars.com/api/?name=User&background=random`;
         if (avatar.startsWith('http')) return avatar;
         return `/storage/avatars/${avatar}`;
+    };
+
+    const getEmbedUrl = (url?: string) => {
+        if (!url) return '';
+        try {
+            const u = new URL(url);
+            const host = u.hostname.toLowerCase();
+
+            if (host.includes('figma.com')) {
+                if (url.includes('/embed')) return url;
+                return `https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(
+                    url,
+                )}`;
+            }
+
+            if (host.includes('miro.com')) {
+                if (url.includes('live-embed') || url.includes('embed'))
+                    return url;
+                return `https://miro.com/app/live-embed/?${u.searchParams.toString()}`;
+            }
+
+            return url;
+        } catch {
+            return url;
+        }
     };
 
     return (
@@ -223,25 +249,91 @@ export default function Phase2Organization({
                 })}
             </div>
 
-            {/* Collaboration Link */}
-            {collaborationLink && (
-                <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg">
-                    <div className="border-b border-emerald-200 bg-gradient-to-r from-emerald-400 to-teal-400 px-6 py-4">
-                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-                            <span className="text-2xl">🔗</span>
-                            Kolaborasi Tim
-                        </h3>
+            <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg">
+                <div className="flex items-center justify-between border-b border-emerald-200 bg-gradient-to-r from-emerald-400 to-teal-400 px-6 py-4">
+                    <div className="flex items-center gap-2 text-white">
+                        <span className="text-2xl">🔗</span>
+                        <h3 className="text-lg font-bold">Kolaborasi Tim</h3>
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowCollab((s) => !s)}
+                        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                        aria-expanded={showCollab}
+                    >
+                        {showCollab ? 'Tutup' : 'Buka'} Workspace
+                    </button>
+                </div>
+
+                <div
+                    className={`overflow-hidden px-6 transition-[max-height,opacity] duration-300 ${
+                        showCollab
+                            ? 'max-h-[720px] opacity-100'
+                            : 'max-h-0 opacity-0'
+                    }`}
+                    aria-hidden={!showCollab}
+                >
                     <div className="p-6">
                         <p className="mb-4 text-slate-700">
                             Gunakan workspace kolaboratif untuk brainstorming
                             dan merencanakan solusi bersama tim:
                         </p>
+
+                        {/* Collaboration Link / Fallbacks */}
+                        {collaborationLink ? (
+                            (() => {
+                                const embedUrl = getEmbedUrl(collaborationLink);
+                                if (embedUrl) {
+                                    return (
+                                        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                            <div className="aspect-video w-full">
+                                                <iframe
+                                                    src={embedUrl}
+                                                    title="FigJam / Miro Workspace"
+                                                    className="h-full w-full"
+                                                    frameBorder="0"
+                                                    allow="clipboard-read clipboard-write; fullscreen; accelerometer; gyroscope; picture-in-picture; geolocation; camera; microphone"
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="rounded-md border border-slate-200 bg-white p-6 text-center text-slate-700">
+                                        <p className="mb-2 font-semibold text-slate-800">
+                                            Link kolaborasi tidak dikenali atau
+                                            rusak
+                                        </p>
+                                        <p className="text-sm">
+                                            Pastikan guru memasukkan link
+                                            FigJam/Miro yang benar.
+                                        </p>
+                                    </div>
+                                );
+                            })()
+                        ) : (
+                            <div className="rounded-md border border-slate-200 bg-white p-6 text-center text-slate-700">
+                                <p className="mb-2 font-semibold text-slate-800">
+                                    Link FigJam belum dimasukkan
+                                </p>
+                                <p className="text-sm">
+                                    Guru belum menambahkan link kolaborasi untuk
+                                    misi ini.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Footer - keep big button always visible (if link exists) */}
+                {collaborationLink && getEmbedUrl(collaborationLink) && (
+                    <div className="flex justify-center px-6 pt-4 pb-6">
                         <a
                             href={collaborationLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4 font-bold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl active:scale-[0.98]"
+                            className="mt-0 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4 font-bold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl active:scale-[0.98]"
                         >
                             <span className="text-xl">🚀</span>
                             <span>Buka FigJam/Miro Workspace</span>
@@ -260,8 +352,8 @@ export default function Phase2Organization({
                             </svg>
                         </a>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Complete Button */}
             {amILeader && (
