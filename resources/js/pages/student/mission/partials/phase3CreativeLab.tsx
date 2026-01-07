@@ -33,6 +33,14 @@ export default function Phase3CreativeLab({
 }: Phase3CreativeLabProps) {
     const [codeLanguage, setCodeLanguage] = useState('javascript');
     const [codeValue, setCodeValue] = useState(getDefaultCode(codeLanguage));
+    const [showPdfViewer, setShowPdfViewer] = useState(false);
+
+    const resolveFileUrl = (path?: string | null) => {
+        if (!path) return null;
+        if (/^https?:\/\//i.test(path)) return path;
+        if (path.startsWith('/')) return path;
+        return `/storage/${path}`;
+    };
 
     function getDefaultCode(lang: string) {
         switch (lang) {
@@ -82,43 +90,121 @@ export default function Phase3CreativeLab({
             </div>
 
             {/* Material PDF Section */}
-            {mission.material_pdf && (
-                <div className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 shadow-lg">
-                    <div className="border-b border-violet-200 bg-gradient-to-r from-violet-400 to-purple-400 px-6 py-4">
-                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-                            <span className="text-2xl">📚</span>
+            <div className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 shadow-lg">
+                <div className="flex items-center justify-between border-b border-violet-200 bg-gradient-to-r from-violet-400 to-purple-400 px-6 py-4">
+                    <div className="flex items-center gap-2 text-white">
+                        <span className="text-2xl">📚</span>
+                        <h3 className="text-lg font-bold">
                             Materi Pembelajaran
                         </h3>
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowPdfViewer((s) => !s)}
+                        className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+                        aria-expanded={showPdfViewer}
+                    >
+                        {showPdfViewer ? 'Tutup' : 'Buka'} Viewer
+                    </button>
+                </div>
+
+                <div
+                    className={`overflow-hidden px-6 transition-[max-height,opacity] duration-300 ${
+                        showPdfViewer
+                            ? 'max-h-[800px] opacity-100'
+                            : 'max-h-0 opacity-0'
+                    }`}
+                    aria-hidden={!showPdfViewer}
+                >
                     <div className="p-6">
-                        <p className="mb-4 text-slate-700">
-                            Pelajari konsep-konsep penting sebelum mulai coding:
-                        </p>
-                        <a
-                            href={mission.material_pdf}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 font-bold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:from-violet-700 hover:to-purple-700 hover:shadow-xl active:scale-[0.98]"
-                        >
-                            <span className="text-xl">📖</span>
-                            <span>Buka Materi PDF</span>
-                            <svg
-                                className="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                />
-                            </svg>
-                        </a>
+                        {(() => {
+                            const fileUrl = resolveFileUrl(
+                                mission.material_pdf,
+                            );
+                            // Jika tidak ada file sama sekali
+                            if (!fileUrl) {
+                                return (
+                                    <div className="rounded-md border border-slate-200 bg-white p-6 text-center text-slate-700">
+                                        <p className="mb-2 font-semibold text-slate-800">
+                                            PDF tidak tersedia
+                                        </p>
+                                        <p className="text-sm">
+                                            Tidak ada materi PDF yang diunggah
+                                            untuk misi ini. Hubungi Guru jika
+                                            ini seharusnya tersedia.
+                                        </p>
+                                    </div>
+                                );
+                            }
+
+                            // Gambar (jpg/png)
+                            if (/\.(jpe?g|png|gif)$/i.test(fileUrl)) {
+                                return (
+                                    <div className="h-[480px] w-full overflow-hidden rounded-md border border-slate-200 bg-white">
+                                        <img
+                                            src={fileUrl}
+                                            alt="Materi"
+                                            className="h-full w-full object-contain"
+                                        />
+                                    </div>
+                                );
+                            }
+
+                            // PDF (tampilkan object dengan fallback)
+                            if (/\.(pdf)$/i.test(fileUrl)) {
+                                return (
+                                    <div className="h-[480px] w-full overflow-hidden rounded-md border border-slate-200 bg-white">
+                                        <object
+                                            data={fileUrl}
+                                            type="application/pdf"
+                                            width="100%"
+                                            height="100%"
+                                        >
+                                            <div className="p-6 text-center">
+                                                <p className="mb-2 text-slate-700">
+                                                    PDF tidak dapat ditampilkan
+                                                    di browser — kemungkinan
+                                                    file rusak atau tidak bisa
+                                                    diakses.
+                                                </p>
+                                                <a
+                                                    href={fileUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="rounded-md bg-indigo-600 px-4 py-2 text-white"
+                                                >
+                                                    Buka PDF di Tab Baru
+                                                </a>
+                                            </div>
+                                        </object>
+                                    </div>
+                                );
+                            }
+
+                            // Tipe file lain / unknown
+                            return (
+                                <div className="rounded-md border border-slate-200 bg-white p-6 text-center text-slate-700">
+                                    <p className="mb-2 font-semibold text-slate-800">
+                                        File tidak dikenali
+                                    </p>
+                                    <p className="text-sm">
+                                        Tipe file tidak didukung untuk
+                                        pratinjau.{' '}
+                                        <a
+                                            className="text-indigo-600"
+                                            href={fileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Buka file
+                                        </a>
+                                    </p>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Code Editor Section */}
             <div className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
