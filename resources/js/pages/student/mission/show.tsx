@@ -342,6 +342,8 @@ export default function Show({
                             activeTab={activeTab}
                             unlockedStep={unlockedStep}
                             onTabChange={setActiveTab}
+                            hasSubmittedInitial={userSubmittedInitial}
+                            groupStatus={groupStatus}
                         />
 
                         {/* Content Area */}
@@ -365,8 +367,7 @@ export default function Show({
                                             isLocked={reflectionLocked}
                                             onRefresh={refreshGroupStatus}
                                             submittedPreviously={
-                                                userSubmittedInitial ||
-                                                groupHasSubmitted
+                                                userSubmittedInitial
                                             }
                                             onNext={() => setActiveTab(2)}
                                         />

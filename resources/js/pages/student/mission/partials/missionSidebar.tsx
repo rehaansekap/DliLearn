@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 interface MissionStep {
@@ -10,6 +11,8 @@ interface MissionSidebarProps {
     activeTab: number;
     unlockedStep: number;
     onTabChange: (step: number) => void;
+    hasSubmittedInitial: boolean;
+    groupStatus?: string;
 }
 
 const steps: MissionStep[] = [
@@ -24,24 +27,46 @@ export default function MissionSidebar({
     activeTab,
     unlockedStep,
     onTabChange,
+    hasSubmittedInitial,
+    groupStatus,
 }: MissionSidebarProps) {
+    const isMobile = useIsMobile();
+
     return (
-        <div className="sticky top-4 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg md:w-1/4">
+        <div
+            className={cn(
+                isMobile ? 'h-full w-full' : 'sticky top-4 h-full w-full',
+                'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg md:w-1/4',
+            )}
+        >
+            {' '}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
                 <h3 className="text-sm font-bold tracking-wider text-white uppercase">
                     Mission Timeline
                 </h3>
             </div>
-
             <div className="relative p-6">
                 {/* Vertical Line */}
-                <div className="absolute top-0 left-11 h-full w-0.5 bg-gradient-to-b from-indigo-200 via-purple-200 to-teal-200" />
+                <div className="absolute top-0 left-16 h-full w-0.5 bg-gradient-to-b from-indigo-200 via-purple-200 to-teal-200" />
 
                 <div className="space-y-4">
                     {steps.map((item) => {
                         const isActive = activeTab === item.step;
-                        const isCompleted = item.step < unlockedStep;
+                        const isMissionCompleted = groupStatus === 'completed';
+                        const isCompleted =
+                            item.step < unlockedStep || isMissionCompleted;
+
                         const isLocked = item.step > unlockedStep;
+
+                        console.log(
+                            item.step,
+                            isActive,
+                            isLocked,
+                            isCompleted,
+                            isMissionCompleted,
+                            hasSubmittedInitial,
+                            groupStatus,
+                        );
 
                         return (
                             <button
@@ -57,10 +82,9 @@ export default function MissionSidebar({
                                     !isActive &&
                                         !isLocked &&
                                         'hover:bg-slate-50',
-                                    isLocked && 'cursor-not-allowed opacity-40',
+                                    isLocked && 'cursor-not-allowed',
                                 )}
                             >
-                                {/* Circle Indicator */}
                                 <div
                                     className={cn(
                                         'relative z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-4 text-2xl transition-all duration-300',
@@ -74,11 +98,14 @@ export default function MissionSidebar({
                                             !isLocked &&
                                             'border-slate-300 bg-white',
                                         isLocked &&
+                                            !isMissionCompleted &&
                                             'border-slate-200 bg-slate-100',
                                     )}
                                 >
-                                    {isCompleted && !isActive ? (
-                                        <span className="text-white">✓</span>
+                                    {!isActive && !isLocked && isCompleted ? (
+                                        <span className="text-slate-100">
+                                            ✓
+                                        </span>
                                     ) : (
                                         <span
                                             className={cn(
@@ -109,13 +136,18 @@ export default function MissionSidebar({
                                         {item.label}
                                     </p>
                                     <p className="text-xs text-slate-500">
-                                        {isCompleted && !isActive
-                                            ? 'Selesai'
-                                            : isActive
-                                              ? 'Sedang Aktif'
-                                              : isLocked
-                                                ? 'Terkunci'
-                                                : 'Siap Dimulai'}
+                                        {isLocked &&
+                                        !isCompleted &&
+                                        item.step !== 1 &&
+                                        !isActive
+                                            ? 'Terkunci'
+                                            : isCompleted && !isActive
+                                              ? 'Selesai'
+                                              : isActive
+                                                ? 'Sedang Aktif'
+                                                : isLocked
+                                                  ? 'Terkunci'
+                                                  : 'Siap Dimulai'}
                                     </p>
                                 </div>
 
@@ -132,7 +164,7 @@ export default function MissionSidebar({
                                 {isActive && (
                                     <div className="absolute top-1/2 right-4 h-3 w-3 -translate-y-1/2">
                                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
-                                        <span className="relative inline-flex h-3 w-3 rounded-full bg-indigo-500" />
+                                        <span className="absolute inline-flex h-3 w-3 rounded-full bg-indigo-500" />
                                     </div>
                                 )}
                             </button>
@@ -140,7 +172,6 @@ export default function MissionSidebar({
                     })}
                 </div>
             </div>
-
             {/* Footer Info */}
             <div className="border-t border-slate-200 bg-slate-50 px-6 py-4">
                 <p className="text-center text-xs text-slate-600">

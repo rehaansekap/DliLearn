@@ -37,7 +37,15 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
+        $myReflection = $this->reflectionService->getUserReflection($user->id, $mission->id);
+        $initialReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'initial');
+        $finalReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
+        $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
+        if ($initialReflection) {
+            $groupMember = $this->groupService->getUserGroupMember($user->id);
+        } else {
+            $groupMember = null;
+        }
 
         if ($groupMember) {
             $progress = $this->progressService->getGroupProgress($groupMember->group_id, $mission->id);
@@ -50,13 +58,12 @@ class MissionController extends Controller
             $currentUserRole = null;
         }
 
-        $myReflection = $this->reflectionService->getUserReflection($user->id, $mission->id);
-        $initialReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'initial');
-        $finalReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
-        $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
-
         $groupHasSubmitted = false;
-        $groupStatus = $progress ? $progress->status : null;
+        if ($groupMember) {
+            $groupStatus = $progress ? $progress->status : null;
+        } else {
+            $groupStatus = null;
+        }
 
         if ($groupMember) {
             $groupHasSubmitted = Submission::where('group_id', $groupMember->group_id)
