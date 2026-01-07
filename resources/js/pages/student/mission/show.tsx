@@ -1,6 +1,7 @@
 import StudentLayout from '@/layouts/student-layout';
-import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { logout } from '@/routes';
+import { Head, Link, router } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 // import Swal from 'sweetalert2';
 // import 'sweetalert2/dist/sweetalert2.min.css';
 import { route } from 'ziggy-js';
@@ -52,9 +53,33 @@ export default function Show({
     // State untuk Phase 4 - Submission
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
+    // Dropdown State
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const profileDropdownRef = useRef<HTMLDivElement>(null);
+
     // Helper variables
     const amILeader = currentUserRole === 'Ketua';
     const collaborationLink = mission.collab_url;
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                profileDropdownRef.current &&
+                !profileDropdownRef.current.contains(event.target as Node)
+            ) {
+                setShowProfileDropdown(false);
+            }
+        }
+        if (showProfileDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showProfileDropdown]);
 
     // Phase 1 Handler
     const handleSubmitReflection = (reflection: string) => {
@@ -275,19 +300,86 @@ export default function Show({
         <StudentLayout
             user={auth.user}
             header={
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-2xl leading-tight font-bold text-slate-800">
-                            {mission.title}
-                        </h2>
-                        <p className="mt-1 text-sm text-slate-600">
-                            {mission.description}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
-                            Level {mission.difficulty_level}
-                        </span>
+                <div className="mx-auto max-w-7xl px-2 py-3 sm:px-6 sm:py-6 lg:px-8">
+                    <div className="flex flex-row items-center justify-between gap-2">
+                        {/* Tombol Kembali + Judul */}
+                        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                            <button
+                                type="button"
+                                onClick={() => window.history.back()}
+                                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 transition hover:bg-slate-200 sm:h-10 sm:w-10"
+                                aria-label="Kembali"
+                            >
+                                <svg
+                                    className="h-5 w-5 text-slate-600"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 19l-7-7 7-7"
+                                    />
+                                </svg>
+                            </button>
+                            <div className="min-w-0">
+                                <h2 className="truncate text-lg font-bold text-slate-800 sm:text-2xl">
+                                    {mission.title}
+                                </h2>
+                                <p className="truncate text-xs text-slate-600 sm:text-sm">
+                                    {mission.description}
+                                </p>
+                            </div>
+                        </div>
+                        {/* Avatar + Dropdown */}
+                        <div className="relative" ref={profileDropdownRef}>
+                            <button
+                                type="button"
+                                className="flex items-center gap-1 rounded-full px-1 py-1 transition hover:bg-slate-100 sm:gap-2 sm:px-2"
+                                onClick={() =>
+                                    setShowProfileDropdown((v) => !v)
+                                }
+                            >
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 text-white shadow-md sm:h-10 sm:w-10">
+                                    <span className="font-bold">
+                                        {(auth.user.name || '?').charAt(0)}
+                                    </span>
+                                </div>
+                                <span className="xs:block hidden max-w-[80px] truncate font-semibold text-slate-700 sm:block sm:max-w-[120px]">
+                                    {auth.user.name}
+                                </span>
+                                <svg
+                                    className="ml-1 h-4 w-4 text-slate-500"
+                                    fill="none"
+                                    viewBox="0 0 20 20"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        d="M7 7l3-3 3 3m0 6l-3 3-3-3"
+                                        strokeWidth={2}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </svg>
+                            </button>
+                            {showProfileDropdown && (
+                                <div className="absolute right-0 z-50 mt-2 w-44 rounded-xl border border-slate-200 bg-white py-2 shadow-xl">
+                                    <div className="truncate px-4 py-2 text-sm font-semibold text-slate-700">
+                                        {auth.user.name}
+                                    </div>
+                                    <Link
+                                        href={logout()}
+                                        method="post"
+                                        as="button"
+                                        className="w-full px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             }
@@ -304,26 +396,26 @@ export default function Show({
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     {/* Mission Header Card */}
                     <div className="mb-8 overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-purple-50 to-teal-50 shadow-lg">
-                        <div className="p-8">
-                            <div className="flex items-start gap-6">
-                                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-3xl shadow-lg">
+                        <div className="p-4 sm:p-8">
+                            <div className="flex flex-col items-start gap-4 sm:flex-row sm:gap-6">
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
                                     🚀
                                 </div>
-                                <div className="flex-1">
-                                    <h1 className="mb-2 text-3xl font-black text-slate-800">
+                                <div className="min-w-0 flex-1">
+                                    <h1 className="mb-2 text-lg font-black break-words whitespace-normal text-slate-800 sm:text-3xl">
                                         {mission.title}
                                     </h1>
-                                    <p className="text-slate-700">
+                                    <p className="text-sm text-slate-700 sm:text-base">
                                         {mission.description}
                                     </p>
-                                    <div className="mt-4 flex items-center gap-4">
-                                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm">
+                                    <div className="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+                                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm sm:text-sm">
                                             ⚡ Difficulty:{' '}
                                             <span className="font-bold text-indigo-600">
                                                 Level {mission.difficulty_level}
                                             </span>
                                         </span>
-                                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm">
+                                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm sm:text-sm">
                                             👤 Role:{' '}
                                             <span className="font-bold text-purple-600">
                                                 {currentUserRole || 'Belum Ada'}
