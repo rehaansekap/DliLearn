@@ -11,7 +11,6 @@ interface MissionStepItemProps {
 }
 
 export function MissionStepItem({
-    step,
     label,
     icon,
     status,
