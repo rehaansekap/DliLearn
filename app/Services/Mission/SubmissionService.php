@@ -22,6 +22,7 @@ class SubmissionService
                 'submissions.id',
                 'groups.name as group_name',
                 'groups.group_code',
+                'groups.id as group_id',
                 'submissions.file_path',
                 'submissions.code_answer',
                 'submissions.submitted_at',
@@ -31,10 +32,17 @@ class SubmissionService
             ->get();
 
         return $submissions->map(function ($submission) use ($userId) {
+            $groupMembers = DB::table('group_members')
+                ->join('users', 'group_members.user_id', '=', 'users.id')
+                ->where('group_members.group_id', $submission->group_id)
+                ->select('users.name', 'group_members.role')
+                ->get();
+
             return [
                 'id' => $submission->id,
                 'group_name' => $submission->group_name,
                 'group_code' => $submission->group_code,
+                'group_members' => $groupMembers,
                 'file_path' => $submission->file_path,
                 'code_answer' => $submission->code_answer,
                 'submitted_at' => $submission->submitted_at,

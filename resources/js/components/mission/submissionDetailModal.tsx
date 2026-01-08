@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 interface Feedback {
     id: number;
     user_name: string;
+    group_name: string;
     message: string;
     created_at: string;
 }
@@ -11,6 +12,8 @@ interface Feedback {
 interface SubmissionDetailModalProps {
     isOpen: boolean;
     groupName: string;
+    groupCode?: string;
+    groupMembers?: Array<{ name: string; role: string }>;
     filePath: string;
     codeAnswer: string;
     feedbacks?: Feedback[];
@@ -22,6 +25,8 @@ interface SubmissionDetailModalProps {
 export function SubmissionDetailModal({
     isOpen,
     groupName,
+    groupCode,
+    groupMembers = [],
     filePath,
     codeAnswer,
     feedbacks = [],
@@ -83,6 +88,58 @@ export function SubmissionDetailModal({
                 {/* Modal Content */}
                 <div className="max-h-[calc(90vh-200px)] overflow-y-auto p-6">
                     <div className="space-y-6">
+                        {/* Group Info */}
+                        <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
+                            <h4 className="mb-3 flex items-center gap-2 font-bold text-slate-800">
+                                <span>👥</span>
+                                <span>Informasi Kelompok</span>
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-slate-600">
+                                        Nama Kelompok:
+                                    </span>
+                                    <span className="text-sm font-bold text-slate-800">
+                                        {groupName}
+                                    </span>
+                                </div>
+                                {groupCode && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-slate-600">
+                                            Kode Kelompok:
+                                        </span>
+                                        <span className="font-mono text-sm font-bold text-indigo-600">
+                                            {groupCode}
+                                        </span>
+                                    </div>
+                                )}
+                                {groupMembers.length > 0 && (
+                                    <div className="mt-3 border-t border-indigo-200 pt-3">
+                                        <p className="mb-2 text-sm font-medium text-slate-700">
+                                            Anggota Kelompok:
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {groupMembers.map((member, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs shadow-sm"
+                                                >
+                                                    <span className="font-medium text-slate-700">
+                                                        {member.name}
+                                                    </span>
+                                                    <span className="text-slate-400">
+                                                        •
+                                                    </span>
+                                                    <span className="text-indigo-600">
+                                                        {member.role}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         {/* Flowchart Preview */}
                         <div>
                             <h4 className="mb-3 font-bold text-slate-800">
@@ -184,7 +241,7 @@ export function SubmissionDetailModal({
                                             <div>
                                                 <p className="text-sm font-bold text-slate-800">
                                                     {feedback.user_name} (
-                                                    {groupName})
+                                                    {feedback.group_name})
                                                 </p>
                                                 <p className="text-xs text-slate-500">
                                                     {new Date(

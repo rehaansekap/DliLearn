@@ -28,8 +28,10 @@ class FeedbackService
     {
         return DB::table('feedbacks')
             ->join('users', 'feedbacks.user_id', '=', 'users.id')
+            ->join('group_members', 'users.id', '=', 'group_members.user_id')
+            ->join('groups', 'group_members.group_id', '=', 'groups.id')
             ->where('feedbacks.submission_id', $submissionId)
-            ->select('feedbacks.*', 'users.name as user_name', 'users.avatar')
+            ->select('feedbacks.*', 'users.name as user_name', 'users.avatar', 'groups.name as group_name')
             ->orderBy('feedbacks.created_at', 'desc')
             ->get();
     }

@@ -10,6 +10,8 @@ import { useState } from 'react';
 interface GallerySubmission {
     id: number;
     group_name: string;
+    group_code?: string;
+    group_members?: Array<{ name: string; role: string }>;
     file_path: string;
     code_answer: string;
     submitted_at: string;
@@ -21,6 +23,7 @@ interface GallerySubmission {
 interface Feedback {
     id: number;
     user_name: string;
+    group_name: string;
     message: string;
     created_at: string;
 }
@@ -240,6 +243,8 @@ export default function Phase5Evaluation({
                 <SubmissionDetailModal
                     isOpen={showDetailModal}
                     groupName={selectedSubmission.group_name}
+                    groupCode={selectedSubmission.group_code}
+                    groupMembers={selectedSubmission.group_members}
                     filePath={selectedSubmission.file_path}
                     codeAnswer={selectedSubmission.code_answer}
                     feedbacks={selectedSubmission.feedbacks}
