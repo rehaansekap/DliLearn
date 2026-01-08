@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->integer('difficulty_level')->default(1);
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
 
             // Tahap 1
             $table->string('video_url')->nullable();
