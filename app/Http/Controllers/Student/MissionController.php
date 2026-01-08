@@ -8,16 +8,18 @@ use App\Http\Requests\Student\Mission\StoreReflectionRequest;
 use App\Http\Requests\Student\Mission\SubmitFeedbackRequest;
 use App\Http\Requests\Student\Mission\SubmitFinalReflectionRequest;
 use App\Http\Requests\Student\Mission\SubmitPhase4Request;
+use App\Http\Requests\Student\Mission\SubmitVoteRequest;
 use App\Http\Requests\Student\Mission\UpdateRoleRequest;
 use App\Models\Mission;
 use App\Models\Submission;
 use App\Services\Mission\FeedbackService;
 use App\Services\Mission\GroupService;
+use App\Services\Mission\MissionLockService;
 use App\Services\Mission\ProgressService;
 use App\Services\Mission\ReflectionService;
 use App\Services\Mission\RewardService;
 use App\Services\Mission\SubmissionService;
-use App\Services\Mission\MissionLockService;
+use App\Services\Mission\VoteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,25 +35,26 @@ class MissionController extends Controller
         protected FeedbackService $feedbackService,
         protected RewardService $rewardService,
         protected MissionLockService $lockService,
-
+        protected VoteService $voteService,
     ) {}
 
     public function show($slug)
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
+
         if ($this->lockService->isMissionLocked($mission, $user)) {
             $prerequisite = Mission::find($mission->prerequisite_mission_id);
-
             return redirect()
                 ->route('dashboard')
-                ->with('error', 'This Mission is locked! Complete "' . ($prerequisite->title ?? 'the previous mission') . '" first.');
+                ->with('error', 'Selesaikan misi "' . ($prerequisite?->title ?? 'sebelumnya') . '" terlebih dahulu.');
         }
 
         $myReflection = $this->reflectionService->getUserReflection($user->id, $mission->id);
         $initialReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'initial');
         $finalReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
         $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
+
         if ($initialReflection) {
             $groupMember = $this->groupService->getUserGroupMember($user->id);
         } else {
@@ -72,15 +75,12 @@ class MissionController extends Controller
         $groupHasSubmitted = false;
         if ($groupMember) {
             $groupStatus = $progress ? $progress->status : null;
-        } else {
-            $groupStatus = null;
-        }
-
-        if ($groupMember) {
             $groupHasSubmitted = Submission::where('group_id', $groupMember->group_id)
                 ->where('mission_id', $mission->id)
                 ->where('is_final', true)
                 ->exists();
+        } else {
+            $groupStatus = null;
         }
 
         $allSubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
@@ -88,25 +88,37 @@ class MissionController extends Controller
         $myGroupCode = null;
         if ($groupMember) {
             $myGroup = DB::table('groups')->where('id', $groupMember->group_id)->first();
-            $myGroupCode = $myGroup ? $myGroup->group_code : null;
+            $myGroupCode = $myGroup?->group_code;
         }
 
         $unreviewedSubmissions = [];
         if ($groupMember && $groupMember->role === 'Ketua') {
-            foreach ($allSubmissions as $submission) {
-                if ($submission['group_code'] === $myGroupCode) continue;
+            $allOtherSubmissions = $allSubmissions->filter(fn($s) => $s['group_code'] !== $myGroupCode);
+            foreach ($allOtherSubmissions as $sub) {
                 $hasFeedback = DB::table('feedbacks')
-                    ->where('submission_id', $submission['id'])
+                    ->where('submission_id', $sub['id'])
                     ->where('user_id', $user->id)
                     ->exists();
                 if (!$hasFeedback) {
                     $unreviewedSubmissions[] = [
-                        'id' => $submission['id'],
-                        'group_name' => $submission['group_name'],
-                        'group_code' => $submission['group_code'],
+                        'group_name' => $sub['group_name'],
+                        'group_code' => $sub['group_code'],
                     ];
                 }
             }
+        }
+
+        $voteData = null;
+        if ($groupMember && $groupMember->role === 'Ketua') {
+            $hasVoted = $this->voteService->hasVoted($groupMember->group_id, $mission->id);
+            $myVote = $this->voteService->getGroupVote($groupMember->group_id, $mission->id);
+            $votableGroups = $this->voteService->getVotableGroups($mission->id, $groupMember->group_id);
+
+            $voteData = [
+                'has_voted' => $hasVoted,
+                'my_vote' => $myVote,
+                'votable_groups' => $votableGroups,
+            ];
         }
 
         return Inertia::render('student/mission/index', [
@@ -114,15 +126,14 @@ class MissionController extends Controller
             'currentStep' => $currentStep,
             'unlockedStep' => $currentStep,
             'groupMembers' => $myGroupMembers,
-            'currentUserRole' => $currentUserRole,
-            'lkpdUrl' => asset('assets/template_lkpd.pdf'),
-            'reflection' => $myReflection,
+            'currentUserRole' => $currentUserRole ?? 'Belum Ada',
+            'groupHasSubmitted' => $groupHasSubmitted,
             'initialReflection' => $initialReflection,
             'finalReflection' => $finalReflection,
             'gallerySubmissions' => $gallerySubmissions,
-            'groupHasSubmitted' => $groupHasSubmitted,
-            'groupStatus' => $groupStatus,
+            'groupStatus' => $groupStatus ?? 'locked',
             'unreviewedSubmissions' => $unreviewedSubmissions,
+            'voteData' => $voteData,
         ]);
     }
 
@@ -147,6 +158,36 @@ class MissionController extends Controller
         }
 
         return redirect()->back()->with('success', 'Refleksi tersimpan! Menunggu pembentukan kelompok oleh Guru.');
+    }
+
+    public function submitVote(SubmitVoteRequest $request, $slug)
+    {
+        $mission = Mission::where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+        $groupMember = $this->groupService->getUserGroupMember($user->id);
+
+        if (!$groupMember) {
+            return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
+        }
+
+        if ($groupMember->role !== 'Ketua') {
+            abort(403, 'Hanya Ketua Kelompok yang dapat memberikan vote!');
+        }
+
+        $validated = $request->validated();
+
+        if ($validated['voted_group_id'] == $groupMember->group_id) {
+            return redirect()->back()->with('error', 'Tidak dapat memilih kelompok sendiri!');
+        }
+
+        $this->voteService->submitVote(
+            $mission->id,
+            $groupMember->group_id,
+            $validated['voted_group_id'],
+            $user->id
+        );
+
+        return redirect()->back()->with('success', 'Vote berhasil disimpan!');
     }
 
     public function updateRole(UpdateRoleRequest $request, $slug)

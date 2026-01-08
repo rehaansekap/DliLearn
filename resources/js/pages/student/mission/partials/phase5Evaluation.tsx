@@ -1,3 +1,4 @@
+import { BestGroupVote } from '@/components/mission/bestGroupVote';
 import { CompletionStatusCard } from '@/components/mission/completionStatusCard';
 import { FinalReflectionForm } from '@/components/mission/finalReflectionForm';
 import { GalleryCard } from '@/components/mission/galleryCard';
@@ -29,7 +30,20 @@ interface Feedback {
     created_at: string;
 }
 
+interface VotableGroup {
+    id: number;
+    name: string;
+    group_code: string;
+}
+
+interface VoteData {
+    has_voted: boolean;
+    my_vote: number | null;
+    votable_groups: VotableGroup[];
+}
+
 interface Phase5EvaluationProps {
+    missionSlug: string;
     gallerySubmissions: GallerySubmission[];
     onSubmitFinalReflection: (reflection: string) => void;
     initialFinalReflection?: string | null;
@@ -38,9 +52,11 @@ interface Phase5EvaluationProps {
     groupStatus?: string;
     amILeader?: boolean;
     unreviewedSubmissions?: Array<{ group_name: string; group_code: string }>;
+    voteData?: VoteData | null;
 }
 
 export default function Phase5Evaluation({
+    missionSlug,
     gallerySubmissions,
     onSubmitFinalReflection,
     initialFinalReflection = '',
@@ -49,6 +65,7 @@ export default function Phase5Evaluation({
     groupStatus,
     amILeader = false,
     unreviewedSubmissions = [],
+    voteData = null,
 }: Phase5EvaluationProps) {
     const isMobile = useIsMobile();
     const [selectedSubmission, setSelectedSubmission] =
@@ -162,6 +179,27 @@ export default function Phase5Evaluation({
             return;
         }
 
+        // Cek apakah ketua sudah vote
+        if (amILeader && voteData && !voteData.has_voted) {
+            const SwalModule = await import('sweetalert2');
+            await import('sweetalert2/dist/sweetalert2.min.css');
+            const Swal = SwalModule.default;
+
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Belum Vote!',
+                text: 'Sebagai ketua, kamu harus memberikan vote untuk kelompok terbaik sebelum menyelesaikan misi.',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'rounded-xl',
+                    title: 'font-bold',
+                    confirmButton:
+                        'bg-gradient-to-r from-amber-500 to-yellow-500',
+                },
+            });
+            return;
+        }
+
         setIsSubmittingReflection(true);
         onSubmitFinalReflection(reflection);
     };
@@ -237,6 +275,7 @@ export default function Phase5Evaluation({
                         ))}
                     </div>
 
+                    {/* Pagination */}
                     <div className="mt-6 flex items-center justify-between">
                         <div className="text-sm text-slate-600">
                             Halaman{' '}
@@ -283,7 +322,7 @@ export default function Phase5Evaluation({
                                 </div>
                             ) : (
                                 <div className="px-2 text-sm text-slate-500">
-                                    {/* compact mobile: keep minimal */}
+                                    {/* compact mobile */}
                                 </div>
                             )}
 
@@ -304,6 +343,17 @@ export default function Phase5Evaluation({
                 </>
             ) : (
                 <EmptyGalleryState />
+            )}
+
+            {/* Best Group Vote Section */}
+            {sortedSubmissions.length > 0 && voteData && (
+                <BestGroupVote
+                    missionSlug={missionSlug}
+                    votableGroups={voteData.votable_groups}
+                    hasVoted={voteData.has_voted}
+                    myVote={voteData.my_vote}
+                    amILeader={amILeader}
+                />
             )}
 
             {/* Final Reflection Section */}

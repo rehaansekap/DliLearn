@@ -23,6 +23,7 @@ export default function Show({
     gallerySubmissions,
     groupStatus,
     unreviewedSubmissions = [],
+    voteData = null,
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
 
@@ -384,6 +385,7 @@ export default function Show({
 
                                     {activeTab === 5 && (
                                         <Phase5Evaluation
+                                            missionSlug={mission.slug}
                                             gallerySubmissions={
                                                 gallerySubmissions
                                             }
@@ -408,6 +410,7 @@ export default function Show({
                                             unreviewedSubmissions={
                                                 unreviewedSubmissions
                                             }
+                                            voteData={voteData}
                                         />
                                     )}
                                 </div>
