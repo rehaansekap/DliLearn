@@ -98,7 +98,7 @@ class MissionController extends Controller
             }
         }
 
-        return Inertia::render('student/mission/show', [
+        return Inertia::render('student/mission/index', [
             'mission' => $mission,
             'currentStep' => $currentStep,
             'unlockedStep' => $currentStep,
