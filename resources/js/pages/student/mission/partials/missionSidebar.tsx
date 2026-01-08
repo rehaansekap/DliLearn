@@ -1,3 +1,5 @@
+import { MissionStepItem } from '@/components/mission/missionStepItem';
+import { ProgressBar } from '@/components/mission/progressBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +25,20 @@ const steps: MissionStep[] = [
     { step: 5, label: 'Evaluasi & Galeri', icon: '⭐' },
 ];
 
+function getStepStatus(
+    step: number,
+    activeTab: number,
+    unlockedStep: number,
+    groupStatus?: string,
+): 'locked' | 'active' | 'completed' | 'available' {
+    const isMissionCompleted = groupStatus === 'completed';
+
+    if (step === activeTab) return 'active';
+    if (step < unlockedStep || isMissionCompleted) return 'completed';
+    if (step > unlockedStep) return 'locked';
+    return 'available';
+}
+
 export default function MissionSidebar({
     activeTab,
     unlockedStep,
@@ -40,137 +56,48 @@ export default function MissionSidebar({
                 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg md:w-1/4',
             )}
         >
-            {' '}
+            {/* Header */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
                 <h3 className="text-sm font-bold tracking-wider text-white uppercase">
                     Mission Timeline
                 </h3>
             </div>
+
+            {/* Steps List */}
             <div className="relative p-6">
                 {/* Vertical Line */}
                 <div className="absolute top-0 left-16 h-full w-0.5 bg-gradient-to-b from-indigo-200 via-purple-200 to-teal-200" />
 
                 <div className="space-y-4">
                     {steps.map((item) => {
-                        const isActive = activeTab === item.step;
-                        const isMissionCompleted = groupStatus === 'completed';
-                        const isCompleted =
-                            item.step < unlockedStep || isMissionCompleted;
-
-                        const isLocked = item.step > unlockedStep;
+                        const status = getStepStatus(
+                            item.step,
+                            activeTab,
+                            unlockedStep,
+                            groupStatus,
+                        );
 
                         return (
-                            <button
+                            <MissionStepItem
                                 key={item.step}
-                                onClick={() =>
-                                    !isLocked && onTabChange(item.step)
-                                }
-                                disabled={isLocked}
-                                className={cn(
-                                    'relative flex w-full items-center gap-4 rounded-xl p-4 text-left transition-all duration-300',
-                                    isActive &&
-                                        'scale-105 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-md ring-2 ring-indigo-500',
-                                    !isActive &&
-                                        !isLocked &&
-                                        'hover:bg-slate-50',
-                                    isLocked && 'cursor-not-allowed',
-                                )}
-                            >
-                                <div
-                                    className={cn(
-                                        'relative z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-4 text-2xl transition-all duration-300',
-                                        isActive &&
-                                            'border-indigo-500 bg-indigo-600 shadow-lg shadow-indigo-500/50',
-                                        isCompleted &&
-                                            !isActive &&
-                                            'border-teal-400 bg-teal-500',
-                                        !isActive &&
-                                            !isCompleted &&
-                                            !isLocked &&
-                                            'border-slate-300 bg-white',
-                                        isLocked &&
-                                            !isMissionCompleted &&
-                                            'border-slate-200 bg-slate-100',
-                                    )}
-                                >
-                                    {!isActive && !isLocked && isCompleted ? (
-                                        <span className="text-slate-100">
-                                            ✓
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className={cn(
-                                                isActive && 'scale-110',
-                                            )}
-                                        >
-                                            {item.icon}
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Label */}
-                                <div className="flex-1">
-                                    <p
-                                        className={cn(
-                                            'text-sm font-bold transition-colors',
-                                            isActive && 'text-indigo-700',
-                                            isCompleted &&
-                                                !isActive &&
-                                                'text-teal-700',
-                                            !isActive &&
-                                                !isCompleted &&
-                                                !isLocked &&
-                                                'text-slate-700',
-                                            isLocked && 'text-slate-400',
-                                        )}
-                                    >
-                                        {item.label}
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        {isLocked &&
-                                        !isCompleted &&
-                                        item.step !== 1 &&
-                                        !isActive
-                                            ? 'Terkunci'
-                                            : isCompleted && !isActive
-                                              ? 'Selesai'
-                                              : isActive
-                                                ? 'Sedang Aktif'
-                                                : isLocked
-                                                  ? 'Terkunci'
-                                                  : 'Siap Dimulai'}
-                                    </p>
-                                </div>
-
-                                {/* Lock Icon */}
-                                {isLocked && (
-                                    <div className="flex-shrink-0">
-                                        <span className="text-slate-300">
-                                            🔒
-                                        </span>
-                                    </div>
-                                )}
-
-                                {/* Active Indicator Pulse */}
-                                {isActive && (
-                                    <div className="absolute top-1/2 right-4 h-3 w-3 -translate-y-1/2">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
-                                        <span className="absolute inline-flex h-3 w-3 rounded-full bg-indigo-500" />
-                                    </div>
-                                )}
-                            </button>
+                                step={item.step}
+                                label={item.label}
+                                icon={item.icon}
+                                status={status}
+                                onClick={() => {
+                                    if (status !== 'locked') {
+                                        onTabChange(item.step);
+                                    }
+                                }}
+                            />
                         );
                     })}
                 </div>
             </div>
-            {/* Footer Info */}
+
+            {/* Footer Progress */}
             <div className="border-t border-slate-200 bg-slate-50 px-6 py-4">
-                <p className="text-center text-xs text-slate-600">
-                    🚀 Progress:{' '}
-                    <span className="font-bold text-indigo-600">
-                        {Math.min(unlockedStep, 5)}/5
-                    </span>
-                </p>
+                <ProgressBar current={Math.min(unlockedStep, 5)} total={5} />
             </div>
         </div>
     );

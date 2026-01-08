@@ -1,9 +1,8 @@
+import { MissionHeader } from '@/components/mission/missionHeader';
 import StudentLayout from '@/layouts/student-layout';
 import { logout } from '@/routes';
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-// import Swal from 'sweetalert2';
-// import 'sweetalert2/dist/sweetalert2.min.css';
 import { route } from 'ziggy-js';
 import MissionSidebar from './partials/missionSidebar';
 import Phase1Orientation from './partials/phase1Orientation';
@@ -98,7 +97,6 @@ export default function Show({
                         return;
                     }
 
-                    // dynamic-import SweetAlert2 (and css)
                     const SwalModule = await import('sweetalert2');
                     await import('sweetalert2/dist/sweetalert2.min.css');
                     const Swal = SwalModule.default;
@@ -126,7 +124,6 @@ export default function Show({
     };
 
     const refreshGroupStatus = () => {
-        // Request minimal props to check groupMembers / progress
         router.get(
             route('mission.show', mission.slug),
             {},
@@ -199,7 +196,6 @@ export default function Show({
         setIsRunning(true);
         setTerminalOutput('> Running code...\n');
 
-        // Simulasi eksekusi kode
         setTimeout(() => {
             setTerminalOutput(
                 `> Code executed successfully!\n> Language: ${language}\n> Output:\nHello World!`,
@@ -395,37 +391,12 @@ export default function Show({
             <div className="relative py-8">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     {/* Mission Header Card */}
-                    <div className="mb-8 overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-purple-50 to-teal-50 shadow-lg">
-                        <div className="p-4 sm:p-8">
-                            <div className="flex flex-col items-start gap-4 sm:flex-row sm:gap-6">
-                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
-                                    🚀
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <h1 className="mb-2 text-lg font-black break-words whitespace-normal text-slate-800 sm:text-3xl">
-                                        {mission.title}
-                                    </h1>
-                                    <p className="text-sm text-slate-700 sm:text-base">
-                                        {mission.description}
-                                    </p>
-                                    <div className="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
-                                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm sm:text-sm">
-                                            ⚡ Difficulty:{' '}
-                                            <span className="font-bold text-indigo-600">
-                                                Level {mission.difficulty_level}
-                                            </span>
-                                        </span>
-                                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm sm:text-sm">
-                                            👤 Role:{' '}
-                                            <span className="font-bold text-purple-600">
-                                                {currentUserRole || 'Belum Ada'}
-                                            </span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <MissionHeader
+                        title={mission.title}
+                        description={mission.description}
+                        level={mission.difficulty_level}
+                        role={currentUserRole || 'Belum Ada'}
+                    />
 
                     {/* Main Content Grid */}
                     <div className="flex flex-col gap-6 lg:flex-row">
