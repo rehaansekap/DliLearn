@@ -4,8 +4,9 @@ import { GalleryCard } from '@/components/mission/galleryCard';
 import { SubmissionDetailModal } from '@/components/mission/submissionDetailModal';
 import { EmptyGalleryState } from '@/components/mission/ui/emptyGalleryState';
 import { MissionButton } from '@/components/mission/ui/missionButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface GallerySubmission {
     id: number;
@@ -49,10 +50,29 @@ export default function Phase5Evaluation({
     amILeader = false,
     unreviewedSubmissions = [],
 }: Phase5EvaluationProps) {
+    const isMobile = useIsMobile();
     const [selectedSubmission, setSelectedSubmission] =
         useState<GallerySubmission | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [isSubmittingReflection, setIsSubmittingReflection] = useState(false);
+
+    const itemsPerPage = isMobile ? 3 : 6;
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const sortedSubmissions = [...gallerySubmissions].sort(
+        (a, b) =>
+            new Date(a.submitted_at).getTime() -
+            new Date(b.submitted_at).getTime(),
+    );
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(sortedSubmissions.length / itemsPerPage),
+    );
+    const pageItems = sortedSubmissions.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
 
     const handleLike = (submissionId: number) => {
         router.post(
@@ -146,6 +166,10 @@ export default function Phase5Evaluation({
         onSubmitFinalReflection(reflection);
     };
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [gallerySubmissions.length, isMobile]);
+
     return (
         <div className="space-y-6 px-2 sm:space-y-8 sm:px-0">
             {/* Header Section */}
@@ -167,24 +191,117 @@ export default function Phase5Evaluation({
                 </div>
             </div>
 
-            {/* Gallery Grid */}
-            {gallerySubmissions.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {gallerySubmissions.map((submission) => (
-                        <GalleryCard
-                            key={submission.id}
-                            groupName={submission.group_name}
-                            submittedAt={submission.submitted_at}
-                            filePath={submission.file_path}
-                            codeAnswer={submission.code_answer}
-                            likesCount={submission.likes_count}
-                            isLikedByMe={submission.is_liked_by_me}
-                            amILeader={amILeader}
-                            onLike={() => handleLike(submission.id)}
-                            onViewDetail={() => handleViewDetail(submission)}
-                        />
-                    ))}
-                </div>
+            {/* Gallery Grid (paginated) */}
+            {sortedSubmissions.length > 0 ? (
+                <>
+                    <div className="mb-3 flex items-center justify-between">
+                        <p className="text-sm text-slate-600">
+                            Menampilkan{' '}
+                            <span className="font-bold text-slate-800">
+                                {sortedSubmissions.length === 0
+                                    ? 0
+                                    : Math.min(
+                                          (currentPage - 1) * itemsPerPage + 1,
+                                          sortedSubmissions.length,
+                                      )}
+                                {' – '}
+                                {Math.min(
+                                    currentPage * itemsPerPage,
+                                    sortedSubmissions.length,
+                                )}
+                            </span>{' '}
+                            dari{' '}
+                            <span className="font-bold text-slate-800">
+                                {sortedSubmissions.length}
+                            </span>{' '}
+                            karya
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {pageItems.map((submission) => (
+                            <GalleryCard
+                                key={submission.id}
+                                groupName={submission.group_name}
+                                submittedAt={submission.submitted_at}
+                                filePath={submission.file_path}
+                                codeAnswer={submission.code_answer}
+                                likesCount={submission.likes_count}
+                                isLikedByMe={submission.is_liked_by_me}
+                                amILeader={amILeader}
+                                onLike={() => handleLike(submission.id)}
+                                onViewDetail={() =>
+                                    handleViewDetail(submission)
+                                }
+                            />
+                        ))}
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between">
+                        <div className="text-sm text-slate-600">
+                            Halaman{' '}
+                            <span className="font-medium text-slate-800">
+                                {currentPage}
+                            </span>{' '}
+                            /{' '}
+                            <span className="font-medium text-slate-800">
+                                {totalPages}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((p) => Math.max(1, p - 1))
+                                }
+                                disabled={currentPage === 1}
+                                className="inline-flex items-center gap-2 rounded-lg border border-indigo-100 bg-white px-3 py-1 text-sm font-medium text-indigo-700 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <span className="text-sm">←</span>
+                                <span className="hidden sm:inline">Prev</span>
+                            </button>
+
+                            {!isMobile ? (
+                                <div className="flex items-center gap-2 rounded-lg border border-indigo-50 bg-white/60 p-1">
+                                    {Array.from({ length: totalPages }).map(
+                                        (_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() =>
+                                                    setCurrentPage(i + 1)
+                                                }
+                                                className={`rounded-md px-3 py-1 text-sm font-medium transition ${
+                                                    currentPage === i + 1
+                                                        ? 'bg-indigo-600 text-white shadow'
+                                                        : 'border border-indigo-100 bg-white text-slate-600 hover:bg-indigo-50'
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ),
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="px-2 text-sm text-slate-500">
+                                    {/* compact mobile: keep minimal */}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((p) =>
+                                        Math.min(totalPages, p + 1),
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                            >
+                                <span className="hidden sm:inline">Next</span>
+                                <span className="text-sm">→</span>
+                            </button>
+                        </div>
+                    </div>
+                </>
             ) : (
                 <EmptyGalleryState />
             )}
