@@ -61,7 +61,7 @@ export function MissionList({ missions }: MissionListProps) {
             </div>
 
             {/* Bottom CTA */}
-            <div className="mt-8 rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-8 text-center">
+            <div className="mt-8 rounded-2xl border-2 border-indigo-200 bg-white p-8 text-center">
                 <span className="mb-3 inline-block text-5xl">🏆</span>
                 <h3 className="mb-2 text-xl font-bold text-slate-800">
                     Selesaikan Semua Misi!
