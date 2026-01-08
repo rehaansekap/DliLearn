@@ -25,7 +25,7 @@ class DashboardController extends Controller
             ];
         });
 
-        return Inertia::render('student/dashboard', [
+        return Inertia::render('student/dashboard/index', [
             'missions' => $missions,
             'userXp' => $user->xp,
             'userLevel' => $user->level,

@@ -1,11 +1,23 @@
 @import 'tailwindcss';
 
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+
+@keyframes shimmer {
+    0% {
+        background-position: -250px 0;
+    }
+    100% {
+        background-position: 250px 0;
+    }
+}
+.animation-delay-300 {
+    animation-delay: 300ms;
+}
 
 @theme {
     --font-sans:
