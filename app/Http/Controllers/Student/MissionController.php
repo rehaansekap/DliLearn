@@ -108,18 +108,22 @@ class MissionController extends Controller
             }
         }
 
-        $voteData = null;
+        $excludeGroupId = $groupMember?->group_id ?? 0;
+        $votableGroups = $this->voteService->getVotableGroups($mission->id, $excludeGroupId);
+
         if ($groupMember && $groupMember->role === 'Ketua') {
             $hasVoted = $this->voteService->hasVoted($groupMember->group_id, $mission->id);
             $myVote = $this->voteService->getGroupVote($groupMember->group_id, $mission->id);
-            $votableGroups = $this->voteService->getVotableGroups($mission->id, $groupMember->group_id);
-
-            $voteData = [
-                'has_voted' => $hasVoted,
-                'my_vote' => $myVote,
-                'votable_groups' => $votableGroups,
-            ];
+        } else {
+            $hasVoted = false;
+            $myVote = null;
         }
+
+        $voteData = [
+            'has_voted' => $hasVoted,
+            'my_vote' => $myVote,
+            'votable_groups' => $votableGroups,
+        ];
 
         return Inertia::render('student/mission/index', [
             'mission' => $mission,
