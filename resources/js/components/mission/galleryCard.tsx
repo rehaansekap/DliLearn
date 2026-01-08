@@ -20,7 +20,7 @@ export function GalleryCard({
     codeAnswer,
     likesCount,
     isLikedByMe,
-    amILeader,
+    // amILeader,
     onLike,
     onViewDetail,
 }: GalleryCardProps) {
