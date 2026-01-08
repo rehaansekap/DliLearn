@@ -341,6 +341,7 @@ export default function Show({
 
                                     {activeTab === 2 && (
                                         <Phase2Organization
+                                            mission={mission}
                                             groupMembers={groupMembers}
                                             currentUserRole={currentUserRole}
                                             collaborationLink={

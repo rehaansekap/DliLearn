@@ -1,8 +1,15 @@
 import { CollaborationWorkspace } from '@/components/mission/collaborationWorkspace';
+import { MaterialViewer } from '@/components/mission/materialViewer';
 import { TeamMemberCard } from '@/components/mission/teamMemberCard';
 import { MissionButton } from '@/components/mission/ui/missionButton';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
 import { useState } from 'react';
+
+interface Mission {
+    material_pdf?: string | null;
+    collab_url?: string | null;
+    [key: string]: unknown;
+}
 
 interface GroupMember {
     user_id: number;
@@ -13,6 +20,7 @@ interface GroupMember {
 }
 
 interface Phase2OrganizationProps {
+    mission: Mission;
     groupMembers: GroupMember[];
     currentUserRole: string;
     collaborationLink?: string;
@@ -42,6 +50,7 @@ const ROLE_COLORS = {
 };
 
 export default function Phase2Organization({
+    mission,
     groupMembers,
     currentUserRole,
     collaborationLink,
@@ -105,6 +114,8 @@ export default function Phase2Organization({
                     />
                 ))}
             </div>
+
+            <MaterialViewer materialUrl={mission?.material_pdf} />
 
             {/* Collaboration Workspace */}
             <CollaborationWorkspace collaborationLink={collaborationLink} />
