@@ -44,12 +44,12 @@ export default function Show({
         initialReflectionLocked,
     );
 
-    // State untuk Phase 3 - Creative Lab
+    // State Phase 3 - Creative Lab
     const [terminalOutput, setTerminalOutput] = useState('');
     const [hasRunCode, setHasRunCode] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
 
-    // State untuk Phase 4 - Submission
+    // State Phase 4 - Submission
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
     // Dropdown State
@@ -60,7 +60,6 @@ export default function Show({
     const amILeader = currentUserRole === 'Ketua';
     const collaborationLink = mission.collab_url;
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
