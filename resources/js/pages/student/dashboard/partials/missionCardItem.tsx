@@ -8,6 +8,8 @@ interface Mission {
     level: number;
     slug: string;
     status: string;
+    started_at?: string | null;
+    finished_at?: string | null;
 }
 
 interface MissionCardItemProps {
@@ -56,6 +58,33 @@ const levelLabels = {
 };
 
 export function MissionCardItem({ mission }: MissionCardItemProps) {
+    // Hitung durasi (menit) berdasarkan started_at & finished_at.
+    const parseDate = (v?: string | null) => {
+        try {
+            return v ? new Date(v) : null;
+        } catch {
+            return null;
+        }
+    };
+
+    const started = parseDate(mission.started_at);
+    const finished =
+        parseDate(mission.finished_at) ?? (started ? new Date() : null);
+
+    let minutesText = '—';
+    if (
+        started &&
+        finished &&
+        !Number.isNaN(started.getTime()) &&
+        !Number.isNaN(finished.getTime())
+    ) {
+        const mins = Math.max(
+            0,
+            Math.round((finished.getTime() - started.getTime()) / 60000),
+        );
+        minutesText = `${mins} menit`;
+    }
+
     const colors =
         levelColors[mission.level as keyof typeof levelColors] ||
         levelColors[1];
@@ -133,7 +162,7 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
                         <span>⏱️</span>
-                        ~60 menit
+                        {minutesText}
                     </span>
                 </div>
 

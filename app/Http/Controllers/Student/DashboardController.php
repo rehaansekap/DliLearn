@@ -21,7 +21,9 @@ class DashboardController extends Controller
                 'description' => $mission->description,
                 'level' => $mission->difficulty_level,
                 'slug' => $mission->slug,
-                'status' => 'unlocked'
+                'status' => 'unlocked',
+                'started_at' => $mission->started_at,
+                'finished_at' => $mission->finished_at,
             ];
         });
 
