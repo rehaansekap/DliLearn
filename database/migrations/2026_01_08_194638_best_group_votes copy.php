@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('best_group_votes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mission_id')->constrained('missions')->onDelete('cascade');
-            $table->foreignId('voter_group_id')->constrained('groups')->onDelete('cascade'); // Kelompok yang memilih
-            $table->foreignId('voted_group_id')->constrained('groups')->onDelete('cascade'); // Kelompok yang dipilih
-            $table->foreignId('voter_user_id')->constrained('users')->onDelete('cascade'); // Ketua yang memilih
+            $table->foreignId('voter_group_id')->constrained('groups')->onDelete('cascade');
+            $table->foreignId('voted_group_id')->constrained('groups')->onDelete('cascade');
+            $table->foreignId('voter_user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
 
             $table->unique(['mission_id', 'voter_group_id']);

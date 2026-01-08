@@ -60,10 +60,12 @@ class VoteService
                 'groups.id',
                 'groups.name',
                 'groups.group_code',
-                DB::raw('COUNT(*) as vote_count')
+                DB::raw('COUNT(best_group_votes.id) as vote_count'),
+                DB::raw("(SELECT COUNT(l.id) FROM likes l JOIN submissions s ON l.submission_id = s.id WHERE s.group_id = groups.id AND s.mission_id = {$missionId} AND s.is_final = 1) as likes_count")
             )
             ->groupBy('groups.id', 'groups.name', 'groups.group_code')
             ->orderByDesc('vote_count')
+            ->orderByDesc('likes_count')
             ->get();
     }
 }

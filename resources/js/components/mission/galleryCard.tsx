@@ -106,16 +106,17 @@ export function GalleryCard({
                 <button
                     type="button"
                     onClick={onLike}
-                    disabled={!amILeader}
+                    aria-label="Like submission"
                     className={cn(
                         'flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 font-bold transition-all duration-200',
                         isLikedByMe
                             ? 'border-2 border-pink-400 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30 hover:border-neutral-100'
                             : 'border-2 border-slate-300 bg-white text-slate-700 hover:border-red-400 hover:bg-red-50',
-                        !amILeader && 'cursor-not-allowed opacity-60',
                     )}
                 >
-                    <span className="text-xl">{isLikedByMe ? '🤍' : '❤️'}</span>
+                    <span className="text-xl" aria-hidden>
+                        {isLikedByMe ? '🤍' : '❤️'}
+                    </span>
                     <span>{likesCount} Likes</span>
                 </button>
             </div>
