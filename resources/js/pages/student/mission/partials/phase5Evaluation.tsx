@@ -214,7 +214,7 @@ export default function Phase5Evaluation({
                             )}
 
                             {/* Overlay on Hover */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:hidden">
                                 <button
                                     onClick={() => handleViewDetail(submission)}
                                     className="rounded-xl bg-white px-6 py-3 font-bold text-slate-800 shadow-lg transition-transform hover:scale-110"
@@ -222,6 +222,17 @@ export default function Phase5Evaluation({
                                     👁️ Lihat Detail
                                 </button>
                             </div>
+                        </div>
+
+                        {/* Mobile CTA — selalu terlihat pada layar kecil */}
+                        <div className="p-3 sm:p-4 md:hidden">
+                            <button
+                                type="button"
+                                onClick={() => handleViewDetail(submission)}
+                                className="w-full rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-800 shadow transition-colors hover:bg-slate-100"
+                            >
+                                👁️ Lihat Detail
+                            </button>
                         </div>
 
                         {/* Card Info */}
