@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->integer('difficulty_level')->default(1);
+            $table->foreignId('prerequisite_mission_id')
+                ->nullable()
+                ->constrained('missions')
+                ->onDelete('set null');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
 

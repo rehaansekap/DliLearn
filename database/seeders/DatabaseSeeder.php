@@ -89,9 +89,9 @@ class DatabaseSeeder extends Seeder
             'difficulty_level' => 1,
             'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             'case_narrative' => 'Mall Grand Indonesia mengubah tarif parkirnya. 1 jam pertama Rp5.000, jam berikutnya Rp3.000 flat. Bantu mereka membuat sistem otomatis!',
-
             'collab_url' => 'https://www.figma.com/board/DW8zTBOSQSYixL5sCYU6ph/Temp-Brainstorming?node-id=0-1&t=DmsqM1KGOzhEaz2u-1',
             'simulator_config' => json_encode(['type' => 'logic', 'answer' => 8000]),
+            'prerequisite_mission_id' => null,
         ]);
 
         $misi2 = Mission::create([
@@ -103,6 +103,7 @@ class DatabaseSeeder extends Seeder
             'case_narrative' => 'Mesin penjual otomatis di sekolah error. Jika tekan tombol A harusnya keluar Teh, tombol B keluar Kopi. Tapi sekarang acak-acakan.',
             'collab_url' => 'https://www.figma.com/board/DW8zTBOSQSYixL5sCYU6ph/Temp-Brainstorming?node-id=0-1&t=DmsqM1KGOzhEaz2u-1',
             'simulator_config' => json_encode(['type' => 'string_match', 'answer' => 'Teh Botol']),
+            'prerequisite_mission_id' => $misi1->id,
         ]);
 
         $misi3 = Mission::create([
@@ -114,6 +115,7 @@ class DatabaseSeeder extends Seeder
             'case_narrative' => 'Guru piket lelah memanggil 40 nama setiap pagi. Buat program yang bisa mengulang panggilan secara otomatis.',
             'collab_url' => null,
             'simulator_config' => json_encode(['type' => 'loop', 'answer' => 30]),
+            'prerequisite_mission_id' => $misi2->id,
         ]);
 
         $rpl1Students = array_slice($students, 0, 20);

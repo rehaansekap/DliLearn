@@ -12,6 +12,14 @@ interface Mission {
     level: number;
     slug: string;
     status: string;
+    locked: boolean;
+    prerequisite?: {
+        id: number;
+        title: string;
+        slug: string;
+    } | null;
+    started_at?: string | null;
+    finished_at?: string | null;
 }
 
 interface DashboardProps {

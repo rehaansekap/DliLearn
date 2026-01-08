@@ -8,6 +8,12 @@ interface Mission {
     level: number;
     slug: string;
     status: string;
+    locked: boolean;
+    prerequisite?: {
+        id: number;
+        title: string;
+        slug: string;
+    } | null;
     started_at?: string | null;
     finished_at?: string | null;
 }
@@ -58,7 +64,6 @@ const levelLabels = {
 };
 
 export function MissionCardItem({ mission }: MissionCardItemProps) {
-    // Hitung durasi (menit) berdasarkan started_at & finished_at.
     const parseDate = (v?: string | null) => {
         try {
             return v ? new Date(v) : null;
@@ -89,6 +94,84 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
         levelColors[mission.level as keyof typeof levelColors] ||
         levelColors[1];
 
+    if (mission.locked) {
+        return (
+            <div
+                className={cn(
+                    'group relative overflow-hidden rounded-2xl border-2 bg-white shadow-lg',
+                    'border-slate-300 opacity-60',
+                )}
+            >
+                {/* Lock Overlay */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+                    <div className="text-center">
+                        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                            <span className="text-4xl">🔒</span>
+                        </div>
+                        <p className="mb-1 text-sm font-bold text-white">
+                            Misi Terkunci
+                        </p>
+                        {mission.prerequisite && (
+                            <p className="px-4 text-xs text-slate-200">
+                                Selesaikan "{mission.prerequisite.title}" dulu
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Thumbnail (grayscale) */}
+                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 grayscale">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/60 shadow-lg backdrop-blur-sm">
+                            <span className="text-5xl opacity-50">🎯</span>
+                        </div>
+                    </div>
+
+                    {/* Level Badge (grayed) */}
+                    <div className="absolute top-4 right-4 opacity-50">
+                        <div className="flex items-center gap-1.5 rounded-full bg-slate-400 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
+                            <span className="text-sm">⭐</span>
+                            <span>Level {mission.level}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content (muted) */}
+                <div className="p-6">
+                    <h3 className="mb-2 line-clamp-2 text-xl font-black text-slate-500">
+                        {mission.title}
+                    </h3>
+                    <p className="mb-4 line-clamp-2 text-sm text-slate-400">
+                        {mission.description}
+                    </p>
+
+                    <div className="mb-4 flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
+                            <span>🎓</span>
+                            {levelLabels[
+                                mission.level as keyof typeof levelLabels
+                            ] || 'Pemula'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
+                            <span>⏱️</span>
+                            {minutesText}
+                        </span>
+                    </div>
+
+                    {/* Disabled Button */}
+                    <button
+                        disabled
+                        className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-300 px-6 py-3 font-bold text-slate-500"
+                    >
+                        <span>🔒 Terkunci</span>
+                    </button>
+                </div>
+
+                <div className="absolute right-0 bottom-0 h-24 w-24 translate-x-8 translate-y-8 rounded-full bg-slate-200 opacity-20" />
+            </div>
+        );
+    }
+
     return (
         <div
             className={cn(
@@ -98,19 +181,16 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
         >
             {/* Thumbnail with Gradient */}
             <div className="relative h-48 overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
-                {/* Pattern Overlay */}
                 <div className="absolute inset-0 opacity-30">
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(99,102,241,.1)_50%,transparent_75%,transparent_100%)] bg-[length:40px_40px]" />
                 </div>
 
-                {/* Mission Icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/80 shadow-lg backdrop-blur-sm">
                         <span className="text-5xl">🎯</span>
                     </div>
                 </div>
 
-                {/* Level Badge */}
                 <div className="absolute top-4 right-4">
                     <div
                         className={cn(
@@ -123,7 +203,6 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
                     </div>
                 </div>
 
-                {/* Status Badge (if in progress) */}
                 {mission.status === 'in_progress' && (
                     <div className="absolute top-4 left-4">
                         <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
@@ -134,19 +213,15 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
                 )}
             </div>
 
-            {/* Content */}
             <div className="p-6">
-                {/* Title */}
                 <h3 className="mb-2 line-clamp-2 text-xl font-black text-slate-800">
                     {mission.title}
                 </h3>
 
-                {/* Description */}
                 <p className="mb-4 line-clamp-2 text-sm text-slate-600">
                     {mission.description}
                 </p>
 
-                {/* Meta Info */}
                 <div className="mb-4 flex items-center gap-3">
                     <span
                         className={cn(
@@ -166,7 +241,6 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
                     </span>
                 </div>
 
-                {/* Action Button */}
                 <Link
                     href={`/mission/${mission.slug}`}
                     className={cn(
@@ -197,12 +271,10 @@ export function MissionCardItem({ mission }: MissionCardItemProps) {
                         </svg>
                     </span>
 
-                    {/* Shine effect on hover */}
                     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover/btn:translate-x-full" />
                 </Link>
             </div>
 
-            {/* Corner decoration */}
             <div className="absolute right-0 bottom-0 h-24 w-24 translate-x-8 translate-y-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 opacity-20" />
         </div>
     );

@@ -17,6 +17,7 @@ use App\Services\Mission\ProgressService;
 use App\Services\Mission\ReflectionService;
 use App\Services\Mission\RewardService;
 use App\Services\Mission\SubmissionService;
+use App\Services\Mission\MissionLockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -31,12 +32,22 @@ class MissionController extends Controller
         protected SubmissionService $submissionService,
         protected FeedbackService $feedbackService,
         protected RewardService $rewardService,
+        protected MissionLockService $lockService,
+
     ) {}
 
     public function show($slug)
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
+        if ($this->lockService->isMissionLocked($mission, $user)) {
+            $prerequisite = Mission::find($mission->prerequisite_mission_id);
+
+            return redirect()
+                ->route('dashboard')
+                ->with('error', 'This Mission is locked! Complete "' . ($prerequisite->title ?? 'the previous mission') . '" first.');
+        }
+
         $myReflection = $this->reflectionService->getUserReflection($user->id, $mission->id);
         $initialReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'initial');
         $finalReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
