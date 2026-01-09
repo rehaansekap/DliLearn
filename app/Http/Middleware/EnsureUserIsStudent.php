@@ -16,13 +16,17 @@ class EnsureUserIsStudent
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if ($user && $user->role !== 'student') {
-            // Redirect teachers to their dashboard instead of aborting
-            if ($user->role === 'teacher') {
-                return redirect()->route('teacher.dashboard');
-            }
 
-            abort(403, 'Unauthorized access. Students only.');
+        if ($user) {
+            $role = $user->role ?? 'student';
+
+            if ($role !== 'student') {
+                if ($role === 'teacher') {
+                    return redirect()->route('teacher.dashboard');
+                }
+
+                abort(403, 'Unauthorized access. Students only.');
+            }
         }
 
         return $next($request);
