@@ -2,19 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
-    protected $guarded = [];
+    use HasFactory;
 
-    public function submissions()
+    protected $fillable = [
+        'name',
+        'group_code',
+        'classroom_id',
+    ];
+
+    public function classroom(): BelongsTo
     {
-        return $this->hasMany(Submission::class);
+        return $this->belongsTo(Classroom::class);
     }
 
-    public function members()
+    public function members(): HasMany
     {
         return $this->hasMany(GroupMember::class);
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(GroupProgress::class, 'group_id');
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 }

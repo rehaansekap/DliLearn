@@ -51,7 +51,7 @@ export function StatsCard({
     return (
         <div
             className={cn(
-                'group relative overflow-hidden rounded-2xl border-2 bg-gradient-to-br p-6 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl',
+                'group relative overflow-hidden rounded-2xl border-2 bg-gradient-to-br p-4 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-6',
                 styles.bg,
                 styles.border,
             )}
@@ -59,20 +59,25 @@ export function StatsCard({
             {/* Decorative Element */}
             <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/30 blur-2xl transition-all group-hover:scale-150" />
 
-            <div className="relative z-10 flex items-center gap-4">
+            <div className="relative z-10 flex items-center gap-3 sm:gap-4">
                 <div
                     className={cn(
-                        'flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg',
+                        'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg sm:h-14 sm:w-14',
                         styles.iconBg,
                     )}
                 >
-                    <span className="text-2xl">{icon}</span>
+                    <span className="text-lg sm:text-2xl">{icon}</span>
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-slate-500">
+                    <p className="text-xs font-medium text-slate-500 sm:text-sm">
                         {title}
                     </p>
-                    <p className={cn('text-3xl font-black', styles.text)}>
+                    <p
+                        className={cn(
+                            'text-xl font-black sm:text-3xl',
+                            styles.text,
+                        )}
+                    >
                         {value.toLocaleString()}
                     </p>
                     {subtitle && (

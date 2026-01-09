@@ -6,14 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class GroupMember extends Model
+class GroupProgress extends Model
 {
     use HasFactory;
 
+    protected $table = 'group_progress';
+
     protected $fillable = [
         'group_id',
-        'user_id',
-        'role',
+        'mission_id',
+        'current_step',
+        'status',
     ];
 
     public function group(): BelongsTo
@@ -21,8 +24,8 @@ class GroupMember extends Model
         return $this->belongsTo(Group::class);
     }
 
-    public function user(): BelongsTo
+    public function mission(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Mission::class);
     }
 }

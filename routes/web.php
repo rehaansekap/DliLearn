@@ -6,6 +6,7 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\MissionController;
 use App\Http\Controllers\Teacher\TeacherDashboardController;
+use App\Http\Controllers\Teacher\TeacherMissionController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -30,6 +31,7 @@ Route::middleware(['auth', 'verified', 'student'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/mission/{id}', [TeacherMissionController::class, 'show'])->name('mission.show');
 });
 
 require __DIR__ . '/settings.php';

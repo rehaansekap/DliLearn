@@ -1,6 +1,5 @@
-import { cn } from '@/lib/utils';
 import type { User } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 
 interface TeacherLayoutProps {
@@ -8,43 +7,13 @@ interface TeacherLayoutProps {
     header?: React.ReactNode;
 }
 
-interface NavItem {
-    name: string;
-    href: string;
-    icon: string;
-    routeName: string;
-}
-
-const navigation: NavItem[] = [
-    {
-        name: 'Dashboard',
-        href: '/teacher/dashboard',
-        icon: '📊',
-        routeName: 'teacher.dashboard',
-    },
-    {
-        name: 'Bank Misi',
-        href: '/teacher/missions',
-        icon: '🎯',
-        routeName: 'teacher.missions',
-    },
-    {
-        name: 'Pengaturan',
-        href: '/teacher/settings',
-        icon: '⚙️',
-        routeName: 'teacher.settings',
-    },
-];
-
 export default function TeacherLayout({
     user,
     header,
     children,
 }: PropsWithChildren<TeacherLayoutProps>) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const profileDropdownRef = useRef<HTMLDivElement>(null);
-    const { url } = usePage();
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -63,137 +32,34 @@ export default function TeacherLayout({
         };
     }, [showProfileDropdown]);
 
-    const isActiveRoute = (href: string) => {
-        return url.startsWith(href);
-    };
-
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* Mobile Sidebar Overlay */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
-            {/* Sidebar */}
-            <aside
-                className={cn(
-                    'fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-xl transition-transform duration-300 ease-in-out lg:translate-x-0',
-                    sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-                )}
-            >
-                {/* Sidebar Header */}
-                <div className="flex h-16 items-center justify-between border-b border-slate-200 px-6">
-                    <Link
-                        href="/teacher/dashboard"
-                        className="flex items-center gap-3"
-                    >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-lg">
-                            <span className="text-xl font-bold text-white">
-                                D
-                            </span>
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-slate-800">
-                                DliLearn
-                            </h1>
-                            <p className="text-xs text-slate-500">
-                                Teacher Portal
-                            </p>
-                        </div>
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={() => setSidebarOpen(false)}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 lg:hidden"
-                        aria-label="Close sidebar"
-                    >
-                        <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Navigation */}
-                <nav className="flex-1 space-y-1 px-3 py-4">
-                    {navigation.map((item) => (
+            {/* Top Header */}
+            <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur-lg">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-16 items-center justify-between">
+                        {/* Logo & Brand */}
                         <Link
-                            key={item.name}
-                            href={item.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
-                                isActiveRoute(item.href)
-                                    ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 shadow-sm'
-                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-                            )}
+                            href="/teacher/dashboard"
+                            className="flex items-center gap-3"
                         >
-                            <span className="text-xl">{item.icon}</span>
-                            <span>{item.name}</span>
-                            {isActiveRoute(item.href) && (
-                                <div className="ml-auto h-2 w-2 rounded-full bg-indigo-600" />
-                            )}
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-lg">
+                                <span className="text-xl font-bold text-white">
+                                    D
+                                </span>
+                            </div>
+                            <div className="hidden sm:block">
+                                <h1 className="text-lg font-bold text-slate-800">
+                                    DliLearn
+                                </h1>
+                                <p className="text-xs text-slate-500">
+                                    Teacher Portal
+                                </p>
+                            </div>
                         </Link>
-                    ))}
-                </nav>
-
-                {/* Sidebar Footer */}
-                <div className="border-t border-slate-200 p-4">
-                    <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 p-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-md">
-                            <span className="font-bold">
-                                {(user.name || '?').charAt(0)}
-                            </span>
-                        </div>
-                        <div className="flex-1 truncate">
-                            <p className="truncate text-sm font-semibold text-slate-800">
-                                {user.name}
-                            </p>
-                            <p className="text-xs text-slate-500">Guru</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            {/* Main Content Area */}
-            <div className="lg:pl-64">
-                {/* Top Header */}
-                <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur-lg">
-                    <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-                        {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 lg:hidden"
-                            title="Open sidebar menu"
-                        >
-                            <svg
-                                className="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                />
-                            </svg>
-                        </button>
 
                         {/* Header Content */}
-                        <div className="flex-1 lg:ml-0">{header}</div>
+                        <div className="flex-1 px-4 sm:px-8">{header}</div>
 
                         {/* Profile Dropdown */}
                         <div className="relative" ref={profileDropdownRef}>
@@ -237,7 +103,7 @@ export default function TeacherLayout({
                                         </p>
                                     </div>
                                     <Link
-                                        href="/teacher/settings"
+                                        href="/settings/profile"
                                         className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
                                     >
                                         <span>⚙️</span>
@@ -269,11 +135,11 @@ export default function TeacherLayout({
                             )}
                         </div>
                     </div>
-                </header>
+                </div>
+            </header>
 
-                {/* Page Content */}
-                <main className="min-h-[calc(100vh-4rem)]">{children}</main>
-            </div>
+            {/* Page Content */}
+            <main className="min-h-[calc(100vh-4rem)]">{children}</main>
         </div>
     );
 }
