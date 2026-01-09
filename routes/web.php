@@ -12,7 +12,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'student'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/mission/{slug}', [MissionController::class, 'show'])->name('mission.show');
     Route::post('/mission/{slug}/reflection', [MissionController::class, 'submitReflection'])->name('mission.reflection');
@@ -25,6 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/submission/{submissionId}/feedback', [MissionController::class, 'submitFeedback'])->name('mission.feedback');
     Route::get('/submission/{submissionId}/feedbacks', [MissionController::class, 'getFeedbacks'])->name('mission.get-feedbacks');
     Route::post('/mission/{slug}/finish', [MissionController::class, 'submitFinalReflection'])->name('mission.finish');
+});
+
+Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    // Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
 });
 
 require __DIR__ . '/settings.php';
