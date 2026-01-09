@@ -15,7 +15,7 @@ interface MissionListProps {
     missions: Mission[];
 }
 
-export function MissionList({ missions, teachers }: MissionListProps) {
+export function MissionList({ missions }: MissionListProps) {
     const isMobile = useIsMobile();
     const itemsPerPage = isMobile ? 2 : 3;
     const [currentPage, setCurrentPage] = useState(1);
