@@ -15,7 +15,7 @@ interface MissionListProps {
     missions: Mission[];
 }
 
-export function MissionList({ missions }: MissionListProps) {
+export function MissionList({ missions, teachers }: MissionListProps) {
     const isMobile = useIsMobile();
     const itemsPerPage = isMobile ? 2 : 3;
     const [currentPage, setCurrentPage] = useState(1);
@@ -50,24 +50,6 @@ export function MissionList({ missions }: MissionListProps) {
 
     return (
         <div>
-            {/* Section Header */}
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-black text-slate-800 sm:text-3xl">
-                        🎯 Misi Petualanganmu
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-600">
-                        Pilih misi dan mulai petualangan coding-mu!
-                    </p>
-                </div>
-                <div className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 sm:flex">
-                    <span className="text-xl">📊</span>
-                    <span className="text-sm font-bold text-indigo-700">
-                        {missions.length} Misi
-                    </span>
-                </div>
-            </div>
-
             {/* Mission Grid */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {pageItems.map((mission) => (

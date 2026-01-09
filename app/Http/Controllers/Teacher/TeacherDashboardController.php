@@ -15,43 +15,16 @@ class TeacherDashboardController extends Controller
     {
         $user = Auth::user();
 
-        $classroomIds = Classroom::where('teacher_id', $user->id)->pluck('id');
+        $classrooms = Classroom::where('teacher_id', $user->id)
+            ->select('id', 'name', 'academic_year')
+            ->orderBy('name')
+            ->get();
 
-        $missions = Mission::select([
-            'missions.id',
-            'missions.title',
-            'missions.description',
-            'missions.difficulty_level',
-            'missions.slug',
-            'missions.started_at',
-            'missions.finished_at',
-            'classrooms.id as classroom_id',
-            'classrooms.name as classroom_name',
-        ])
-            ->join('groups', function ($join) {
-                $join->on('groups.classroom_id', '=', DB::raw('groups.classroom_id'));
-            })
-            ->join('classrooms', 'groups.classroom_id', '=', 'classrooms.id')
-            ->join('group_progress', function ($join) {
-                $join->on('group_progress.group_id', '=', 'groups.id')
-                    ->on('group_progress.mission_id', '=', 'missions.id');
-            })
-            ->whereIn('classrooms.id', $classroomIds)
-            ->groupBy([
-                'missions.id',
-                'missions.title',
-                'missions.description',
-                'missions.difficulty_level',
-                'missions.slug',
-                'missions.started_at',
-                'missions.finished_at',
-                'classrooms.id',
-                'classrooms.name',
-            ])
-            ->orderBy('missions.created_at', 'desc')
+        $missions = Mission::where('teacher_id', $user->id)
+            ->with(['classroom:id,name'])
+            ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($mission) {
-
                 $groupStats = DB::table('group_progress')
                     ->join('groups', 'group_progress.group_id', '=', 'groups.id')
                     ->where('group_progress.mission_id', $mission->id)
@@ -78,7 +51,7 @@ class TeacherDashboardController extends Controller
                     'difficulty_level' => $mission->difficulty_level,
                     'slug' => $mission->slug,
                     'classroom_id' => $mission->classroom_id,
-                    'classroom_name' => $mission->classroom_name,
+                    'classroom_name' => $mission->classroom?->name ?? 'N/A',
                     'total_groups' => $groupStats->total_groups ?? 0,
                     'completed_groups' => $groupStats->completed_groups ?? 0,
                     'needs_review' => $needsReview,
@@ -87,8 +60,15 @@ class TeacherDashboardController extends Controller
                 ];
             });
 
+        $missionClassroomIds = $missions->pluck('classroom_id')->filter()->unique()->values()->all();
+
+        $classrooms = Classroom::whereIn('id', $missionClassroomIds)
+            ->select('id', 'name', 'academic_year')
+            ->orderBy('name')
+            ->get();
+
         $totalStudents = DB::table('classroom_user')
-            ->whereIn('classroom_id', $classroomIds)
+            ->whereIn('classroom_id', $missionClassroomIds)
             ->count();
 
         $activeMissions = $missions->filter(function ($m) {
@@ -99,6 +79,7 @@ class TeacherDashboardController extends Controller
 
         return Inertia::render('teacher/dashboard/index', [
             'missions' => $missions->values(),
+            'classrooms' => $classrooms,
             'stats' => [
                 'totalMissions' => $missions->count(),
                 'totalStudents' => $totalStudents,

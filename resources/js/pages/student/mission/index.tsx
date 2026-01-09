@@ -271,14 +271,13 @@ export default function Show({
     return (
         <StudentLayout
             user={auth.user}
-            showBackButton={true}
             backUrl="/dashboard"
             header={
-                <div>
-                    <h2 className="truncate text-lg font-bold text-slate-800 sm:text-xl">
+                <div className="hidden sm:block">
+                    <h2 className="text-lg font-bold text-slate-800">
                         {mission.title}
                     </h2>
-                    <p className="truncate text-xs text-slate-600 sm:text-sm">
+                    <p className="text-xs text-slate-500">
                         {mission.description}
                     </p>
                 </div>

@@ -21,14 +21,20 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('missions')
                 ->onDelete('set null');
+            $table->foreignId('teacher_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('cascade');
+            $table->foreignId('classroom_id')
+                ->nullable()
+                ->constrained('classrooms')
+                ->onDelete('cascade');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
 
-            // Tahap 1
             $table->string('video_url')->nullable();
             $table->longText('case_narrative')->nullable();
 
-            // Tahap 3
             $table->string('material_pdf')->nullable();
             $table->json('simulator_config')->nullable();
 
