@@ -17,6 +17,11 @@ class EnsureUserIsStudent
     {
         $user = $request->user();
         if ($user && $user->role !== 'student') {
+            // Redirect teachers to their dashboard instead of aborting
+            if ($user->role === 'teacher') {
+                return redirect()->route('teacher.dashboard');
+            }
+
             abort(403, 'Unauthorized access. Students only.');
         }
 
