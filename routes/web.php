@@ -31,7 +31,15 @@ Route::middleware(['auth', 'verified', 'student'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/mission/{id}', [TeacherMissionController::class, 'show'])->name('mission.show');
+    Route::get('/mission/create', [TeacherMissionController::class, 'create'])->name('missions.create');
+    Route::post('/mission', [TeacherMissionController::class, 'store'])->name('missions.store');
+    Route::get('/mission/{slug}/edit', [TeacherMissionController::class, 'edit'])->name('missions.edit');
+    Route::put('/mission/{mission}', [TeacherMissionController::class, 'update'])->name('missions.update');
+    Route::delete('/mission/{mission}', [TeacherMissionController::class, 'destroy'])->name('missions.destroy');
+    Route::get('/mission/{slug}', [TeacherMissionController::class, 'index'])->name('mission.show');
 });
 
+if (file_exists(__DIR__ . '/auth.php')) {
+    require __DIR__ . '/auth.php';
+}
 require __DIR__ . '/settings.php';

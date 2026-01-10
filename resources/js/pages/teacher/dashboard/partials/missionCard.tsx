@@ -148,13 +148,13 @@ export function MissionCard({ mission }: MissionCardProps) {
                 {/* Actions */}
                 <div className="flex gap-2">
                     <Link
-                        href={`/teacher/mission/${mission.id}`}
+                        href={`/teacher/mission/${mission.slug}`}
                         className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow transition-all hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg"
                     >
                         Lihat Detail
                     </Link>
                     <Link
-                        href={`/teacher/mission/${mission.id}/edit`}
+                        href={`/teacher/mission/${mission.slug}/edit`}
                         className="rounded-xl border-2 border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
                     >
                         Edit
