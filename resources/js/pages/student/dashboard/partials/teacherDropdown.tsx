@@ -40,7 +40,6 @@ export function TeacherDropdown({
         }
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
-            // Focus search input when dropdown opens
             setTimeout(() => searchInputRef.current?.focus(), 100);
         }
         return () => {
@@ -49,8 +48,6 @@ export function TeacherDropdown({
     }, [isOpen]);
 
     const selectedTeacher = teachers.find((t) => t.id === selectedId);
-
-    // Filter teachers based on search query
     const filteredTeachers = useMemo(() => {
         if (!query.trim()) return teachers;
         const q = query.toLowerCase();

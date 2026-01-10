@@ -44,19 +44,15 @@ export default function Show({
         initialReflectionLocked,
     );
 
-    // State Phase 3 - Creative Lab
     const [terminalOutput, setTerminalOutput] = useState('');
     const [hasRunCode, setHasRunCode] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
 
-    // State Phase 4 - Submission
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
-    // Helper variables
     const amILeader = currentUserRole === 'Ketua';
     const collaborationLink = mission.collab_url;
 
-    // Phase 1 Handler
     const handleSubmitReflection = (reflection: string) => {
         router.post(
             route('mission.reflection', mission.slug),
@@ -143,7 +139,6 @@ export default function Show({
         );
     };
 
-    // Phase 2 Handlers
     const handleRoleChange = (userId: number, newRole: string) => {
         router.post(
             route('mission.update-role', mission.slug),
@@ -167,7 +162,6 @@ export default function Show({
         );
     };
 
-    // Phase 3 Handlers
     const handleRunCode = (code: string, language: string) => {
         setIsRunning(true);
         setTerminalOutput('> Running code...\n');
@@ -196,7 +190,6 @@ export default function Show({
         );
     };
 
-    // Phase 4 Handler
     const handleSubmitPhase4 = (file: File, finalCode: string) => {
         setIsSubmittingPhase4(true);
 
@@ -255,7 +248,6 @@ export default function Show({
         );
     };
 
-    // Phase 5 Handler
     const handleSubmitFinalReflection = (reflection: string) => {
         router.post(
             route('mission.finish', mission.slug),

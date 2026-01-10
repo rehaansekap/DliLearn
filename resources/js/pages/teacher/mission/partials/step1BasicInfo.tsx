@@ -58,19 +58,16 @@ export function Step1BasicInfo({
     missions,
     onChange,
 }: Step1BasicInfoProps) {
-    // Classroom Dropdown State
     const [isClassroomOpen, setIsClassroomOpen] = useState(false);
     const [classroomQuery, setClassroomQuery] = useState('');
     const classroomDropdownRef = useRef<HTMLDivElement>(null);
     const classroomSearchRef = useRef<HTMLInputElement>(null);
 
-    // Prerequisite Dropdown State
     const [isPrerequisiteOpen, setIsPrerequisiteOpen] = useState(false);
     const [prerequisiteQuery, setPrerequisiteQuery] = useState('');
     const prerequisiteDropdownRef = useRef<HTMLDivElement>(null);
     const prerequisiteSearchRef = useRef<HTMLInputElement>(null);
 
-    // Close dropdowns on outside click
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -94,7 +91,6 @@ export function Step1BasicInfo({
         };
     }, []);
 
-    // Auto-focus search when dropdown opens
     useEffect(() => {
         if (isClassroomOpen) {
             setTimeout(() => classroomSearchRef.current?.focus(), 100);
@@ -114,7 +110,6 @@ export function Step1BasicInfo({
         (m) => m.id === data.prerequisite_mission_id,
     );
 
-    // Filter classrooms
     const filteredClassrooms = useMemo(() => {
         if (!classroomQuery.trim()) return classrooms;
         const q = classroomQuery.toLowerCase();
@@ -123,7 +118,6 @@ export function Step1BasicInfo({
         );
     }, [classrooms, classroomQuery]);
 
-    // Filter prerequisite missions
     const filteredMissions = useMemo(() => {
         if (!prerequisiteQuery.trim()) return missions;
         const q = prerequisiteQuery.toLowerCase();

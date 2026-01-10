@@ -26,12 +26,9 @@ export function MissionStepItem({
             disabled={isLocked}
             className={cn(
                 'relative flex w-full items-center gap-4 rounded-xl p-4 text-left transition-all duration-300',
-                // Active state
                 isActive &&
                     'scale-105 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-md ring-2 ring-indigo-500',
-                // Hover state for available steps
                 !isActive && !isLocked && 'hover:bg-slate-50',
-                // Locked state
                 isLocked && 'cursor-not-allowed opacity-60',
             )}
             aria-label={`${label} - ${status === 'active' ? 'Sedang Aktif' : status === 'completed' ? 'Selesai' : status === 'locked' ? 'Terkunci' : 'Siap Dimulai'}`}
@@ -40,17 +37,13 @@ export function MissionStepItem({
             <div
                 className={cn(
                     'relative z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-4 text-2xl transition-all duration-300',
-                    // Active styling
                     isActive &&
                         'border-indigo-500 bg-indigo-600 shadow-lg shadow-indigo-500/50',
-                    // Completed styling
                     isCompleted && !isActive && 'border-teal-400 bg-teal-500',
-                    // Available styling
                     !isActive &&
                         !isCompleted &&
                         !isLocked &&
                         'border-slate-300 bg-white',
-                    // Locked styling
                     isLocked && 'border-slate-200 bg-slate-100',
                 )}
             >

@@ -1,5 +1,4 @@
 <?php
-// filepath: app/Http/Controllers/Teacher/TeacherMissionController.php
 
 namespace App\Http\Controllers\Teacher;
 
@@ -136,9 +135,6 @@ class TeacherMissionController extends Controller
             'material_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
             'collab_url' => ['nullable', 'url'],
             'simulator_config' => ['nullable', 'string'],
-            // 'prerequisite_mission_id' => ['nullable', 'exists:missions,id'],
-            // 'started_at' => ['nullable', 'date'],
-            // 'finished_at' => ['nullable', 'date'],
         ], [
             'classroom_id.required' => 'Kelas wajib dipilih',
             'title.required' => 'Judul misi wajib diisi',

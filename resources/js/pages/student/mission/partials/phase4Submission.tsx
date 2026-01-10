@@ -31,7 +31,6 @@ export default function Phase4Submission({
         }
     };
 
-    // Non-Leader View
     if (!amILeader) {
         return (
             <div className="space-y-6 px-2 sm:px-0">
@@ -69,7 +68,6 @@ export default function Phase4Submission({
         );
     }
 
-    // Already Submitted View
     if (groupHasSubmitted) {
         return (
             <div className="space-y-6 px-2 sm:px-0">
@@ -87,7 +85,6 @@ export default function Phase4Submission({
         );
     }
 
-    // Leader Submission Form
     return (
         <div className="h-full space-y-6 px-2 sm:px-0">
             {/* Page Title */}

@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('missions', function (Blueprint $table) {
-            // Kolom untuk menyimpan link FigJam/Miro/dll
             $table->string('collab_url')->nullable()->after('case_narrative');
         });
     }

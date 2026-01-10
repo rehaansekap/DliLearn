@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('group_id')->constrained('groups')->onDelete('cascade');
             $table->foreignId('mission_id')->constrained('missions')->onDelete('cascade');
 
-            // 0=Belum, 1=Orientasi, 2=Organisasi, 3=Penyelidikan, 4=Submit, 5=Selesai
             $table->integer('current_step')->default(0);
             $table->enum('status', ['locked', 'in_progress', 'completed'])->default('locked');
 

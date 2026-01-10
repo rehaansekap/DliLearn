@@ -58,7 +58,6 @@ export default function Dashboard({
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
 
-    // Calculate mission counts per classroom
     const missionCounts = useMemo(() => {
         return missions.reduce(
             (acc, mission) => {
@@ -70,7 +69,6 @@ export default function Dashboard({
         );
     }, [missions]);
 
-    // Filter missions berdasarkan search dan classroom
     const filteredMissions = missions.filter((mission) => {
         const matchesSearch =
             mission.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -85,7 +83,6 @@ export default function Dashboard({
         return matchesSearch && matchesClassroom;
     });
 
-    // Pagination
     const totalPages = Math.ceil(filteredMissions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedMissions = filteredMissions.slice(
@@ -93,7 +90,6 @@ export default function Dashboard({
         startIndex + itemsPerPage,
     );
 
-    // Reset to page 1 when filters change
     const handleSearchChange = (value: string) => {
         setSearchQuery(value);
         setCurrentPage(1);

@@ -62,7 +62,6 @@ export function MaterialViewer({
                             );
                         }
 
-                        // Gambar (jpg/png)
                         if (/\.(jpe?g|png|gif)$/i.test(fileUrl)) {
                             return (
                                 <div className="h-[480px] w-full overflow-hidden rounded-md border border-slate-200 bg-white">
@@ -75,7 +74,6 @@ export function MaterialViewer({
                             );
                         }
 
-                        // PDF
                         if (/\.(pdf)$/i.test(fileUrl)) {
                             return (
                                 <div className="h-[480px] w-full overflow-hidden rounded-md border border-slate-200 bg-white">
@@ -105,7 +103,6 @@ export function MaterialViewer({
                             );
                         }
 
-                        // Tipe file lain / unknown
                         return (
                             <div className="rounded-md border border-slate-200 bg-white p-6 text-center text-slate-700">
                                 <p className="mb-2 font-semibold text-slate-800">

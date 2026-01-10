@@ -179,7 +179,6 @@ export default function Phase5Evaluation({
             return;
         }
 
-        // Cek apakah ketua sudah vote
         if (amILeader && voteData && !voteData.has_voted) {
             const SwalModule = await import('sweetalert2');
             await import('sweetalert2/dist/sweetalert2.min.css');

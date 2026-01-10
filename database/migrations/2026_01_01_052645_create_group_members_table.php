@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('group_id')->constrained('groups')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('role')->nullable(); // 'Ketua', 'Coder'
+            $table->string('role')->nullable();
             $table->timestamps();
         });
     }

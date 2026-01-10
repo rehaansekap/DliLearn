@@ -51,7 +51,6 @@ export default function Dashboard({
         null,
     );
 
-    // missionCounts per teacher
     const missionCounts = useMemo(() => {
         return missions.reduce(
             (acc, m) => {
@@ -62,7 +61,6 @@ export default function Dashboard({
         );
     }, [missions]);
 
-    // Filter missions berdasarkan teacher yang dipilih
     const filteredMissions =
         selectedTeacherId === null
             ? missions

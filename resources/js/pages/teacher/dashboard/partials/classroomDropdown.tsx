@@ -40,7 +40,7 @@ export function ClassroomDropdown({
         }
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
-            // Focus search input when dropdown opens
+
             setTimeout(() => searchInputRef.current?.focus(), 100);
         }
         return () => {
@@ -50,7 +50,6 @@ export function ClassroomDropdown({
 
     const selectedClassroom = classrooms.find((c) => c.id === selectedId);
 
-    // Filter classrooms based on search query
     const filteredClassrooms = useMemo(() => {
         if (!query.trim()) return classrooms;
         const q = query.toLowerCase();
