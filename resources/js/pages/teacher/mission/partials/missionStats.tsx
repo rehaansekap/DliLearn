@@ -1,17 +1,18 @@
 import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle2, Users } from 'lucide-react';
+import { CheckCircle2, Clock, Loader2, Users } from 'lucide-react';
 
 interface MissionStatsProps {
     totalGroups: number;
     completedGroups: number;
-    needsReview: number;
+    inProgressGroups: number;
+    notStartedGroups: number;
 }
 
 interface StatCardProps {
     title: string;
     value: number;
     icon: React.ReactNode;
-    color: 'blue' | 'green' | 'amber';
+    color: 'blue' | 'green' | 'amber' | 'slate';
     subtitle?: string;
 }
 
@@ -36,6 +37,13 @@ const colorStyles = {
         iconBg: 'from-amber-500 to-yellow-500',
         text: 'text-amber-900',
         subtitle: 'text-amber-600',
+    },
+    slate: {
+        bg: 'from-slate-50 to-gray-50',
+        border: 'border-slate-200',
+        iconBg: 'from-slate-500 to-gray-500',
+        text: 'text-slate-900',
+        subtitle: 'text-slate-600',
     },
 };
 
@@ -83,10 +91,11 @@ function StatCard({ title, value, icon, color, subtitle }: StatCardProps) {
 export function MissionStats({
     totalGroups,
     completedGroups,
-    needsReview,
+    inProgressGroups,
+    notStartedGroups,
 }: MissionStatsProps) {
     return (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
                 title="Total Kelompok"
                 value={totalGroups}
@@ -102,11 +111,18 @@ export function MissionStats({
                 subtitle="Misi telah diselesaikan"
             />
             <StatCard
-                title="Perlu Review"
-                value={needsReview}
-                icon={<AlertCircle className="h-6 w-6" />}
+                title="Sedang Mengerjakan"
+                value={inProgressGroups}
+                icon={<Loader2 className="h-6 w-6" />}
                 color="amber"
-                subtitle="Submission belum dinilai"
+                subtitle="Progress berlangsung"
+            />
+            <StatCard
+                title="Belum Mulai"
+                value={notStartedGroups}
+                icon={<Clock className="h-6 w-6" />}
+                color="slate"
+                subtitle="Menunggu dimulai"
             />
         </div>
     );

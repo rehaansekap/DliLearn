@@ -5,7 +5,7 @@ import { ArrowLeft, Edit } from 'lucide-react';
 import { useState } from 'react';
 import { GroupProgressTable } from './partials/groupProgressTable';
 import { MissionStats } from './partials/missionStats';
-import { MissionTabs } from './partials/missionTabs';
+import { SubmissionDetailModal } from './partials/submissionDetailModal';
 
 interface Mission {
     id: number;
@@ -15,21 +15,34 @@ interface Mission {
     slug: string;
 }
 
+interface GroupMember {
+    id: number;
+    name: string;
+    avatar?: string | null;
+}
+
 interface GroupProgress {
     group_id: number;
     group_name: string;
     group_code: string | null;
+    members: GroupMember[];
+    step1_status: 'locked' | 'in_progress' | 'completed';
+    step2_status: 'locked' | 'in_progress' | 'completed';
+    step3_status: 'locked' | 'in_progress' | 'completed';
+    step4_status: 'locked' | 'in_progress' | 'completed';
+    step5_status: 'locked' | 'in_progress' | 'completed';
     current_step: number;
-    status: 'locked' | 'in_progress' | 'completed';
-    members_count: number;
-    has_submitted: boolean;
-    is_graded: boolean;
+    has_submission: boolean;
+    file_path?: string | null;
+    code_answer?: string | null;
+    submitted_at?: string | null;
 }
 
 interface Stats {
     totalGroups: number;
     completedGroups: number;
-    needsReview: number;
+    inProgressGroups: number;
+    notStartedGroups: number;
 }
 
 interface ShowProps {
@@ -42,25 +55,33 @@ interface ShowProps {
 }
 
 export default function Show({ auth, mission, groups, stats }: ShowProps) {
-    const [activeTab, setActiveTab] = useState<
-        'overview' | 'submissions' | 'settings'
-    >('overview');
+    const [selectedSubmission, setSelectedSubmission] =
+        useState<GroupProgress | null>(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleViewDetail = (groupId: number) => {
+        const group = groups.find((g) => g.group_id === groupId);
+        if (group) {
+            setSelectedSubmission(group);
+            setShowModal(true);
+        }
+    };
 
     return (
         <TeacherLayout
             user={auth.user}
             header={
-                <div>
-                    <h2 className="text-lg font-bold text-slate-800 sm:text-xl">
-                        Detail Misi
+                <div className="hidden sm:block">
+                    <h2 className="text-lg font-bold text-slate-800">
+                        Detail Misi & Monitoring
                     </h2>
-                    <p className="text-xs text-slate-500 sm:text-sm">
-                        Pantau progress kelompok pada misi ini
+                    <p className="text-xs text-slate-500">
+                        Pantau progress setiap kelompok secara real-time
                     </p>
                 </div>
             }
         >
-            <Head title={`Detail Misi: ${mission.title}`} />
+            <Head title={`Monitoring: ${mission.title}`} />
 
             {/* Background Pattern */}
             <div className="fixed inset-0 -z-10 bg-slate-50">
@@ -69,111 +90,84 @@ export default function Show({ auth, mission, groups, stats }: ShowProps) {
 
             <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl space-y-8">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Link
-                            href="/teacher/dashboard"
-                            className="transition hover:text-indigo-600"
-                        >
-                            Dashboard
-                        </Link>
-                        <span>›</span>
-                        <span className="font-medium text-slate-800">
-                            {mission.title}
-                        </span>
-                    </div>
+                    {/* Back Button */}
+                    <Link
+                        href="/teacher/dashboard"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-indigo-600"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span>Kembali ke Dashboard</span>
+                    </Link>
 
                     {/* Mission Header */}
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-                        <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 p-6">
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex items-start gap-4">
-                                    <Link
-                                        href="/teacher/dashboard"
-                                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition hover:bg-white/30"
-                                    >
-                                        <ArrowLeft className="h-5 w-5 text-white" />
-                                    </Link>
-                                    <div>
-                                        <div className="mb-2 flex items-center gap-2">
-                                            <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                                                Level {mission.difficulty_level}
-                                            </span>
-                                        </div>
-                                        <h1 className="mb-2 text-2xl font-black text-white sm:text-3xl">
-                                            {mission.title}
-                                        </h1>
-                                        <p className="max-w-2xl text-sm text-indigo-100 sm:text-base">
-                                            {mission.description}
-                                        </p>
+                    <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 sm:p-8">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-3xl shadow-lg">
+                                    🎯
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-black text-slate-800 sm:text-3xl">
+                                        {mission.title}
+                                    </h1>
+                                    <p className="mt-1 text-sm text-slate-600">
+                                        {mission.description}
+                                    </p>
+                                    <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 text-xs font-semibold text-indigo-700">
+                                        <span>⭐</span>
+                                        <span>
+                                            Level {mission.difficulty_level}
+                                        </span>
                                     </div>
                                 </div>
-                                <Link
-                                    href={`/teacher/mission/${mission.id}/edit`}
-                                    className="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/30"
-                                >
-                                    <Edit className="h-4 w-4" />
-                                    <span className="hidden sm:inline">
-                                        Edit Soal
-                                    </span>
-                                </Link>
                             </div>
+                            <Link
+                                href={`/teacher/mission/${mission.slug}/edit`}
+                                className="inline-flex items-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50"
+                            >
+                                <Edit className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    Edit Misi
+                                </span>
+                            </Link>
                         </div>
                     </div>
 
-                    {/* Stats */}
+                    {/* Statistics */}
                     <MissionStats
                         totalGroups={stats.totalGroups}
                         completedGroups={stats.completedGroups}
-                        needsReview={stats.needsReview}
+                        inProgressGroups={stats.inProgressGroups}
+                        notStartedGroups={stats.notStartedGroups}
                     />
 
-                    {/* Tabs */}
-                    <MissionTabs
-                        activeTab={activeTab}
-                        onTabChange={setActiveTab}
+                    {/* Group Progress Table */}
+                    <GroupProgressTable
+                        groups={groups}
+                        onViewDetail={handleViewDetail}
                     />
-
-                    {/* Tab Content */}
-                    <div className="min-h-[400px]">
-                        {activeTab === 'overview' && (
-                            <GroupProgressTable
-                                groups={groups}
-                                missionId={mission.id}
-                            />
-                        )}
-
-                        {activeTab === 'submissions' && (
-                            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-lg">
-                                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
-                                    <span className="text-4xl">📝</span>
-                                </div>
-                                <h3 className="mb-2 text-lg font-bold text-slate-700">
-                                    Area Penilaian
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Fitur penilaian submission akan tersedia
-                                    segera
-                                </p>
-                            </div>
-                        )}
-
-                        {activeTab === 'settings' && (
-                            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-lg">
-                                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
-                                    <span className="text-4xl">⚙️</span>
-                                </div>
-                                <h3 className="mb-2 text-lg font-bold text-slate-700">
-                                    Pengaturan Misi
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Konfigurasi misi akan tersedia segera
-                                </p>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
+
+            {/* Submission Detail Modal */}
+            {selectedSubmission && (
+                <SubmissionDetailModal
+                    isOpen={showModal}
+                    onClose={() => {
+                        setShowModal(false);
+                        setSelectedSubmission(null);
+                    }}
+                    submission={{
+                        group_id: selectedSubmission.group_id,
+                        group_name: selectedSubmission.group_name,
+                        group_code: selectedSubmission.group_code,
+                        members: selectedSubmission.members,
+                        file_path: selectedSubmission.file_path || null,
+                        code_answer: selectedSubmission.code_answer || null,
+                        submitted_at: selectedSubmission.submitted_at || null,
+                    }}
+                />
+            )}
         </TeacherLayout>
     );
 }

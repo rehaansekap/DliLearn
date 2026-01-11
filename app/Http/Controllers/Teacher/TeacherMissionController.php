@@ -14,68 +14,84 @@ use Inertia\Inertia;
 
 class TeacherMissionController extends Controller
 {
-    public function index($slug)
+    public function show($slug)
     {
         $user = Auth::user();
+
+        // Get mission
         $mission = Mission::where('slug', $slug)
             ->where('teacher_id', $user->id)
             ->firstOrFail();
 
+        // Get all groups working on this mission && class with their progress
         $groups = DB::table('groups')
             ->join('group_progress', 'groups.id', '=', 'group_progress.group_id')
-            ->leftJoin('submissions', function ($join) use ($mission) {
-                $join->on('groups.id', '=', 'submissions.group_id')
-                    ->where('submissions.mission_id', '=', $mission->id)
-                    ->where('submissions.is_final', '=', true);
-            })
-            ->leftJoin('grades', 'submissions.id', '=', 'grades.submission_id')
+            ->join('classrooms', 'groups.classroom_id', '=', 'classrooms.id')
+            ->where('classrooms.teacher_id', $user->id)
             ->where('group_progress.mission_id', $mission->id)
             ->select(
                 'groups.id as group_id',
                 'groups.name as group_name',
                 'groups.group_code',
                 'group_progress.current_step',
-                'group_progress.status',
-                DB::raw('COUNT(DISTINCT group_members.id) as members_count')
+                'group_progress.status'
             )
-            ->leftJoin('group_members', 'groups.id', '=', 'group_members.group_id')
-            ->groupBy('groups.id', 'groups.name', 'groups.group_code', 'group_progress.current_step', 'group_progress.status')
             ->get()
             ->map(function ($group) use ($mission) {
-                $hasSubmitted = DB::table('submissions')
+                // Get group members
+                $members = DB::table('group_members')
+                    ->join('users', 'group_members.user_id', '=', 'users.id')
+                    ->where('group_members.group_id', $group->group_id)
+                    ->select('users.id', 'users.name', 'users.avatar')
+                    ->get()
+                    ->map(fn($m) => [
+                        'id' => $m->id,
+                        'name' => $m->name,
+                        'avatar' => $m->avatar,
+                    ])
+                    ->toArray();
+
+                // Determine step statuses based on current_step
+                $currentStep = $group->current_step ?? 0;
+
+                $step1Status = $currentStep >= 2 ? 'completed' : ($currentStep === 1 ? 'in_progress' : 'locked');
+                $step2Status = $currentStep >= 3 ? 'completed' : ($currentStep === 2 ? 'in_progress' : 'locked');
+                $step3Status = $currentStep >= 4 ? 'completed' : ($currentStep === 3 ? 'in_progress' : 'locked');
+                $step4Status = $currentStep >= 5 ? 'completed' : ($currentStep === 4 ? 'in_progress' : 'locked');
+                $step5Status = $currentStep >= 5 && $group->status === 'completed' ? 'completed' : ($currentStep === 5 ? 'in_progress' : 'locked');
+
+                // Get submission data if exists
+                $submission = DB::table('submissions')
                     ->where('group_id', $group->group_id)
                     ->where('mission_id', $mission->id)
                     ->where('is_final', true)
-                    ->exists();
-
-                $isGraded = DB::table('grades')
-                    ->whereIn('submission_id', function ($query) use ($group, $mission) {
-                        $query->select('id')
-                            ->from('submissions')
-                            ->where('group_id', $group->group_id)
-                            ->where('mission_id', $mission->id)
-                            ->where('is_final', true);
-                    })
-                    ->exists();
+                    ->first();
 
                 return [
                     'group_id' => $group->group_id,
                     'group_name' => $group->group_name,
                     'group_code' => $group->group_code,
-                    'current_step' => $group->current_step ?? 0,
+                    'members' => $members,
+                    'current_step' => $currentStep,
                     'status' => $group->status ?? 'locked',
-                    'members_count' => $group->members_count ?? 0,
-                    'has_submitted' => $hasSubmitted,
-                    'is_graded' => $isGraded,
+                    'step1_status' => $step1Status,
+                    'step2_status' => $step2Status,
+                    'step3_status' => $step3Status,
+                    'step4_status' => $step4Status,
+                    'step5_status' => $step5Status,
+                    'has_submission' => $submission !== null,
+                    'file_path' => $submission->file_path ?? null,
+                    'code_answer' => $submission->code_answer ?? null,
+                    'submitted_at' => $submission->submitted_at ?? null,
                 ];
-            });
+            })
+            ->toArray();
 
-        $totalGroups = $groups->count();
-        $completedGroups = $groups->where('status', 'completed')->count();
-
-        $needsReview = $groups->filter(function ($group) {
-            return $group['has_submitted'] && !$group['is_graded'];
-        })->count();
+        // Calculate statistics
+        $totalGroups = count($groups);
+        $completedGroups = collect($groups)->where('status', 'completed')->count();
+        $inProgressGroups = collect($groups)->where('status', 'in_progress')->count();
+        $notStartedGroups = collect($groups)->where('status', 'locked')->count();
 
         return Inertia::render('teacher/mission/index', [
             'mission' => [
@@ -89,7 +105,8 @@ class TeacherMissionController extends Controller
             'stats' => [
                 'totalGroups' => $totalGroups,
                 'completedGroups' => $completedGroups,
-                'needsReview' => $needsReview,
+                'inProgressGroups' => $inProgressGroups,
+                'notStartedGroups' => $notStartedGroups,
             ],
         ]);
     }

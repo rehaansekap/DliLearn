@@ -1,88 +1,106 @@
 import { cn } from '@/lib/utils';
-import { Link } from '@inertiajs/react';
-import { Eye, FileCheck } from 'lucide-react';
+import { Eye } from 'lucide-react';
+
+interface Member {
+    id: number;
+    name: string;
+    avatar?: string | null;
+}
 
 interface GroupProgress {
     group_id: number;
     group_name: string;
-    group_code: string | null;
+    members: Member[];
+    step1_status: 'locked' | 'in_progress' | 'completed';
+    step2_status: 'locked' | 'in_progress' | 'completed';
+    step3_status: 'locked' | 'in_progress' | 'completed';
+    step4_status: 'locked' | 'in_progress' | 'completed';
+    step5_status: 'locked' | 'in_progress' | 'completed';
     current_step: number;
-    status: 'locked' | 'in_progress' | 'completed';
-    members_count: number;
-    has_submitted: boolean;
-    is_graded: boolean;
+    has_submission: boolean;
 }
 
 interface GroupProgressTableProps {
     groups: GroupProgress[];
-    missionId: number;
+    onViewDetail: (groupId: number) => void;
 }
 
-const statusConfig = {
-    locked: {
-        label: 'Terkunci',
-        color: 'bg-slate-100 text-slate-700 border-slate-300',
-    },
-    in_progress: {
-        label: 'Sedang Berlangsung',
-        color: 'bg-amber-100 text-amber-700 border-amber-300',
-    },
-    completed: {
-        label: 'Selesai',
-        color: 'bg-green-100 text-green-700 border-green-300',
-    },
-};
-
 const stepLabels = [
-    'Belum Dimulai',
-    'Orientasi Masalah',
-    'Organisasi Tim',
+    'Orientasi',
+    'Organisasi',
     'Creative Lab',
-    'Penyajian Hasil',
+    'Penyajian',
     'Evaluasi',
 ];
 
-function ProgressBar({
-    current,
-    total = 5,
+function StatusBadge({
+    status,
 }: {
-    current: number;
-    total?: number;
+    status: 'locked' | 'in_progress' | 'completed';
 }) {
-    const percentage = Math.min((current / total) * 100, 100);
+    const styles = {
+        locked: 'bg-slate-200 border-slate-300',
+        in_progress: 'bg-amber-200 border-amber-300 animate-pulse',
+        completed: 'bg-green-200 border-green-300',
+    };
 
     return (
-        <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-600">
-                    Step {current}/{total}
-                </span>
-                <span className="text-slate-500">
-                    {Math.round(percentage)}%
-                </span>
+        <div
+            className={cn(
+                'h-3 w-3 rounded-full border-2 transition-all',
+                styles[status],
+            )}
+            title={
+                status === 'completed'
+                    ? 'Selesai'
+                    : status === 'in_progress'
+                      ? 'Sedang Proses'
+                      : 'Terkunci'
+            }
+        />
+    );
+}
+
+function MemberAvatarStack({ members }: { members: Member[] }) {
+    const displayMembers = members.slice(0, 3);
+    const remaining = Math.max(0, members.length - 3);
+
+    return (
+        <div className="flex items-center">
+            <div className="flex -space-x-2">
+                {displayMembers.map((member, idx) => (
+                    <div
+                        key={member.id}
+                        className="relative inline-block h-8 w-8 overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-indigo-400 to-purple-500 shadow-sm"
+                        title={member.name}
+                        style={{ zIndex: displayMembers.length - idx }}
+                    >
+                        {member.avatar ? (
+                            <img
+                                src={member.avatar}
+                                alt={member.name}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-white">
+                                {member.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                    </div>
+                ))}
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                <div
-                    className={cn(
-                        'h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500',
-                    )}
-                    style={{ width: `${percentage}%` }}
-                    role="progressbar"
-                    aria-valuenow={current}
-                    aria-valuemin={0}
-                    aria-valuemax={total}
-                />
-            </div>
-            <p className="text-xs text-slate-500">
-                {stepLabels[current] || 'Unknown'}
-            </p>
+            {remaining > 0 && (
+                <span className="ml-2 text-xs font-medium text-slate-500">
+                    +{remaining}
+                </span>
+            )}
         </div>
     );
 }
 
 export function GroupProgressTable({
     groups,
-    missionId,
+    onViewDetail,
 }: GroupProgressTableProps) {
     if (groups.length === 0) {
         return (
@@ -110,7 +128,7 @@ export function GroupProgressTable({
                     📊 Progress Kelompok
                 </h3>
                 <p className="text-sm text-slate-500">
-                    Pantau perkembangan setiap kelompok
+                    Pantau perkembangan setiap kelompok secara real-time
                 </p>
             </div>
 
@@ -125,13 +143,20 @@ export function GroupProgressTable({
                             <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-600 uppercase">
                                 Anggota
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-600 uppercase">
-                                Progress
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-600 uppercase">
-                                Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-600 uppercase">
+                            {stepLabels.map((label, idx) => (
+                                <th
+                                    key={idx}
+                                    className="px-6 py-3 text-center text-xs font-semibold tracking-wider text-slate-600 uppercase"
+                                >
+                                    <div className="flex flex-col items-center gap-1">
+                                        <span>Tahap {idx + 1}</span>
+                                        <span className="text-[10px] font-normal text-slate-400">
+                                            {label}
+                                        </span>
+                                    </div>
+                                </th>
+                            ))}
+                            <th className="px-6 py-3 text-center text-xs font-semibold tracking-wider text-slate-600 uppercase">
                                 Aksi
                             </th>
                         </tr>
@@ -154,76 +179,68 @@ export function GroupProgressTable({
                                             <p className="font-semibold text-slate-800">
                                                 {group.group_name}
                                             </p>
-                                            {group.group_code && (
-                                                <p className="font-mono text-xs text-slate-500">
-                                                    {group.group_code}
-                                                </p>
-                                            )}
+                                            <p className="text-xs text-slate-500">
+                                                Step {group.current_step}/5
+                                            </p>
                                         </div>
                                     </div>
                                 </td>
 
-                                {/* Members Count */}
+                                {/* Members */}
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-1 text-sm text-slate-600">
-                                        <span>👥</span>
-                                        <span className="font-medium">
-                                            {group.members_count} Siswa
-                                        </span>
-                                    </div>
+                                    <MemberAvatarStack
+                                        members={group.members}
+                                    />
                                 </td>
 
-                                {/* Progress */}
-                                <td className="px-6 py-4">
-                                    <div className="min-w-[200px]">
-                                        <ProgressBar
-                                            current={group.current_step}
+                                {/* Step Status */}
+                                <td className="px-6 py-4 text-center">
+                                    <div className="flex justify-center">
+                                        <StatusBadge
+                                            status={group.step1_status}
+                                        />
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <div className="flex justify-center">
+                                        <StatusBadge
+                                            status={group.step2_status}
+                                        />
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <div className="flex justify-center">
+                                        <StatusBadge
+                                            status={group.step3_status}
+                                        />
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <div className="flex justify-center">
+                                        <StatusBadge
+                                            status={group.step4_status}
+                                        />
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <div className="flex justify-center">
+                                        <StatusBadge
+                                            status={group.step5_status}
                                         />
                                     </div>
                                 </td>
 
-                                {/* Status Badge */}
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        className={cn(
-                                            'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold',
-                                            statusConfig[group.status].color,
-                                        )}
+                                {/* Action */}
+                                <td className="px-6 py-4 text-center whitespace-nowrap">
+                                    <button
+                                        onClick={() =>
+                                            onViewDetail(group.group_id)
+                                        }
+                                        className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
                                     >
-                                        {statusConfig[group.status].label}
-                                    </span>
-                                </td>
-
-                                {/* Actions */}
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <Link
-                                            href={`/teacher/mission/${missionId}/group/${group.group_id}`}
-                                            className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                            <span>Detail</span>
-                                        </Link>
-
-                                        {group.has_submitted && (
-                                            <Link
-                                                href={`/teacher/mission/${missionId}/group/${group.group_id}/grade`}
-                                                className={cn(
-                                                    'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition',
-                                                    group.is_graded
-                                                        ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
-                                                        : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
-                                                )}
-                                            >
-                                                <FileCheck className="h-4 w-4" />
-                                                <span>
-                                                    {group.is_graded
-                                                        ? 'Sudah Dinilai'
-                                                        : 'Beri Nilai'}
-                                                </span>
-                                            </Link>
-                                        )}
-                                    </div>
+                                        <Eye className="h-4 w-4" />
+                                        <span>Detail</span>
+                                    </button>
                                 </td>
                             </tr>
                         ))}
