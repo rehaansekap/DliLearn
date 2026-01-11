@@ -1,6 +1,6 @@
 import TeacherLayout from '@/layouts/teacher-layout';
 import { User } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { AlertCircle, ArrowLeft, ArrowRight, Save } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
@@ -199,18 +199,17 @@ export default function Edit({
 
             <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-5xl space-y-8">
-                    {/* Back Button */}
-                    <a
-                        href="/teacher/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-indigo-600"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span>Kembali ke Dashboard</span>
-                    </a>
-
                     {/* Page Title */}
                     <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 sm:p-8">
                         <div className="flex items-center gap-4">
+                            <div>
+                                <Link
+                                    href="/teacher/dashboard"
+                                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-orange-500/70 backdrop-blur-sm transition hover:bg-orange-500/90"
+                                >
+                                    <ArrowLeft className="h-5 w-5 text-white" />
+                                </Link>
+                            </div>
                             <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-3xl shadow-lg">
                                 ✏️
                             </div>
