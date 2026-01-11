@@ -75,17 +75,11 @@ function MemberAvatarStack({ members }: { members: Member[] }) {
                         title={member.name}
                         style={{ zIndex: displayMembers.length - idx }}
                     >
-                        {member.avatar ? (
-                            <img
-                                src={member.avatar}
-                                alt={member.name}
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-white">
-                                {member.name.charAt(0).toUpperCase()}
-                            </div>
-                        )}
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-md">
+                            <span className="text-sm font-bold">
+                                {(member.name || '?').charAt(0)}
+                            </span>
+                        </div>
                     </div>
                 ))}
             </div>
