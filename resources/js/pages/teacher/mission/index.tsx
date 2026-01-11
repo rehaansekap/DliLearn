@@ -3,9 +3,12 @@ import { User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { useState } from 'react';
-import { GroupProgressTable } from './partials/groupProgressTable';
 import { MissionStats } from './partials/missionStats';
+import { MissionTabs } from './partials/missionTabs';
 import { SubmissionDetailModal } from './partials/submissionDetailModal';
+import { TabAttendance } from './partials/tabAttendance';
+import { TabGroupManagement } from './partials/tabGroupManagement';
+import { TabMonitoring } from './partials/tabMonitoring';
 
 interface Mission {
     id: number;
@@ -15,24 +18,40 @@ interface Mission {
     slug: string;
 }
 
-interface GroupMember {
+interface Student {
     id: number;
     name: string;
+    username: string;
     avatar?: string | null;
 }
 
-interface GroupProgress {
+interface GroupMember extends Student {
+    role: 'Ketua' | 'Programmer' | 'Designer' | 'Notulis' | 'Anggota';
+}
+
+interface Group {
     group_id: number;
     group_name: string;
-    group_code: string | null;
+    group_code: string;
     members: GroupMember[];
+}
+
+interface Reflection {
+    user_id: number;
+    user_name: string;
+    content: string;
+    created_at: string;
+    type: 'initial' | 'final';
+}
+
+interface GroupMonitoring extends Group {
     step1_status: 'locked' | 'in_progress' | 'completed';
     step2_status: 'locked' | 'in_progress' | 'completed';
     step3_status: 'locked' | 'in_progress' | 'completed';
     step4_status: 'locked' | 'in_progress' | 'completed';
     step5_status: 'locked' | 'in_progress' | 'completed';
     current_step: number;
-    has_submission: boolean;
+    reflections: Reflection[];
     file_path?: string | null;
     code_answer?: string | null;
     submitted_at?: string | null;
@@ -50,17 +69,29 @@ interface ShowProps {
         user: User;
     };
     mission: Mission;
-    groups: GroupProgress[];
+    students: Student[];
+    groups: Group[];
+    groupsMonitoring: GroupMonitoring[];
     stats: Stats;
 }
 
-export default function Show({ auth, mission, groups, stats }: ShowProps) {
+export default function Show({
+    auth,
+    mission,
+    students,
+    groups,
+    groupsMonitoring,
+    stats,
+}: ShowProps) {
+    const [activeTab, setActiveTab] = useState<
+        'attendance' | 'groups' | 'monitoring'
+    >('attendance');
     const [selectedSubmission, setSelectedSubmission] =
-        useState<GroupProgress | null>(null);
+        useState<GroupMonitoring | null>(null);
     const [showModal, setShowModal] = useState(false);
 
-    const handleViewDetail = (groupId: number) => {
-        const group = groups.find((g) => g.group_id === groupId);
+    const handleViewSubmission = (groupId: number) => {
+        const group = groupsMonitoring.find((g) => g.group_id === groupId);
         if (group) {
             setSelectedSubmission(group);
             setShowModal(true);
@@ -73,15 +104,15 @@ export default function Show({ auth, mission, groups, stats }: ShowProps) {
             header={
                 <div className="hidden sm:block">
                     <h2 className="text-lg font-bold text-slate-800">
-                        Detail Misi & Monitoring
+                        Manajemen Kelas & Monitoring
                     </h2>
                     <p className="text-xs text-slate-500">
-                        Pantau progress setiap kelompok secara real-time
+                        Kelola kehadiran, kelompok, dan pantau progress siswa
                     </p>
                 </div>
             }
         >
-            <Head title={`Monitoring: ${mission.title}`} />
+            <Head title={`Kelola: ${mission.title}`} />
 
             {/* Background Pattern */}
             <div className="fixed inset-0 -z-10 bg-slate-50">
@@ -141,11 +172,36 @@ export default function Show({ auth, mission, groups, stats }: ShowProps) {
                         notStartedGroups={stats.notStartedGroups}
                     />
 
-                    {/* Group Progress Table */}
-                    <GroupProgressTable
-                        groups={groups}
-                        onViewDetail={handleViewDetail}
+                    {/* Tab Navigation */}
+                    <MissionTabs
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
                     />
+
+                    {/* Tab Content */}
+                    <div>
+                        {activeTab === 'attendance' && (
+                            <TabAttendance
+                                students={students}
+                                missionId={mission.id}
+                            />
+                        )}
+
+                        {activeTab === 'groups' && (
+                            <TabGroupManagement
+                                students={students}
+                                groups={groups}
+                                missionId={mission.id}
+                            />
+                        )}
+
+                        {activeTab === 'monitoring' && (
+                            <TabMonitoring
+                                groups={groupsMonitoring}
+                                onViewSubmission={handleViewSubmission}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
 

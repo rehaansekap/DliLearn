@@ -37,6 +37,9 @@ Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('tea
     Route::put('/mission/{mission}', [TeacherMissionController::class, 'update'])->name('missions.update');
     Route::delete('/mission/{mission}', [TeacherMissionController::class, 'destroy'])->name('missions.destroy');
     Route::get('/mission/{slug}', [TeacherMissionController::class, 'show'])->name('mission.show');
+    Route::get('/mission/{slug}', [TeacherMissionController::class, 'show'])->name('mission.show');
+    Route::post('/mission/{mission}/attendance', [TeacherMissionController::class, 'saveAttendance'])->name('mission.attendance');
+    Route::post('/mission/{mission}/update-groups', [TeacherMissionController::class, 'updateGroups'])->name('mission.update-groups');
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {

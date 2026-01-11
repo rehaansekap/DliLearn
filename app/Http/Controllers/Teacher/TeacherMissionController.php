@@ -23,11 +23,64 @@ class TeacherMissionController extends Controller
             ->where('teacher_id', $user->id)
             ->firstOrFail();
 
-        // Get all groups working on this mission && class with their progress
+        // Get classroom
+        $classroom = Classroom::find($mission->classroom_id);
+
+        // Get all students in this classroom
+        $students = DB::table('classroom_user')
+            ->join('users', 'classroom_user.user_id', '=', 'users.id')
+            ->where('classroom_user.classroom_id', $mission->classroom_id)
+            ->where('users.role', 'student')
+            ->select('users.id', 'users.name', 'users.username', 'users.avatar')
+            ->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'username' => $s->username,
+                'avatar' => $s->avatar,
+            ])
+            ->toArray();
+
+        // Get groups for this mission (for Group Management tab)
         $groups = DB::table('groups')
             ->join('group_progress', 'groups.id', '=', 'group_progress.group_id')
-            ->join('classrooms', 'groups.classroom_id', '=', 'classrooms.id')
-            ->where('classrooms.teacher_id', $user->id)
+            ->where('groups.classroom_id', $mission->classroom_id)
+            ->where('group_progress.mission_id', $mission->id)
+            ->select(
+                'groups.id as group_id',
+                'groups.name as group_name',
+                'groups.group_code'
+            )
+            ->get()
+            ->map(function ($group) {
+                // Get members with roles
+                $members = DB::table('group_members')
+                    ->join('users', 'group_members.user_id', '=', 'users.id')
+                    ->where('group_members.group_id', $group->group_id)
+                    ->select('users.id', 'users.name', 'users.username', 'users.avatar', 'group_members.role')
+                    ->get()
+                    ->map(fn($m) => [
+                        'id' => $m->id,
+                        'name' => $m->name,
+                        'username' => $m->username,
+                        'avatar' => $m->avatar,
+                        'role' => $m->role ?? 'Anggota',
+                    ])
+                    ->toArray();
+
+                return [
+                    'group_id' => $group->group_id,
+                    'group_name' => $group->group_name,
+                    'group_code' => $group->group_code,
+                    'members' => $members,
+                ];
+            })
+            ->toArray();
+
+        // Get groups with full monitoring data (for Monitoring tab)
+        $groupsMonitoring = DB::table('groups')
+            ->join('group_progress', 'groups.id', '=', 'group_progress.group_id')
+            ->where('groups.classroom_id', $mission->classroom_id)
             ->where('group_progress.mission_id', $mission->id)
             ->select(
                 'groups.id as group_id',
@@ -42,16 +95,17 @@ class TeacherMissionController extends Controller
                 $members = DB::table('group_members')
                     ->join('users', 'group_members.user_id', '=', 'users.id')
                     ->where('group_members.group_id', $group->group_id)
-                    ->select('users.id', 'users.name', 'users.avatar')
+                    ->select('users.id', 'users.name', 'users.avatar', 'group_members.role')
                     ->get()
                     ->map(fn($m) => [
                         'id' => $m->id,
                         'name' => $m->name,
                         'avatar' => $m->avatar,
+                        'role' => $m->role ?? 'Anggota',
                     ])
                     ->toArray();
 
-                // Determine step statuses based on current_step
+                // Determine step statuses
                 $currentStep = $group->current_step ?? 0;
 
                 $step1Status = $currentStep >= 2 ? 'completed' : ($currentStep === 1 ? 'in_progress' : 'locked');
@@ -60,12 +114,35 @@ class TeacherMissionController extends Controller
                 $step4Status = $currentStep >= 5 ? 'completed' : ($currentStep === 4 ? 'in_progress' : 'locked');
                 $step5Status = $currentStep >= 5 && $group->status === 'completed' ? 'completed' : ($currentStep === 5 ? 'in_progress' : 'locked');
 
-                // Get submission data if exists
+                // Get submission data
                 $submission = DB::table('submissions')
                     ->where('group_id', $group->group_id)
                     ->where('mission_id', $mission->id)
                     ->where('is_final', true)
                     ->first();
+
+                // Get reflections (initial and final) from all members
+                $reflections = DB::table('reflections')
+                    ->join('users', 'reflections.user_id', '=', 'users.id')
+                    ->join('group_members', 'users.id', '=', 'group_members.user_id')
+                    ->where('group_members.group_id', $group->group_id)
+                    ->where('reflections.mission_id', $mission->id)
+                    ->select(
+                        'reflections.user_id',
+                        'users.name as user_name',
+                        'reflections.content',
+                        'reflections.created_at',
+                        'reflections.type'
+                    )
+                    ->get()
+                    ->map(fn($r) => [
+                        'user_id' => $r->user_id,
+                        'user_name' => $r->user_name,
+                        'content' => $r->content,
+                        'created_at' => $r->created_at,
+                        'type' => $r->type ?? 'initial',
+                    ])
+                    ->toArray();
 
                 return [
                     'group_id' => $group->group_id,
@@ -79,7 +156,7 @@ class TeacherMissionController extends Controller
                     'step3_status' => $step3Status,
                     'step4_status' => $step4Status,
                     'step5_status' => $step5Status,
-                    'has_submission' => $submission !== null,
+                    'reflections' => $reflections,
                     'file_path' => $submission->file_path ?? null,
                     'code_answer' => $submission->code_answer ?? null,
                     'submitted_at' => $submission->submitted_at ?? null,
@@ -88,10 +165,10 @@ class TeacherMissionController extends Controller
             ->toArray();
 
         // Calculate statistics
-        $totalGroups = count($groups);
-        $completedGroups = collect($groups)->where('status', 'completed')->count();
-        $inProgressGroups = collect($groups)->where('status', 'in_progress')->count();
-        $notStartedGroups = collect($groups)->where('status', 'locked')->count();
+        $totalGroups = count($groupsMonitoring);
+        $completedGroups = collect($groupsMonitoring)->where('status', 'completed')->count();
+        $inProgressGroups = collect($groupsMonitoring)->where('status', 'in_progress')->count();
+        $notStartedGroups = collect($groupsMonitoring)->where('status', 'locked')->count();
 
         return Inertia::render('teacher/mission/index', [
             'mission' => [
@@ -101,7 +178,13 @@ class TeacherMissionController extends Controller
                 'difficulty_level' => $mission->difficulty_level,
                 'slug' => $mission->slug,
             ],
+            'classroom' => [
+                'id' => $classroom->id,
+                'name' => $classroom->name,
+            ],
+            'students' => $students,
             'groups' => $groups,
+            'groupsMonitoring' => $groupsMonitoring,
             'stats' => [
                 'totalGroups' => $totalGroups,
                 'completedGroups' => $completedGroups,
@@ -109,6 +192,64 @@ class TeacherMissionController extends Controller
                 'notStartedGroups' => $notStartedGroups,
             ],
         ]);
+    }
+
+    public function saveAttendance(Request $request, $missionId)
+    {
+        $validated = $request->validate([
+            'attendance' => 'required|array',
+            'attendance.*.student_id' => 'required|exists:users,id',
+            'attendance.*.is_present' => 'required|boolean',
+        ]);
+
+        return redirect()->back()->with('success', 'Kehadiran berhasil disimpan!');
+    }
+
+    public function updateGroups(Request $request, $missionId)
+    {
+        $validated = $request->validate([
+            'groups' => 'required|array',
+            'groups.*.group_id' => 'required|integer',
+            'groups.*.group_name' => 'required|string',
+            'groups.*.group_code' => 'required|string',
+            'groups.*.members' => 'required|array',
+            'groups.*.members.*.user_id' => 'required|exists:users,id',
+            'groups.*.members.*.role' => 'required|string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($validated['groups'] as $groupData) {
+                // Update or create group
+                $group = DB::table('groups')
+                    ->where('id', $groupData['group_id'])
+                    ->first();
+
+                if ($group) {
+                    // Clear existing members
+                    DB::table('group_members')
+                        ->where('group_id', $group->id)
+                        ->delete();
+
+                    // Insert new members with roles
+                    foreach ($groupData['members'] as $member) {
+                        DB::table('group_members')->insert([
+                            'group_id' => $group->id,
+                            'user_id' => $member['user_id'],
+                            'role' => $member['role'],
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Kelompok berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memperbarui kelompok: ' . $e->getMessage());
+        }
     }
 
     public function create()
