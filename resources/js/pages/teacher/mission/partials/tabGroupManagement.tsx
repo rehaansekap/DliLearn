@@ -464,7 +464,7 @@ function MemberRow({
                 onClick={() => onRemove(groupId, member.id)}
                 aria-label={`Hapus ${member.name}`}
                 title={`Hapus ${member.name}`}
-                className="rounded-lg bg-red-100 p-1 text-red-600 transition sm:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:hover:bg-red-200"
+                className="rounded-lg bg-red-100 p-1 text-red-600 transition sm:opacity-100 lg:opacity-40 lg:group-hover:opacity-100 lg:hover:bg-red-200"
             >
                 <X className="h-4 w-4" />
             </button>
