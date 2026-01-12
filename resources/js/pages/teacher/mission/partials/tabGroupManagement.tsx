@@ -61,7 +61,6 @@ export function TabGroupManagement({
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [groupCount, setGroupCount] = useState(4);
 
-    // Get unassigned students
     const assignedStudentIds = groups.flatMap((g) =>
         g.members.map((m) => m.id),
     );
@@ -69,7 +68,6 @@ export function TabGroupManagement({
         (s) => !assignedStudentIds.includes(s.id),
     );
 
-    // Handle create groups
     const handleCreateGroups = () => {
         const newGroups: Group[] = [];
         for (let i = 0; i < groupCount; i++) {
@@ -84,7 +82,6 @@ export function TabGroupManagement({
         setShowCreateDialog(false);
     };
 
-    // Handle role change
     const handleRoleChange = (
         groupId: number,
         studentId: number,
@@ -108,7 +105,6 @@ export function TabGroupManagement({
         );
     };
 
-    // Remove student from group
     const handleRemoveFromGroup = (groupId: number, studentId: number) => {
         setGroups((prev) =>
             prev.map((group) => {
@@ -121,7 +117,6 @@ export function TabGroupManagement({
         );
     };
 
-    // Add student to group
     const handleAddToGroup = (student: Student, groupId: number) => {
         setGroups((prev) =>
             prev.map((group) => {
@@ -137,7 +132,6 @@ export function TabGroupManagement({
         );
     };
 
-    // Randomize groups
     const handleRandomize = () => {
         if (groups.length === 0) {
             setShowCreateDialog(true);
@@ -145,14 +139,12 @@ export function TabGroupManagement({
         }
         setIsRandomizing(true);
 
-        // Shuffle all students
         const allStudents = [...students];
         for (let i = allStudents.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allStudents[i], allStudents[j]] = [allStudents[j], allStudents[i]];
         }
 
-        // Distribute evenly
         const groupCount = groups.length || 4;
         const membersPerGroup = Math.ceil(allStudents.length / groupCount);
         const newGroups: Group[] = [];
@@ -177,14 +169,12 @@ export function TabGroupManagement({
         setIsRandomizing(false);
     };
 
-    // Save changes
     const handleSave = () => {
         const extractErrorMessage = (err: unknown): string | null => {
             if (!err) return null;
             if (typeof err === 'string') return err;
             if (Array.isArray(err)) return err.join('; ');
             if (typeof err === 'object') {
-                // validation errors object from server
                 for (const v of Object.values(err)) {
                     if (typeof v === 'string') return v;
                     if (Array.isArray(v) && v.length > 0) return v[0];
@@ -445,7 +435,6 @@ export function TabGroupManagement({
     );
 }
 
-// Student Card Component (Unassigned)
 function StudentCard({
     student,
     groups,
@@ -535,7 +524,6 @@ function StudentCard({
     );
 }
 
-// Group Card Component
 function GroupCard({
     group,
     onRoleChange,
@@ -576,7 +564,6 @@ function GroupCard({
     );
 }
 
-// Member Row Component
 function MemberRow({
     member,
     groupId,

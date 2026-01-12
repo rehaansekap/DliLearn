@@ -1,4 +1,4 @@
-import { useIsMobile } from '@/hooks/use-mobile'; // ✅ NEW
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { Heart, MessageCircle, Save, X } from 'lucide-react';
@@ -33,7 +33,7 @@ interface Submission {
     submitted_at: string | null;
     submission_id: number | null;
     likes_count?: number;
-    feedbacks?: Feedback[]; // ✅ NEW
+    feedbacks?: Feedback[];
     grade?: Grade | null;
 }
 
@@ -57,7 +57,7 @@ export function SubmissionDetailModal({
     const [isSaving, setIsSaving] = useState(false);
 
     const hasSubmission = Boolean(submission.submission_id);
-    // Helper empty state node
+
     const EmptySubmission = (
         <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
@@ -858,7 +858,7 @@ export function SubmissionDetailModal({
                         </div>
                     )}
                 </div>
-                
+
                 {/* Mobile Sticky Save Button (only on Grade tab) */}
                 {isMobile && activeTab === 'grade' && hasSubmission && (
                     <div className="fixed inset-x-0 bottom-0 z-50 bg-white/90 p-3 backdrop-blur-sm sm:hidden">

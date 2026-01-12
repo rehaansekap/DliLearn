@@ -42,7 +42,7 @@ interface VoteResult {
 interface TabMonitoringProps {
     groups: GroupMonitoring[];
     voteResults: VoteResult[];
-    allReflections: Reflection[]; // ✅ NEW: semua refleksi (termasuk yang belum punya kelompok)
+    allReflections: Reflection[];
     onViewSubmission: (groupId: number) => void;
 }
 
@@ -71,11 +71,11 @@ function StatusDot({
 export function TabMonitoring({
     groups,
     voteResults,
-    allReflections = [], // ✅ NEW
+    allReflections = [],
     onViewSubmission,
 }: TabMonitoringProps) {
-    const isMobile = useIsMobile(); // ✅ NEW
-    // Combine votes with groups so we show all groups (vote_count defaults to 0)
+    const isMobile = useIsMobile();
+
     const voteMap = useMemo(() => {
         const m = new Map<number, number>();
         voteResults.forEach((v) => m.set(v.group_id, v.vote_count));
@@ -100,7 +100,6 @@ export function TabMonitoring({
         0,
     );
 
-    // ✅ UPDATED: Gunakan allReflections dari props, bukan dari groups
     const [expandedReflectionType, setExpandedReflectionType] = useState<
         'initial' | 'final' | null
     >(null);
@@ -109,7 +108,6 @@ export function TabMonitoring({
         setExpandedReflectionType((prev) => (prev === type ? null : type));
     };
 
-    // ✅ UPDATED: Langsung pakai allReflections dari backend
     const initialReflections = allReflections.filter(
         (r) => r.type === 'initial',
     );
@@ -164,7 +162,6 @@ export function TabMonitoring({
                         </p>
                     </div>
                 ) : isMobile ? (
-                    // Mobile: horizontal scrollable cards for vote results
                     <div className="p-4">
                         <div className="flex gap-3 overflow-x-auto pb-2">
                             {combinedResults.map((result, index) => {
@@ -187,7 +184,7 @@ export function TabMonitoring({
                                                         isTop
                                                             ? 'text-amber-900'
                                                             : 'text-slate-800',
-                                                        // add text wrap
+
                                                         'text-wrap break-words',
                                                     )}
                                                 >

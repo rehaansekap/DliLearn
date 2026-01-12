@@ -95,8 +95,8 @@ interface ShowProps {
     voteResults: VoteResult[];
     stats: Stats;
     initialAttendance?: { student_id: number; is_present: boolean }[];
-    allReflections?: Reflection[]; // ✅ NEW
-    classroom?: { id: number; name: string; join_code?: string | null }; // ✅ NEW
+    allReflections?: Reflection[];
+    classroom?: { id: number; name: string; join_code?: string | null };
 }
 
 export default function Show({
@@ -224,7 +224,7 @@ export default function Show({
                                 students={students}
                                 missionId={mission.id}
                                 initialAttendance={initialAttendance}
-                                classroom={classroom} // ✅ NEW
+                                classroom={classroom}
                             />
                         )}
 
@@ -240,7 +240,7 @@ export default function Show({
                             <TabMonitoring
                                 groups={groupsMonitoring}
                                 voteResults={voteResults}
-                                allReflections={allReflections} // ✅ NEW
+                                allReflections={allReflections}
                                 onViewSubmission={handleViewSubmission}
                             />
                         )}

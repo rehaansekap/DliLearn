@@ -41,7 +41,6 @@ export function TabAttendance({
         },
     );
 
-    // mark all convenience for mobile
     const markAllPresent = () => {
         const all: Record<number, boolean> = {};
         students.forEach((s) => {
