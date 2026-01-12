@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { ChevronDown, Eye, MessageCircle } from 'lucide-react';
+import { ChevronDown, Eye, MessageCircle, Trophy } from 'lucide-react';
 import { useState } from 'react';
 
 interface Student {
@@ -14,6 +14,7 @@ interface Reflection {
     content: string;
     created_at: string;
     type: 'initial' | 'final';
+    group_name?: string;
 }
 
 interface GroupMonitoring {
@@ -30,8 +31,17 @@ interface GroupMonitoring {
     reflections: Reflection[];
 }
 
+interface VoteResult {
+    group_id: number;
+    group_name: string;
+    group_code: string | null;
+    vote_count: number;
+}
+
 interface TabMonitoringProps {
     groups: GroupMonitoring[];
+    voteResults: VoteResult[];
+    allReflections: Reflection[]; // ✅ NEW: semua refleksi (termasuk yang belum punya kelompok)
     onViewSubmission: (groupId: number) => void;
 }
 
@@ -59,23 +69,24 @@ function StatusDot({
 
 export function TabMonitoring({
     groups,
+    voteResults,
+    allReflections = [], // ✅ NEW
     onViewSubmission,
 }: TabMonitoringProps) {
-    const [expandedGroups, setExpandedGroups] = useState<Set<number>>(
-        new Set(),
-    );
+    // ✅ UPDATED: Gunakan allReflections dari props, bukan dari groups
+    const [expandedReflectionType, setExpandedReflectionType] = useState<
+        'initial' | 'final' | null
+    >(null);
 
-    const toggleGroup = (groupId: number) => {
-        setExpandedGroups((prev) => {
-            const next = new Set(prev);
-            if (next.has(groupId)) {
-                next.delete(groupId);
-            } else {
-                next.add(groupId);
-            }
-            return next;
-        });
+    const toggleReflectionType = (type: 'initial' | 'final') => {
+        setExpandedReflectionType((prev) => (prev === type ? null : type));
     };
+
+    // ✅ UPDATED: Langsung pakai allReflections dari backend
+    const initialReflections = allReflections.filter(
+        (r) => r.type === 'initial',
+    );
+    const finalReflections = allReflections.filter((r) => r.type === 'final');
 
     return (
         <div className="space-y-6">
@@ -95,6 +106,100 @@ export function TabMonitoring({
                     </div>
                 </div>
             </div>
+
+            {/* Vote Results Section */}
+            {voteResults.length > 0 && (
+                <div className="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-lg">
+                    <div className="border-b border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-6 py-4">
+                        <div className="flex items-center gap-3">
+                            <Trophy className="h-6 w-6 text-amber-600" />
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-800">
+                                    🏆 Hasil Voting Kelompok Terbaik
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    Berdasarkan vote dari seluruh siswa
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="divide-y divide-slate-200">
+                        {voteResults.map((result, index) => {
+                            const isWinner = index === 0;
+                            return (
+                                <div
+                                    key={result.group_id}
+                                    className={cn(
+                                        'flex items-center justify-between px-6 py-4 transition hover:bg-slate-50',
+                                        isWinner &&
+                                            'bg-gradient-to-r from-amber-50 to-yellow-50',
+                                    )}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        {/* Rank Badge */}
+                                        <div
+                                            className={cn(
+                                                'flex h-12 w-12 items-center justify-center rounded-full font-black text-white shadow-md',
+                                                isWinner
+                                                    ? 'bg-gradient-to-br from-amber-500 to-yellow-500 text-2xl'
+                                                    : index === 1
+                                                      ? 'bg-gradient-to-br from-slate-400 to-slate-500 text-xl'
+                                                      : index === 2
+                                                        ? 'bg-gradient-to-br from-orange-400 to-amber-600 text-xl'
+                                                        : 'bg-gradient-to-br from-slate-300 to-slate-400',
+                                            )}
+                                        >
+                                            {index === 0
+                                                ? '🥇'
+                                                : index === 1
+                                                  ? '🥈'
+                                                  : index === 2
+                                                    ? '🥉'
+                                                    : index + 1}
+                                        </div>
+
+                                        {/* Group Info */}
+                                        <div>
+                                            <p
+                                                className={cn(
+                                                    'font-bold text-slate-800',
+                                                    isWinner &&
+                                                        'text-lg text-amber-900',
+                                                )}
+                                            >
+                                                {result.group_name}
+                                            </p>
+                                            <p className="text-sm text-slate-500">
+                                                {result.group_code || 'No Code'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Vote Count */}
+                                    <div className="text-right">
+                                        <p
+                                            className={cn(
+                                                'text-3xl font-black',
+                                                isWinner
+                                                    ? 'text-amber-700'
+                                                    : 'text-slate-700',
+                                            )}
+                                        >
+                                            {result.vote_count}
+                                        </p>
+                                        <p className="text-sm text-slate-500">
+                                            {result.vote_count === 1
+                                                ? 'vote'
+                                                : 'votes'}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* Progress Matrix Table */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
@@ -206,191 +311,197 @@ export function TabMonitoring({
                 </div>
             </div>
 
-            {/* Reflection Log (Accordion) */}
+            {/* ✅ Reflection Log (Accordion per-tipe) */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
                 <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4">
                     <h3 className="text-lg font-bold text-slate-800">
                         💬 Log Refleksi Siswa
                     </h3>
                     <p className="text-sm text-slate-500">
-                        Jawaban refleksi awal & akhir per kelompok
+                        Jawaban refleksi awal & akhir dari semua siswa
                     </p>
                 </div>
 
                 <div className="divide-y divide-slate-200">
-                    {groups.map((group) => {
-                        const isExpanded = expandedGroups.has(group.group_id);
-                        const initialReflections = group.reflections.filter(
-                            (r) => r.type === 'initial',
-                        );
-                        const finalReflections = group.reflections.filter(
-                            (r) => r.type === 'final',
-                        );
+                    {/* Refleksi Awal Accordion */}
+                    <div>
+                        <button
+                            onClick={() => toggleReflectionType('initial')}
+                            className="flex w-full items-center justify-between px-6 py-4 text-left transition hover:bg-slate-50"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-500 font-bold text-white">
+                                    🤔
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-slate-800">
+                                        Refleksi Awal (Tahap 1)
+                                    </p>
+                                    <p className="flex items-center gap-2 text-xs text-slate-500">
+                                        <MessageCircle className="h-3 w-3" />
+                                        <span>
+                                            {initialReflections.length} refleksi
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <ChevronDown
+                                className={cn(
+                                    'h-5 w-5 text-slate-400 transition-transform',
+                                    expandedReflectionType === 'initial' &&
+                                        'rotate-180',
+                                )}
+                            />
+                        </button>
 
-                        return (
-                            <div key={group.group_id}>
-                                {/* Accordion Header */}
-                                <button
-                                    onClick={() => toggleGroup(group.group_id)}
-                                    className="flex w-full items-center justify-between px-6 py-4 text-left transition hover:bg-slate-50"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 font-bold text-white">
-                                            {group.group_name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-slate-800">
-                                                {group.group_name}
-                                            </p>
-                                            <p className="flex items-center gap-2 text-xs text-slate-500">
-                                                <MessageCircle className="h-3 w-3" />
-                                                <span>
-                                                    {group.reflections.length}{' '}
-                                                    refleksi
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <ChevronDown
-                                        className={cn(
-                                            'h-5 w-5 text-slate-400 transition-transform',
-                                            isExpanded && 'rotate-180',
-                                        )}
-                                    />
-                                </button>
-
-                                {/* Accordion Content */}
-                                {isExpanded && (
-                                    <div className="border-t border-slate-100 bg-slate-50 px-6 py-4">
-                                        {/* Members */}
-                                        <div className="mb-4">
-                                            <p className="mb-2 text-xs font-semibold text-slate-600 uppercase">
-                                                Anggota
-                                            </p>
-                                            <div className="flex flex-wrap gap-2">
-                                                {group.members.map((member) => (
-                                                    <div
-                                                        key={member.id}
-                                                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5"
-                                                    >
-                                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-xs font-bold text-white">
-                                                            {member.name
-                                                                .charAt(0)
-                                                                .toUpperCase()}
+                        {expandedReflectionType === 'initial' && (
+                            <div className="border-t border-slate-100 bg-slate-50 px-6 py-4">
+                                {initialReflections.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {initialReflections.map(
+                                            (reflection) => (
+                                                <div
+                                                    key={`${reflection.user_id}-initial-${reflection.created_at}`}
+                                                    className="rounded-lg border border-green-200 bg-green-50 p-4"
+                                                >
+                                                    <div className="mb-2 flex items-center justify-between">
+                                                        <div>
+                                                            <p className="text-sm font-bold text-green-900">
+                                                                {
+                                                                    reflection.user_name
+                                                                }
+                                                            </p>
+                                                            <p className="text-xs text-green-700">
+                                                                Kelompok:{' '}
+                                                                {
+                                                                    reflection.group_name
+                                                                }
+                                                            </p>
                                                         </div>
-                                                        <span className="text-sm font-medium text-slate-700">
-                                                            {member.name}
-                                                        </span>
+                                                        <p className="text-xs text-green-600">
+                                                            {new Date(
+                                                                reflection.created_at,
+                                                            ).toLocaleDateString(
+                                                                'id-ID',
+                                                                {
+                                                                    day: 'numeric',
+                                                                    month: 'short',
+                                                                    year: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                },
+                                                            )}
+                                                        </p>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Initial Reflections */}
-                                        {initialReflections.length > 0 && (
-                                            <div className="mb-4">
-                                                <p className="mb-2 text-xs font-semibold text-slate-600 uppercase">
-                                                    🤔 Refleksi Awal (Tahap 1)
-                                                </p>
-                                                <div className="space-y-2">
-                                                    {initialReflections.map(
-                                                        (reflection) => (
-                                                            <div
-                                                                key={`${reflection.user_id}-initial`}
-                                                                className="rounded-lg border border-green-200 bg-green-50 p-3"
-                                                            >
-                                                                <p className="mb-1 text-xs font-semibold text-green-900">
-                                                                    {
-                                                                        reflection.user_name
-                                                                    }
-                                                                </p>
-                                                                <p className="text-sm text-green-800">
-                                                                    {
-                                                                        reflection.content
-                                                                    }
-                                                                </p>
-                                                                <p className="mt-1 text-xs text-green-600">
-                                                                    {new Date(
-                                                                        reflection.created_at,
-                                                                    ).toLocaleDateString(
-                                                                        'id-ID',
-                                                                        {
-                                                                            day: 'numeric',
-                                                                            month: 'short',
-                                                                            year: 'numeric',
-                                                                            hour: '2-digit',
-                                                                            minute: '2-digit',
-                                                                        },
-                                                                    )}
-                                                                </p>
-                                                            </div>
-                                                        ),
-                                                    )}
+                                                    <p className="text-sm text-green-800">
+                                                        {reflection.content}
+                                                    </p>
                                                 </div>
-                                            </div>
+                                            ),
                                         )}
-
-                                        {/* Final Reflections */}
-                                        {finalReflections.length > 0 && (
-                                            <div>
-                                                <p className="mb-2 text-xs font-semibold text-slate-600 uppercase">
-                                                    ✅ Refleksi Akhir (Tahap 5)
-                                                </p>
-                                                <div className="space-y-2">
-                                                    {finalReflections.map(
-                                                        (reflection) => (
-                                                            <div
-                                                                key={`${reflection.user_id}-final`}
-                                                                className="rounded-lg border border-blue-200 bg-blue-50 p-3"
-                                                            >
-                                                                <p className="mb-1 text-xs font-semibold text-blue-900">
-                                                                    {
-                                                                        reflection.user_name
-                                                                    }
-                                                                </p>
-                                                                <p className="text-sm text-blue-800">
-                                                                    {
-                                                                        reflection.content
-                                                                    }
-                                                                </p>
-                                                                <p className="mt-1 text-xs text-blue-600">
-                                                                    {new Date(
-                                                                        reflection.created_at,
-                                                                    ).toLocaleDateString(
-                                                                        'id-ID',
-                                                                        {
-                                                                            day: 'numeric',
-                                                                            month: 'short',
-                                                                            year: 'numeric',
-                                                                            hour: '2-digit',
-                                                                            minute: '2-digit',
-                                                                        },
-                                                                    )}
-                                                                </p>
-                                                            </div>
-                                                        ),
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Empty State */}
-                                        {group.reflections.length === 0 && (
-                                            <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
-                                                <span className="mb-2 block text-2xl">
-                                                    📝
-                                                </span>
-                                                <p className="text-sm text-slate-500">
-                                                    Belum ada refleksi dari
-                                                    kelompok ini
-                                                </p>
-                                            </div>
-                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+                                        <span className="mb-2 block text-2xl">
+                                            📝
+                                        </span>
+                                        <p className="text-sm text-slate-500">
+                                            Belum ada refleksi awal dari siswa
+                                        </p>
                                     </div>
                                 )}
                             </div>
-                        );
-                    })}
+                        )}
+                    </div>
+
+                    {/* Refleksi Akhir Accordion */}
+                    <div>
+                        <button
+                            onClick={() => toggleReflectionType('final')}
+                            className="flex w-full items-center justify-between px-6 py-4 text-left transition hover:bg-slate-50"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 font-bold text-white">
+                                    ✅
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-slate-800">
+                                        Refleksi Akhir (Tahap 5)
+                                    </p>
+                                    <p className="flex items-center gap-2 text-xs text-slate-500">
+                                        <MessageCircle className="h-3 w-3" />
+                                        <span>
+                                            {finalReflections.length} refleksi
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <ChevronDown
+                                className={cn(
+                                    'h-5 w-5 text-slate-400 transition-transform',
+                                    expandedReflectionType === 'final' &&
+                                        'rotate-180',
+                                )}
+                            />
+                        </button>
+
+                        {expandedReflectionType === 'final' && (
+                            <div className="border-t border-slate-100 bg-slate-50 px-6 py-4">
+                                {finalReflections.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {finalReflections.map((reflection) => (
+                                            <div
+                                                key={`${reflection.user_id}-final-${reflection.created_at}`}
+                                                className="rounded-lg border border-blue-200 bg-blue-50 p-4"
+                                            >
+                                                <div className="mb-2 flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-sm font-bold text-blue-900">
+                                                            {
+                                                                reflection.user_name
+                                                            }
+                                                        </p>
+                                                        <p className="text-xs text-blue-700">
+                                                            Kelompok:{' '}
+                                                            {
+                                                                reflection.group_name
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-xs text-blue-600">
+                                                        {new Date(
+                                                            reflection.created_at,
+                                                        ).toLocaleDateString(
+                                                            'id-ID',
+                                                            {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            },
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <p className="text-sm text-blue-800">
+                                                    {reflection.content}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+                                        <span className="mb-2 block text-2xl">
+                                            📝
+                                        </span>
+                                        <p className="text-sm text-slate-500">
+                                            Belum ada refleksi akhir dari siswa
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

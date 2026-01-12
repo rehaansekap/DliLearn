@@ -91,7 +91,7 @@ class TeacherMissionController extends Controller
                 'group_progress.status'
             )
             ->get()
-            ->map(function ($group) use ($mission) {
+            ->map(function ($group) use ($mission, $user) {
                 // Get group members
                 $members = DB::table('group_members')
                     ->join('users', 'group_members.user_id', '=', 'users.id')
@@ -122,15 +122,68 @@ class TeacherMissionController extends Controller
                     ->where('is_final', true)
                     ->first();
 
-                // Get reflections (initial and final) from all members
+                // Get likes count for this submission
+                $likesCount = 0;
+                if ($submission) {
+                    $likesCount = DB::table('likes')
+                        ->where('submission_id', $submission->id)
+                        ->count();
+                }
+
+                // Get grade from teacher (if exists)
+                $grade = null;
+                if ($submission) {
+                    $gradeRecord = DB::table('grades')
+                        ->where('submission_id', $submission->id)
+                        ->where('teacher_id', $user->id)
+                        ->first();
+
+                    if ($gradeRecord) {
+                        $grade = [
+                            'score' => $gradeRecord->score,
+                            'teacher_notes' => $gradeRecord->teacher_notes,
+                        ];
+                    }
+                }
+
+                // Get feedbacks for this submission
+                $feedbacks = [];
+                if ($submission) {
+                    $feedbacks = DB::table('feedbacks')
+                        ->join('users', 'feedbacks.user_id', '=', 'users.id')
+                        ->join('group_members', 'users.id', '=', 'group_members.user_id')
+                        ->join('groups', 'group_members.group_id', '=', 'groups.id')
+                        ->where('feedbacks.submission_id', $submission->id)
+                        ->select(
+                            'feedbacks.id',
+                            'users.name as user_name',
+                            'groups.name as group_name',
+                            'feedbacks.message',
+                            'feedbacks.created_at'
+                        )
+                        ->orderBy('feedbacks.created_at', 'desc')
+                        ->get()
+                        ->map(fn($f) => [
+                            'id' => $f->id,
+                            'user_name' => $f->user_name,
+                            'group_name' => $f->group_name,
+                            'message' => $f->message,
+                            'created_at' => $f->created_at,
+                        ])
+                        ->toArray();
+                }
+
+                // ✅ FIXED: Get reflections only from group members (keep existing per-group logic)
                 $reflections = DB::table('reflections')
                     ->join('users', 'reflections.user_id', '=', 'users.id')
                     ->join('group_members', 'users.id', '=', 'group_members.user_id')
+                    ->join('groups', 'group_members.group_id', '=', 'groups.id')
                     ->where('group_members.group_id', $group->group_id)
                     ->where('reflections.mission_id', $mission->id)
                     ->select(
                         'reflections.user_id',
                         'users.name as user_name',
+                        'groups.name as group_name',
                         'reflections.content',
                         'reflections.created_at',
                         'reflections.type'
@@ -139,6 +192,7 @@ class TeacherMissionController extends Controller
                     ->map(fn($r) => [
                         'user_id' => $r->user_id,
                         'user_name' => $r->user_name,
+                        'group_name' => $r->group_name,
                         'content' => $r->content,
                         'created_at' => $r->created_at,
                         'type' => $r->type ?? 'initial',
@@ -161,6 +215,57 @@ class TeacherMissionController extends Controller
                     'file_path' => $submission->file_path ?? null,
                     'code_answer' => $submission->code_answer ?? null,
                     'submitted_at' => $submission->submitted_at ?? null,
+                    'submission_id' => $submission->id ?? null,
+                    'likes_count' => $likesCount,
+                    'feedbacks' => $feedbacks,
+                    'grade' => $grade,
+                ];
+            })
+            ->toArray();
+
+        // ✅ NEW: Get ALL reflections from students in this classroom for this mission
+        // (including students who don't have groups yet)
+        $allReflectionsForMission = DB::table('reflections')
+            ->join('users', 'reflections.user_id', '=', 'users.id')
+            ->join('classroom_user', 'users.id', '=', 'classroom_user.user_id')
+            ->leftJoin('group_members', 'users.id', '=', 'group_members.user_id')
+            ->leftJoin('groups', 'group_members.group_id', '=', 'groups.id')
+            ->where('classroom_user.classroom_id', $mission->classroom_id)
+            ->where('reflections.mission_id', $mission->id)
+            ->select(
+                'reflections.user_id',
+                'users.name as user_name',
+                DB::raw('COALESCE(groups.name, "Belum Ada Kelompok") as group_name'),
+                'reflections.content',
+                'reflections.created_at',
+                'reflections.type'
+            )
+            ->orderBy('reflections.created_at', 'desc')
+            ->get()
+            ->map(fn($r) => [
+                'user_id' => $r->user_id,
+                'user_name' => $r->user_name,
+                'group_name' => $r->group_name,
+                'content' => $r->content,
+                'created_at' => $r->created_at,
+                'type' => $r->type ?? 'initial',
+            ])
+            ->toArray();
+
+        // Get vote results (Best Group)
+        $voteResults = DB::table('best_group_votes')
+            ->select('voted_group_id', DB::raw('count(*) as vote_count'))
+            ->where('mission_id', $mission->id)
+            ->groupBy('voted_group_id')
+            ->orderByDesc('vote_count')
+            ->get()
+            ->map(function ($vote) {
+                $group = DB::table('groups')->where('id', $vote->voted_group_id)->first();
+                return [
+                    'group_id' => $vote->voted_group_id,
+                    'group_name' => $group->name ?? 'Unknown',
+                    'group_code' => $group->group_code ?? null,
+                    'vote_count' => $vote->vote_count,
                 ];
             })
             ->toArray();
@@ -186,6 +291,8 @@ class TeacherMissionController extends Controller
             'students' => $students,
             'groups' => $groups,
             'groupsMonitoring' => $groupsMonitoring,
+            'allReflections' => $allReflectionsForMission, // ✅ NEW: Semua refleksi (termasuk yang belum punya kelompok)
+            'voteResults' => $voteResults,
             'initialAttendance' => DB::table('attendances')
                 ->where('mission_id', $mission->id)
                 ->select('user_id', 'is_present')
@@ -199,6 +306,38 @@ class TeacherMissionController extends Controller
                 'notStartedGroups' => $notStartedGroups,
             ],
         ]);
+    }
+
+    /**
+     * Save or update grade for a submission
+     */
+    public function saveGrade(Request $request, $submissionId)
+    {
+        $validated = $request->validate([
+            'score' => 'required|integer|min:0|max:100',
+            'teacher_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $user = Auth::user();
+
+        DB::table('grades')->updateOrInsert(
+            [
+                'submission_id' => $submissionId,
+                'teacher_id' => $user->id,
+            ],
+            [
+                'score' => $validated['score'],
+                'teacher_notes' => $validated['teacher_notes'] ?? null,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json(['ok' => true, 'score' => $validated['score']]);
+        }
+
+        return redirect()->back()->with('success', 'Nilai berhasil disimpan!');
     }
 
     public function saveAttendance(Request $request, $missionId)

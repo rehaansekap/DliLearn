@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('tea
     Route::get('/mission/{slug}', [TeacherMissionController::class, 'show'])->name('mission.show');
     Route::post('/mission/{mission}/attendance', [TeacherMissionController::class, 'saveAttendance'])->name('mission.attendance');
     Route::post('/mission/{mission}/update-groups', [TeacherMissionController::class, 'updateGroups'])->name('mission.update-groups');
+    Route::post('/submission/{submission}/grade', [TeacherMissionController::class, 'saveGrade'])->name('submission.grade');
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {

@@ -44,6 +44,14 @@ interface Reflection {
     type: 'initial' | 'final';
 }
 
+interface Feedback {
+    id: number;
+    user_name: string;
+    group_name: string;
+    message: string;
+    created_at: string;
+}
+
 interface GroupMonitoring extends Group {
     step1_status: 'locked' | 'in_progress' | 'completed';
     step2_status: 'locked' | 'in_progress' | 'completed';
@@ -55,6 +63,10 @@ interface GroupMonitoring extends Group {
     file_path?: string | null;
     code_answer?: string | null;
     submitted_at?: string | null;
+    submission_id?: number | null;
+    likes_count?: number;
+    feedbacks?: Feedback[];
+    grade?: Grade | null;
 }
 
 interface Stats {
@@ -62,6 +74,13 @@ interface Stats {
     completedGroups: number;
     inProgressGroups: number;
     notStartedGroups: number;
+}
+
+interface VoteResult {
+    group_id: number;
+    group_name: string;
+    group_code: string | null;
+    vote_count: number;
 }
 
 interface ShowProps {
@@ -72,8 +91,10 @@ interface ShowProps {
     students: Student[];
     groups: Group[];
     groupsMonitoring: GroupMonitoring[];
+    voteResults: VoteResult[];
     stats: Stats;
     initialAttendance?: { student_id: number; is_present: boolean }[];
+    allReflections?: Reflection[]; // ✅ NEW
 }
 
 export default function Show({
@@ -82,8 +103,10 @@ export default function Show({
     students,
     groups,
     groupsMonitoring,
+    voteResults,
     stats,
     initialAttendance = [],
+    allReflections = [],
 }: ShowProps) {
     const [activeTab, setActiveTab] = useState<
         'attendance' | 'groups' | 'monitoring'
@@ -201,6 +224,8 @@ export default function Show({
                         {activeTab === 'monitoring' && (
                             <TabMonitoring
                                 groups={groupsMonitoring}
+                                voteResults={voteResults}
+                                allReflections={allReflections} // ✅ NEW
                                 onViewSubmission={handleViewSubmission}
                             />
                         )}
@@ -224,6 +249,10 @@ export default function Show({
                         file_path: selectedSubmission.file_path || null,
                         code_answer: selectedSubmission.code_answer || null,
                         submitted_at: selectedSubmission.submitted_at || null,
+                        submission_id: selectedSubmission.submission_id || null,
+                        likes_count: selectedSubmission.likes_count,
+                        feedbacks: selectedSubmission.feedbacks || [],
+                        grade: selectedSubmission.grade || null,
                     }}
                 />
             )}
