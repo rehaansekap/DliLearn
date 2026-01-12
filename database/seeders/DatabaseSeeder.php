@@ -158,11 +158,7 @@ class DatabaseSeeder extends Seeder
             Grade::create([
                 'submission_id' => $sub->id,
                 'teacher_id' => $guru1->id,
-                'score_clarification' => rand(3, 4),
-                'score_assessment' => rand(3, 4),
-                'score_strategy' => rand(2, 4),
-                'score_conclusion' => 4,
-                'score_collaboration' => 4,
+                'score' => rand(5, 100),
                 'teacher_notes' => 'Kerja bagus, tapi perhatikan indentasi kode ya!',
             ]);
 
