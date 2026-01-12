@@ -121,19 +121,11 @@ export function TabAttendance({
                                 {/* Student Info */}
                                 <div className="flex items-center gap-4">
                                     <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white shadow-md">
-                                        {student.avatar ? (
-                                            <img
-                                                src={`/storage/${student.avatar}`}
-                                                alt={student.name}
-                                                className="h-full w-full object-cover"
-                                            />
-                                        ) : (
-                                            <span className="text-lg font-bold">
-                                                {student.name
-                                                    .charAt(0)
-                                                    .toUpperCase()}
-                                            </span>
-                                        )}
+                                        <span className="text-lg font-bold">
+                                            {student.name
+                                                .charAt(0)
+                                                .toUpperCase()}
+                                        </span>
                                     </div>
                                     <div>
                                         <p className="font-semibold text-slate-800">

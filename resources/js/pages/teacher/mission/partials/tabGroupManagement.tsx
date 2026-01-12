@@ -214,9 +214,9 @@ export function TabGroupManagement({
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
                 {/* Left: Unassigned Students */}
-                <div className="lg:col-span-1">
-                    <div className="rounded-2xl border border-slate-200 bg-white shadow-lg">
-                        <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="h-full lg:col-span-1">
+                    <div className="h-auto rounded-2xl border border-slate-200 bg-white shadow-lg">
+                        <div className="rounded-t-2xl border-b border-slate-200 bg-slate-50 px-4 py-3">
                             <h3 className="text-sm font-bold text-slate-800">
                                 📋 Siswa Belum Terkelompok
                             </h3>
@@ -224,9 +224,9 @@ export function TabGroupManagement({
                                 {unassignedStudents.length} siswa
                             </p>
                         </div>
-                        <div className="max-h-[600px] space-y-2 overflow-y-auto p-4">
+                        <div className="h-full max-h-[600px] space-y-2 p-4">
                             {unassignedStudents.length === 0 ? (
-                                <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+                                <div className="rounded-t-2xl border-2 border-dashed border-slate-200 p-6 text-center">
                                     <span className="mb-2 block text-3xl">
                                         ✅
                                     </span>
@@ -282,17 +282,9 @@ function StudentCard({
         <div className="group relative rounded-lg border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-300 hover:bg-indigo-50">
             <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-slate-400 to-slate-500 text-white shadow-md">
-                    {student.avatar ? (
-                        <img
-                            src={`/storage/${student.avatar}`}
-                            alt={student.name}
-                            className="h-full w-full object-cover"
-                        />
-                    ) : (
-                        <span className="text-sm font-bold">
-                            {student.name.charAt(0).toUpperCase()}
-                        </span>
-                    )}
+                    <span className="text-sm font-bold">
+                        {student.name.charAt(0).toUpperCase()}
+                    </span>
                 </div>
                 <div className="flex-1">
                     <p className="text-sm font-semibold text-slate-800">
@@ -358,7 +350,7 @@ function GroupCard({
 }) {
     return (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-lg">
-            <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-3">
+            <div className="rounded-t-2xl border-b border-slate-200 bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-3">
                 <h4 className="font-bold text-white">{group.group_name}</h4>
                 <p className="text-xs text-indigo-100">{group.group_code}</p>
             </div>
@@ -406,17 +398,9 @@ function MemberRow({
     return (
         <div className="group flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 transition hover:border-indigo-200 hover:bg-indigo-50">
             <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white shadow-sm">
-                {member.avatar ? (
-                    <img
-                        src={`/storage/${member.avatar}`}
-                        alt={member.name}
-                        className="h-full w-full object-cover"
-                    />
-                ) : (
-                    <span className="text-xs font-bold">
-                        {member.name.charAt(0).toUpperCase()}
-                    </span>
-                )}
+                <span className="text-xs font-bold">
+                    {member.name.charAt(0).toUpperCase()}
+                </span>
             </div>
 
             <div className="min-w-0 flex-1">
@@ -480,7 +464,7 @@ function MemberRow({
                 onClick={() => onRemove(groupId, member.id)}
                 aria-label={`Hapus ${member.name}`}
                 title={`Hapus ${member.name}`}
-                className="rounded-lg bg-red-100 p-1 text-red-600 opacity-0 transition group-hover:opacity-100 hover:bg-red-200"
+                className="rounded-lg bg-red-100 p-1 text-red-600 transition sm:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:hover:bg-red-200"
             >
                 <X className="h-4 w-4" />
             </button>
