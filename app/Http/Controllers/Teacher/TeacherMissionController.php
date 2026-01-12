@@ -8,6 +8,7 @@ use App\Models\Mission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -185,6 +186,12 @@ class TeacherMissionController extends Controller
             'students' => $students,
             'groups' => $groups,
             'groupsMonitoring' => $groupsMonitoring,
+            'initialAttendance' => DB::table('attendances')
+                ->where('mission_id', $mission->id)
+                ->select('user_id', 'is_present')
+                ->get()
+                ->map(fn($a) => ['student_id' => $a->user_id, 'is_present' => (bool) $a->is_present])
+                ->toArray(),
             'stats' => [
                 'totalGroups' => $totalGroups,
                 'completedGroups' => $completedGroups,
@@ -202,7 +209,35 @@ class TeacherMissionController extends Controller
             'attendance.*.is_present' => 'required|boolean',
         ]);
 
-        return redirect()->back()->with('success', 'Kehadiran berhasil disimpan!');
+        Log::info('saveAttendance payload', ['mission' => $missionId, 'attendance' => $validated]);
+
+        // optional: return JSON for debugging
+        if ($request->wantsJson()) {
+            return response()->json(['ok' => true, 'received' => $validated]);
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($validated['attendance'] as $att) {
+                DB::table('attendances')->updateOrInsert(
+                    [
+                        'mission_id' => $missionId,
+                        'user_id' => $att['student_id'],
+                    ],
+                    [
+                        'is_present' => (bool) $att['is_present'],
+                        'recorded_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Kehadiran berhasil disimpan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menyimpan kehadiran: ' . $e->getMessage());
+        }
     }
 
     public function updateGroups(Request $request, $missionId)

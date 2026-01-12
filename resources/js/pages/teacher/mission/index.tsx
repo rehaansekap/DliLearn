@@ -73,6 +73,7 @@ interface ShowProps {
     groups: Group[];
     groupsMonitoring: GroupMonitoring[];
     stats: Stats;
+    initialAttendance?: { student_id: number; is_present: boolean }[];
 }
 
 export default function Show({
@@ -82,6 +83,7 @@ export default function Show({
     groups,
     groupsMonitoring,
     stats,
+    initialAttendance = [],
 }: ShowProps) {
     const [activeTab, setActiveTab] = useState<
         'attendance' | 'groups' | 'monitoring'
@@ -184,6 +186,7 @@ export default function Show({
                             <TabAttendance
                                 students={students}
                                 missionId={mission.id}
+                                initialAttendance={initialAttendance}
                             />
                         )}
 

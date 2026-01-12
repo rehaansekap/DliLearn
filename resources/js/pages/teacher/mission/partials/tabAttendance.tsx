@@ -60,8 +60,10 @@ export function TabAttendance({
             {
                 onSuccess: () => {
                     setIsSaving(false);
+                    router.reload();
                 },
-                onError: () => {
+                onError: (errors) => {
+                    console.error('attendance errors', errors);
                     setIsSaving(false);
                 },
             },
