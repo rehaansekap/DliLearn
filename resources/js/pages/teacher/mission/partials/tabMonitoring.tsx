@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Eye, MessageCircle, Trophy } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -73,6 +74,7 @@ export function TabMonitoring({
     allReflections = [], // ✅ NEW
     onViewSubmission,
 }: TabMonitoringProps) {
+    const isMobile = useIsMobile(); // ✅ NEW
     // Combine votes with groups so we show all groups (vote_count defaults to 0)
     const voteMap = useMemo(() => {
         const m = new Map<number, number>();
@@ -160,6 +162,64 @@ export function TabMonitoring({
                             Belum ada siswa yang memberikan vote untuk kelompok
                             terbaik.
                         </p>
+                    </div>
+                ) : isMobile ? (
+                    // Mobile: horizontal scrollable cards for vote results
+                    <div className="p-4">
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                            {combinedResults.map((result, index) => {
+                                const isTop = index === 0;
+                                return (
+                                    <div
+                                        key={result.group_id}
+                                        className={cn(
+                                            'min-w-[180px] flex-shrink-0 rounded-2xl border px-4 py-3',
+                                            isTop
+                                                ? 'border-amber-200 bg-amber-50'
+                                                : 'border-slate-200 bg-white',
+                                        )}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p
+                                                    className={cn(
+                                                        'font-bold',
+                                                        isTop
+                                                            ? 'text-amber-900'
+                                                            : 'text-slate-800',
+                                                        // add text wrap
+                                                        'text-wrap break-words',
+                                                    )}
+                                                >
+                                                    {result.group_name}
+                                                </p>
+                                                <p className="text-[11px] text-slate-500">
+                                                    {result.group_code ||
+                                                        'No Code'}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p
+                                                    className={cn(
+                                                        'text-2xl font-black',
+                                                        isTop
+                                                            ? 'text-amber-700'
+                                                            : 'text-slate-700',
+                                                    )}
+                                                >
+                                                    {result.vote_count}
+                                                </p>
+                                                <p className="text-xs text-slate-500">
+                                                    {result.vote_count === 1
+                                                        ? 'vote'
+                                                        : 'votes'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 ) : (
                     <div className="divide-y divide-slate-200">
@@ -261,6 +321,54 @@ export function TabMonitoring({
                                 dipantau di sini.
                             </p>
                         </div>
+                    </div>
+                ) : isMobile ? (
+                    <div className="space-y-3 p-4">
+                        {groups.map((group) => (
+                            <div
+                                key={group.group_id}
+                                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"
+                            >
+                                <div>
+                                    <p className="font-semibold text-slate-800">
+                                        {group.group_name}
+                                    </p>
+                                    <p className="text-xs text-slate-500">
+                                        {group.group_code}
+                                    </p>
+                                    <div className="mt-2 flex gap-2">
+                                        {[
+                                            group.step1_status,
+                                            group.step2_status,
+                                            group.step3_status,
+                                            group.step4_status,
+                                            group.step5_status,
+                                        ].map((s, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex flex-col items-center"
+                                            >
+                                                <StatusDot status={s} />
+                                                <span className="mt-1 text-[10px] text-slate-400">
+                                                    T-{i + 1}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                    <button
+                                        onClick={() =>
+                                            onViewSubmission(group.group_id)
+                                        }
+                                        className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                        <span>Detail</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">

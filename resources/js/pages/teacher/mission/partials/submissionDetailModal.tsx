@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile'; // ✅ NEW
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { Heart, MessageCircle, Save, X } from 'lucide-react';
@@ -47,6 +48,7 @@ export function SubmissionDetailModal({
     onClose,
     submission,
 }: SubmissionDetailModalProps) {
+    const isMobile = useIsMobile();
     const [activeTab, setActiveTab] = useState<'code' | 'grade'>('code');
     const [score, setScore] = useState<number | undefined>(undefined);
     const [teacherNotes, setTeacherNotes] = useState<string | undefined>(
@@ -97,19 +99,55 @@ export function SubmissionDetailModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div
+            className={cn(
+                'fixed inset-0 z-50 bg-black/50',
+                isMobile
+                    ? 'flex flex-col'
+                    : 'flex items-center justify-center p-4',
+            )}
+        >
+            <div
+                className={cn(
+                    'relative bg-white shadow-2xl',
+                    isMobile
+                        ? 'flex h-full w-full flex-col overflow-hidden'
+                        : 'max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl',
+                )}
+            >
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-500 to-purple-500 p-6">
+                <div
+                    className={cn(
+                        'flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-500 to-purple-500',
+                        isMobile ? 'p-4' : 'p-6',
+                    )}
+                >
                     <div>
-                        <h3 className="text-xl font-bold text-white">
+                        <h3
+                            className={cn(
+                                'font-bold text-white',
+                                isMobile ? 'text-lg' : 'text-xl',
+                            )}
+                        >
                             {submission.group_name}
                         </h3>
-                        <p className="text-sm text-indigo-100">
+                        <p
+                            className={cn(
+                                'text-indigo-100',
+                                isMobile ? 'text-xs' : 'text-sm',
+                            )}
+                        >
                             {submission.group_code || 'No Code'}
                         </p>
                         {!hasSubmission && (
-                            <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white/90">
+                            <div
+                                className={cn(
+                                    'mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 font-semibold text-white/90',
+                                    isMobile
+                                        ? 'px-2 py-0.5 text-[10px]'
+                                        : 'px-3 py-1 text-xs',
+                                )}
+                            >
                                 <span>⌛</span>
                                 <span>Belum Dikumpulkan</span>
                             </div>
@@ -119,9 +157,12 @@ export function SubmissionDetailModal({
                         onClick={onClose}
                         title="Tutup"
                         aria-label="Tutup"
-                        className="rounded-full bg-white/20 p-2 text-white transition hover:bg-white/30"
+                        className={cn(
+                            'rounded-full bg-white/20 text-white transition hover:bg-white/30',
+                            isMobile ? 'p-1.5' : 'p-2',
+                        )}
                     >
-                        <X className="h-5 w-5" />
+                        <X className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
                         <span className="sr-only">Tutup</span>
                     </button>
                 </div>
@@ -131,7 +172,10 @@ export function SubmissionDetailModal({
                     <button
                         onClick={() => setActiveTab('code')}
                         className={cn(
-                            'flex-1 px-6 py-3 text-sm font-semibold transition',
+                            'flex-1 font-semibold transition',
+                            isMobile
+                                ? 'px-4 py-2 text-xs'
+                                : 'px-6 py-3 text-sm',
                             activeTab === 'code'
                                 ? 'border-b-2 border-indigo-500 bg-white text-indigo-600'
                                 : 'text-slate-600 hover:bg-slate-100',
@@ -142,7 +186,10 @@ export function SubmissionDetailModal({
                     <button
                         onClick={() => setActiveTab('grade')}
                         className={cn(
-                            'flex-1 px-6 py-3 text-sm font-semibold transition',
+                            'flex-1 font-semibold transition',
+                            isMobile
+                                ? 'px-4 py-2 text-xs'
+                                : 'px-6 py-3 text-sm',
                             !hasSubmission
                                 ? 'cursor-not-allowed text-slate-400 opacity-60'
                                 : activeTab === 'grade'
@@ -158,31 +205,71 @@ export function SubmissionDetailModal({
                 </div>
 
                 {/* Content */}
-                <div className="max-h-[calc(90vh-180px)] overflow-y-auto p-6">
+                <div
+                    className={cn(
+                        'overflow-y-auto',
+                        isMobile
+                            ? 'flex-1 p-4 pb-20'
+                            : 'max-h-[calc(90vh-180px)] p-6',
+                    )}
+                >
                     {activeTab === 'code' && (
-                        <div className="space-y-6">
+                        <div
+                            className={cn(isMobile ? 'space-y-4' : 'space-y-6')}
+                        >
                             {!hasSubmission ? (
                                 EmptySubmission
                             ) : (
                                 <>
                                     {/* Members */}
                                     <div>
-                                        <h4 className="mb-3 text-sm font-bold text-slate-700">
+                                        <h4
+                                            className={cn(
+                                                'font-bold text-slate-700',
+                                                isMobile
+                                                    ? 'mb-2 text-xs'
+                                                    : 'mb-3 text-sm',
+                                            )}
+                                        >
                                             👥 Anggota Kelompok
                                         </h4>
-                                        <div className="flex flex-wrap gap-3">
+                                        <div
+                                            className={cn(
+                                                'flex flex-wrap',
+                                                isMobile ? 'gap-2' : 'gap-3',
+                                            )}
+                                        >
                                             {submission.members.map(
                                                 (member) => (
                                                     <div
                                                         key={member.id}
-                                                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                                                        className={cn(
+                                                            'flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50',
+                                                            isMobile
+                                                                ? 'px-2 py-1'
+                                                                : 'px-3 py-2',
+                                                        )}
                                                     >
-                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-xs font-bold text-white">
+                                                        <div
+                                                            className={cn(
+                                                                'flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 font-bold text-white',
+                                                                isMobile
+                                                                    ? 'h-6 w-6 text-[10px]'
+                                                                    : 'h-8 w-8 text-xs',
+                                                            )}
+                                                        >
                                                             {member.name
                                                                 .charAt(0)
                                                                 .toUpperCase()}
                                                         </div>
-                                                        <span className="text-sm font-medium text-slate-700">
+                                                        <span
+                                                            className={cn(
+                                                                'font-medium text-slate-700',
+                                                                isMobile
+                                                                    ? 'text-xs'
+                                                                    : 'text-sm',
+                                                            )}
+                                                        >
                                                             {member.name}
                                                         </span>
                                                     </div>
@@ -192,17 +279,63 @@ export function SubmissionDetailModal({
                                     </div>
 
                                     {/* Likes & Feedbacks */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="rounded-xl border border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50 p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-md">
-                                                    <Heart className="h-6 w-6 fill-current" />
+                                    <div
+                                        className={cn(
+                                            'grid grid-cols-2',
+                                            isMobile ? 'gap-2' : 'gap-4',
+                                        )}
+                                    >
+                                        <div
+                                            className={cn(
+                                                'rounded-xl border border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50',
+                                                isMobile ? 'p-3' : 'p-4',
+                                            )}
+                                        >
+                                            <div
+                                                className={cn(
+                                                    'flex items-center',
+                                                    isMobile
+                                                        ? 'gap-2'
+                                                        : 'gap-3',
+                                                )}
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        'flex items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-md',
+                                                        isMobile
+                                                            ? 'h-10 w-10'
+                                                            : 'h-12 w-12',
+                                                    )}
+                                                >
+                                                    <Heart
+                                                        className={cn(
+                                                            'fill-current',
+                                                            isMobile
+                                                                ? 'h-5 w-5'
+                                                                : 'h-6 w-6',
+                                                        )}
+                                                    />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-slate-600">
+                                                    <p
+                                                        className={cn(
+                                                            'font-medium text-slate-600',
+                                                            isMobile
+                                                                ? 'text-xs'
+                                                                : 'text-sm',
+                                                        )}
+                                                    >
                                                         Total Likes
                                                     </p>
-                                                    <p className="text-2xl font-black text-pink-700">
+                                                    <p
+                                                        className={cn(
+                                                            'font-black text-pink-700',
+                                                            isMobile
+                                                                ? 'text-xl'
+                                                                : 'text-2xl',
+                                                        )}
+                                                    >
+                                                        {' '}
                                                         {submission.likes_count ??
                                                             0}
                                                     </p>
@@ -211,16 +344,55 @@ export function SubmissionDetailModal({
                                         </div>
 
                                         {/* Feedbacks Count / Placeholder */}
-                                        <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md">
-                                                    <MessageCircle className="h-6 w-6" />
+                                        <div
+                                            className={cn(
+                                                'rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50',
+                                                isMobile ? 'p-3' : 'p-4',
+                                            )}
+                                        >
+                                            <div
+                                                className={cn(
+                                                    'flex items-center',
+                                                    isMobile
+                                                        ? 'gap-2'
+                                                        : 'gap-3',
+                                                )}
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        'flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md',
+                                                        isMobile
+                                                            ? 'h-10 w-10'
+                                                            : 'h-12 w-12',
+                                                    )}
+                                                >
+                                                    <MessageCircle
+                                                        className={cn(
+                                                            isMobile
+                                                                ? 'h-5 w-5'
+                                                                : 'h-6 w-6',
+                                                        )}
+                                                    />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-slate-600">
+                                                    <p
+                                                        className={cn(
+                                                            'font-medium text-slate-600',
+                                                            isMobile
+                                                                ? 'text-xs'
+                                                                : 'text-sm',
+                                                        )}
+                                                    >
                                                         Total Feedback
                                                     </p>
-                                                    <p className="text-2xl font-black text-blue-700">
+                                                    <p
+                                                        className={cn(
+                                                            'font-black text-blue-700',
+                                                            isMobile
+                                                                ? 'text-xl'
+                                                                : 'text-2xl',
+                                                        )}
+                                                    >
                                                         {submission.feedbacks
                                                             ?.length ?? 0}
                                                     </p>
@@ -292,27 +464,66 @@ export function SubmissionDetailModal({
 
                                     {/* Feedbacks List or empty placeholder */}
                                     <div>
-                                        <h4 className="mb-3 text-sm font-bold text-slate-700">
+                                        <h4
+                                            className={cn(
+                                                'font-bold text-slate-700',
+                                                isMobile
+                                                    ? 'mb-2 text-xs'
+                                                    : 'mb-3 text-sm',
+                                            )}
+                                        >
                                             💬 Feedback dari Siswa (
                                             {submission.feedbacks?.length ?? 0})
                                         </h4>
                                         {submission.feedbacks &&
                                         submission.feedbacks.length > 0 ? (
-                                            <div className="space-y-3">
+                                            <div
+                                                className={cn(
+                                                    isMobile
+                                                        ? 'space-y-2'
+                                                        : 'space-y-3',
+                                                )}
+                                            >
                                                 {submission.feedbacks.map(
                                                     (feedback) => (
                                                         <div
                                                             key={feedback.id}
-                                                            className="rounded-xl border border-blue-200 bg-blue-50 p-4"
+                                                            className={cn(
+                                                                'rounded-xl border border-blue-200 bg-blue-50',
+                                                                isMobile
+                                                                    ? 'p-3'
+                                                                    : 'p-4',
+                                                            )}
                                                         >
-                                                            <div className="mb-2 flex items-center gap-2">
-                                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 text-sm font-bold text-white">
+                                                            <div
+                                                                className={cn(
+                                                                    'flex items-center gap-2',
+                                                                    isMobile
+                                                                        ? 'mb-1.5'
+                                                                        : 'mb-2',
+                                                                )}
+                                                            >
+                                                                <div
+                                                                    className={cn(
+                                                                        'flex items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 font-bold text-white',
+                                                                        isMobile
+                                                                            ? 'h-6 w-6 text-[10px]'
+                                                                            : 'h-8 w-8 text-sm',
+                                                                    )}
+                                                                >
                                                                     {feedback.user_name.charAt(
                                                                         0,
                                                                     )}
                                                                 </div>
                                                                 <div>
-                                                                    <p className="text-sm font-bold text-blue-900">
+                                                                    <p
+                                                                        className={cn(
+                                                                            'text-blue-800',
+                                                                            isMobile
+                                                                                ? 'text-xs'
+                                                                                : 'text-sm',
+                                                                        )}
+                                                                    >
                                                                         {
                                                                             feedback.user_name
                                                                         }
@@ -330,7 +541,14 @@ export function SubmissionDetailModal({
                                                                     feedback.message
                                                                 }
                                                             </p>
-                                                            <p className="mt-2 text-xs text-blue-600">
+                                                            <p
+                                                                className={cn(
+                                                                    'text-blue-600',
+                                                                    isMobile
+                                                                        ? 'mt-1 text-[10px]'
+                                                                        : 'mt-2 text-xs',
+                                                                )}
+                                                            >
                                                                 {new Date(
                                                                     feedback.created_at,
                                                                 ).toLocaleDateString(
@@ -381,20 +599,60 @@ export function SubmissionDetailModal({
                             )}
                         </div>
                     )}
-
                     {activeTab === 'grade' && (
-                        <div className="space-y-6">
+                        <div
+                            className={cn(isMobile ? 'space-y-4' : 'space-y-6')}
+                        >
                             {/* Grade Form */}
-                            <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-6">
-                                <div className="mb-4 flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 text-white shadow-md">
-                                        <span className="text-2xl">⭐</span>
+                            <div
+                                className={cn(
+                                    'rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50',
+                                    isMobile ? 'p-4' : 'p-6',
+                                )}
+                            >
+                                <div
+                                    className={cn(
+                                        'flex items-center gap-3',
+                                        isMobile ? 'mb-3' : 'mb-4',
+                                    )}
+                                >
+                                    <div
+                                        className={cn(
+                                            'flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 text-white shadow-md',
+                                            isMobile
+                                                ? 'h-10 w-10'
+                                                : 'h-12 w-12',
+                                        )}
+                                    >
+                                        <span
+                                            className={cn(
+                                                isMobile
+                                                    ? 'text-xl'
+                                                    : 'text-2xl',
+                                            )}
+                                        >
+                                            ⭐
+                                        </span>
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-bold text-slate-800">
+                                        <h4
+                                            className={cn(
+                                                'font-bold text-slate-800',
+                                                isMobile
+                                                    ? 'text-base'
+                                                    : 'text-lg',
+                                            )}
+                                        >
                                             Berikan Nilai
                                         </h4>
-                                        <p className="text-sm text-slate-600">
+                                        <p
+                                            className={cn(
+                                                'text-slate-600',
+                                                isMobile
+                                                    ? 'text-xs'
+                                                    : 'text-sm',
+                                            )}
+                                        >
                                             Nilai (0-100) dan catatan untuk
                                             kelompok ini
                                         </p>
@@ -402,8 +660,15 @@ export function SubmissionDetailModal({
                                 </div>
 
                                 {/* Score Input */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block text-sm font-bold text-slate-700">
+                                <div className={cn(isMobile ? 'mb-3' : 'mb-4')}>
+                                    <label
+                                        className={cn(
+                                            'block font-bold text-slate-700',
+                                            isMobile
+                                                ? 'mb-1.5 text-xs'
+                                                : 'mb-2 text-sm',
+                                        )}
+                                    >
                                         Nilai (0-100)
                                     </label>
                                     <input
@@ -426,18 +691,37 @@ export function SubmissionDetailModal({
                                                 ),
                                             )
                                         }
-                                        className="w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-2xl font-bold text-slate-800 transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none"
+                                        className={cn(
+                                            'w-full rounded-xl border-2 border-slate-300 font-bold text-slate-800 transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none',
+                                            isMobile
+                                                ? 'px-3 py-2 text-xl'
+                                                : 'px-4 py-3 text-2xl',
+                                        )}
                                         placeholder="85"
                                     />
-                                    <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                                    <div
+                                        className={cn(
+                                            'flex items-center justify-between text-slate-500',
+                                            isMobile
+                                                ? 'mt-1 text-[10px]'
+                                                : 'mt-2 text-xs',
+                                        )}
+                                    >
                                         <span>Minimum: 0</span>
                                         <span>Maximum: 100</span>
                                     </div>
                                 </div>
 
                                 {/* Teacher Notes */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block text-sm font-bold text-slate-700">
+                                <div className={cn(isMobile ? 'mb-3' : 'mb-4')}>
+                                    <label
+                                        className={cn(
+                                            'block font-bold text-slate-700',
+                                            isMobile
+                                                ? 'mb-1.5 text-xs'
+                                                : 'mb-2 text-sm',
+                                        )}
+                                    >
                                         Catatan Guru (Opsional)
                                     </label>
                                     <textarea
@@ -450,10 +734,22 @@ export function SubmissionDetailModal({
                                             setTeacherNotes(e.target.value)
                                         }
                                         placeholder="Berikan feedback konstruktif untuk kelompok..."
-                                        rows={4}
-                                        className="w-full resize-none rounded-xl border-2 border-slate-300 px-4 py-3 text-sm text-slate-700 transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none"
+                                        rows={isMobile ? 3 : 4}
+                                        className={cn(
+                                            'w-full resize-none rounded-xl border-2 border-slate-300 text-slate-700 transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none',
+                                            isMobile
+                                                ? 'px-3 py-2 text-xs'
+                                                : 'px-4 py-3 text-sm',
+                                        )}
                                     />
-                                    <p className="mt-1 text-xs text-slate-500">
+                                    <p
+                                        className={cn(
+                                            'text-slate-500',
+                                            isMobile
+                                                ? 'mt-1 text-[10px]'
+                                                : 'mt-1 text-xs',
+                                        )}
+                                    >
                                         {
                                             (
                                                 teacherNotes ??
@@ -467,52 +763,53 @@ export function SubmissionDetailModal({
                                 </div>
 
                                 {/* Save Button */}
-                                <button
-                                    onClick={handleSaveGrade}
-                                    disabled={isSaving || !hasSubmission}
-                                    className={cn(
-                                        'inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white shadow-lg transition',
-                                        !hasSubmission
-                                            ? 'cursor-not-allowed bg-slate-200 text-slate-500'
-                                            : 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700',
-                                    )}
-                                >
-                                    {isSaving ? (
-                                        <>
-                                            <svg
-                                                className="h-5 w-5 animate-spin"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <circle
-                                                    className="opacity-25"
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                />
-                                                <path
-                                                    className="opacity-75"
-                                                    fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                />
-                                            </svg>
-                                            <span>Menyimpan...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save className="h-5 w-5" />
-                                            <span>Simpan Nilai</span>
-                                            <span>
-                                                {!hasSubmission
-                                                    ? 'Tidak Tersedia'
-                                                    : 'Simpan Nilai'}
-                                            </span>
-                                        </>
-                                    )}
-                                </button>
+                                {!isMobile && (
+                                    <button
+                                        onClick={handleSaveGrade}
+                                        disabled={isSaving || !hasSubmission}
+                                        className={cn(
+                                            'inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white shadow-lg transition',
+                                            !hasSubmission
+                                                ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+                                                : 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700',
+                                        )}
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <svg
+                                                    className="h-5 w-5 animate-spin"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <circle
+                                                        className="opacity-25"
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                        stroke="currentColor"
+                                                        strokeWidth="4"
+                                                    />
+                                                    <path
+                                                        className="opacity-75"
+                                                        fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                    />
+                                                </svg>
+                                                <span>Menyimpan...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="h-5 w-5" />
+                                                <span>
+                                                    {!hasSubmission
+                                                        ? 'Tidak Tersedia'
+                                                        : 'Simpan Nilai'}
+                                                </span>
+                                            </>
+                                        )}
+                                    </button>
+                                )}
                             </div>
 
                             {/* Current Grade Display (if exists) */}
@@ -561,6 +858,31 @@ export function SubmissionDetailModal({
                         </div>
                     )}
                 </div>
+                
+                {/* Mobile Sticky Save Button (only on Grade tab) */}
+                {isMobile && activeTab === 'grade' && hasSubmission && (
+                    <div className="fixed inset-x-0 bottom-0 z-50 bg-white/90 p-3 backdrop-blur-sm sm:hidden">
+                        <div className="mx-auto max-w-3xl">
+                            <button
+                                onClick={handleSaveGrade}
+                                disabled={isSaving}
+                                className={cn(
+                                    'w-full rounded-xl px-4 py-3 font-semibold text-white shadow-lg transition',
+                                    'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 disabled:cursor-not-allowed disabled:opacity-50',
+                                )}
+                            >
+                                {isSaving ? (
+                                    'Menyimpan...'
+                                ) : (
+                                    <>
+                                        <Save className="mr-2 inline h-4 w-4" />
+                                        <span>Simpan Nilai</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
