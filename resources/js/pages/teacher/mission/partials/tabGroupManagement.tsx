@@ -179,6 +179,20 @@ export function TabGroupManagement({
 
     // Save changes
     const handleSave = () => {
+        const extractErrorMessage = (err: unknown): string | null => {
+            if (!err) return null;
+            if (typeof err === 'string') return err;
+            if (Array.isArray(err)) return err.join('; ');
+            if (typeof err === 'object') {
+                // validation errors object from server
+                for (const v of Object.values(err)) {
+                    if (typeof v === 'string') return v;
+                    if (Array.isArray(v) && v.length > 0) return v[0];
+                }
+            }
+            return null;
+        };
+
         setIsSaving(true);
 
         const payload = groups.map((group) => ({
@@ -195,11 +209,33 @@ export function TabGroupManagement({
             `/teacher/mission/${missionId}/update-groups`,
             { groups: payload },
             {
-                onSuccess: () => {
+                onSuccess: async () => {
                     setIsSaving(false);
+                    const SwalModule = await import('sweetalert2');
+                    await import('sweetalert2/dist/sweetalert2.min.css');
+                    await SwalModule.default.fire({
+                        icon: 'success',
+                        title: 'Kelompok Diperbarui',
+                        text: 'Perubahan kelompok berhasil disimpan.',
+                        timer: 1400,
+                        showConfirmButton: false,
+                        customClass: { popup: 'rounded-xl' },
+                    });
                 },
-                onError: () => {
+                onError: async (errors) => {
+                    console.error('update-groups errors', errors);
                     setIsSaving(false);
+                    const SwalModule = await import('sweetalert2');
+                    await import('sweetalert2/dist/sweetalert2.min.css');
+                    const message =
+                        extractErrorMessage(errors) ||
+                        'Gagal memperbarui kelompok. Coba lagi.';
+                    await SwalModule.default.fire({
+                        icon: 'error',
+                        title: 'Gagal Memperbarui',
+                        text: message,
+                        customClass: { popup: 'rounded-xl' },
+                    });
                 },
             },
         );
@@ -208,26 +244,28 @@ export function TabGroupManagement({
     return (
         <div className="space-y-6">
             {/* Header Card */}
-            <div className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-2xl shadow-lg">
+            <div className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-6">
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-xl shadow-lg sm:h-14 sm:w-14 sm:text-2xl">
                             👥
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-800">
+                            <h2 className="text-lg font-bold text-slate-800 sm:text-xl">
                                 Manajemen Kelompok
                             </h2>
-                            <p className="text-sm text-slate-600">
+                            <p className="text-xs text-slate-600 sm:text-sm">
                                 Atur pembagian kelompok dan role setiap anggota
                             </p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
+
+                    {/* Actions: stacked / full-width on mobile */}
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                         {groups.length === 0 ? (
                             <button
                                 onClick={() => setShowCreateDialog(true)}
-                                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:from-indigo-700 hover:to-purple-700"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:from-indigo-700 hover:to-purple-700"
                             >
                                 <Users className="h-4 w-4" />
                                 <span>Buat Kelompok</span>
@@ -237,20 +275,18 @@ export function TabGroupManagement({
                                 <button
                                     onClick={handleRandomize}
                                     disabled={isRandomizing}
-                                    className="inline-flex items-center gap-2 rounded-xl border border-purple-300 bg-white px-4 py-2 text-sm font-semibold text-purple-700 transition hover:bg-purple-50"
+                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-purple-300 bg-white px-4 py-2 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 sm:w-auto"
                                 >
                                     <Shuffle className="h-4 w-4" />
-                                    <span className="hidden sm:inline">
-                                        Acak Kelompok
-                                    </span>
+                                    <span>Acak Kelompok</span>
                                 </button>
                                 <button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:from-indigo-700 hover:to-purple-700"
+                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:from-indigo-700 hover:to-purple-700 sm:w-auto"
                                 >
                                     <Save className="h-4 w-4" />
-                                    <span className="hidden sm:inline">
+                                    <span>
                                         {isSaving
                                             ? 'Menyimpan...'
                                             : 'Simpan Perubahan'}
