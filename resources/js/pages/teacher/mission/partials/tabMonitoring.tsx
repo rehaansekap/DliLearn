@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ChevronDown, Eye, MessageCircle, Trophy } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface Student {
     id: number;
@@ -73,6 +73,31 @@ export function TabMonitoring({
     allReflections = [], // ✅ NEW
     onViewSubmission,
 }: TabMonitoringProps) {
+    // Combine votes with groups so we show all groups (vote_count defaults to 0)
+    const voteMap = useMemo(() => {
+        const m = new Map<number, number>();
+        voteResults.forEach((v) => m.set(v.group_id, v.vote_count));
+        return m;
+    }, [voteResults]);
+
+    const combinedResults = useMemo(
+        () =>
+            groups
+                .map((g) => ({
+                    group_id: g.group_id,
+                    group_name: g.group_name,
+                    group_code: g.group_code,
+                    vote_count: voteMap.get(g.group_id) ?? 0,
+                }))
+                .sort((a, b) => b.vote_count - a.vote_count),
+        [groups, voteMap],
+    );
+
+    const totalVotes = combinedResults.reduce(
+        (sum, r) => sum + r.vote_count,
+        0,
+    );
+
     // ✅ UPDATED: Gunakan allReflections dari props, bukan dari groups
     const [expandedReflectionType, setExpandedReflectionType] = useState<
         'initial' | 'final' | null
@@ -107,25 +132,38 @@ export function TabMonitoring({
                 </div>
             </div>
 
-            {/* Vote Results Section */}
-            {voteResults.length > 0 && (
-                <div className="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-lg">
-                    <div className="border-b border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-6 py-4">
-                        <div className="flex items-center gap-3">
-                            <Trophy className="h-6 w-6 text-amber-600" />
-                            <div>
-                                <h3 className="text-lg font-bold text-slate-800">
-                                    🏆 Hasil Voting Kelompok Terbaik
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Berdasarkan vote dari seluruh siswa
-                                </p>
-                            </div>
+            {/* Vote Results Section - now shows all groups + empty state */}
+            <div className="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-lg">
+                <div className="border-b border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <Trophy className="h-6 w-6 text-amber-600" />
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800">
+                                🏆 Hasil Voting Kelompok
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                Ringkasan vote per kelompok
+                            </p>
                         </div>
                     </div>
+                </div>
 
+                {totalVotes === 0 ? (
+                    <div className="p-6 text-center">
+                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-50">
+                            <span className="text-2xl">🗳️</span>
+                        </div>
+                        <p className="mb-1 text-lg font-semibold text-slate-800">
+                            Belum Ada Vote
+                        </p>
+                        <p className="text-sm text-slate-500">
+                            Belum ada siswa yang memberikan vote untuk kelompok
+                            terbaik.
+                        </p>
+                    </div>
+                ) : (
                     <div className="divide-y divide-slate-200">
-                        {voteResults.map((result, index) => {
+                        {combinedResults.map((result, index) => {
                             const isWinner = index === 0;
                             return (
                                 <div
@@ -137,7 +175,6 @@ export function TabMonitoring({
                                     )}
                                 >
                                     <div className="flex items-center gap-4">
-                                        {/* Rank Badge */}
                                         <div
                                             className={cn(
                                                 'flex h-12 w-12 items-center justify-center rounded-full font-black text-white shadow-md',
@@ -159,7 +196,6 @@ export function TabMonitoring({
                                                     : index + 1}
                                         </div>
 
-                                        {/* Group Info */}
                                         <div>
                                             <p
                                                 className={cn(
@@ -176,7 +212,6 @@ export function TabMonitoring({
                                         </div>
                                     </div>
 
-                                    {/* Vote Count */}
                                     <div className="text-right">
                                         <p
                                             className={cn(
@@ -198,8 +233,8 @@ export function TabMonitoring({
                             );
                         })}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Progress Matrix Table */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
@@ -212,112 +247,131 @@ export function TabMonitoring({
                     </p>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-600 uppercase">
-                                    Kelompok
-                                </th>
-                                {stepLabels.map((label, idx) => (
-                                    <th
-                                        key={idx}
-                                        className="px-6 py-3 text-center text-xs font-semibold tracking-wider text-slate-600 uppercase"
-                                    >
-                                        <div className="flex flex-col items-center gap-1">
-                                            <span>T-{idx + 1}</span>
-                                            <span className="text-[10px] font-normal text-slate-400">
-                                                {label}
-                                            </span>
-                                        </div>
+                {groups.length === 0 ? (
+                    <div className="flex min-h-[240px] items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8">
+                        <div className="text-center">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
+                                <span className="text-2xl">👥</span>
+                            </div>
+                            <h4 className="mb-2 text-lg font-bold text-slate-700">
+                                Belum Ada Kelompok
+                            </h4>
+                            <p className="text-sm text-slate-500">
+                                Buat kelompok terlebih dahulu agar progress bisa
+                                dipantau di sini.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-600 uppercase">
+                                        Kelompok
                                     </th>
-                                ))}
-                                <th className="px-6 py-3 text-center text-xs font-semibold tracking-wider text-slate-600 uppercase">
-                                    Aksi
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {groups.map((group) => (
-                                <tr
-                                    key={group.group_id}
-                                    className="hover:bg-slate-50"
-                                >
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 font-bold text-white shadow-md">
-                                                {group.group_name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-slate-800">
-                                                    {group.group_name}
-                                                </p>
-                                                <p className="text-xs text-slate-500">
-                                                    {group.group_code}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex justify-center">
-                                            <StatusDot
-                                                status={group.step1_status}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex justify-center">
-                                            <StatusDot
-                                                status={group.step2_status}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex justify-center">
-                                            <StatusDot
-                                                status={group.step3_status}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex justify-center">
-                                            <StatusDot
-                                                status={group.step4_status}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex justify-center">
-                                            <StatusDot
-                                                status={group.step5_status}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <button
-                                            onClick={() =>
-                                                onViewSubmission(group.group_id)
-                                            }
-                                            className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                                    {stepLabels.map((label, idx) => (
+                                        <th
+                                            key={idx}
+                                            className="px-6 py-3 text-center text-xs font-semibold tracking-wider text-slate-600 uppercase"
                                         >
-                                            <Eye className="h-4 w-4" />
-                                            <span>Detail</span>
-                                        </button>
-                                    </td>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span>T-{idx + 1}</span>
+                                                <span className="text-[10px] font-normal text-slate-400">
+                                                    {label}
+                                                </span>
+                                            </div>
+                                        </th>
+                                    ))}
+                                    <th className="px-6 py-3 text-center text-xs font-semibold tracking-wider text-slate-600 uppercase">
+                                        Aksi
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200">
+                                {groups.map((group) => (
+                                    <tr
+                                        key={group.group_id}
+                                        className="hover:bg-slate-50"
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 font-bold text-white shadow-md">
+                                                    {group.group_name.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-slate-800">
+                                                        {group.group_name}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500">
+                                                        {group.group_code}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center">
+                                                <StatusDot
+                                                    status={group.step1_status}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center">
+                                                <StatusDot
+                                                    status={group.step2_status}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center">
+                                                <StatusDot
+                                                    status={group.step3_status}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center">
+                                                <StatusDot
+                                                    status={group.step4_status}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center">
+                                                <StatusDot
+                                                    status={group.step5_status}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <button
+                                                onClick={() =>
+                                                    onViewSubmission(
+                                                        group.group_id,
+                                                    )
+                                                }
+                                                className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                                <span>Detail</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {/* ✅ Reflection Log (Accordion per-tipe) */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-                <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4">
-                    <h3 className="text-lg font-bold text-slate-800">
+                <div className="border-b border-slate-200 bg-indigo-600 px-6 py-4">
+                    <h3 className="text-white-800 text-lg font-bold">
                         💬 Log Refleksi Siswa
                     </h3>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-white-300 text-sm">
                         Jawaban refleksi awal & akhir dari semua siswa
                     </p>
                 </div>

@@ -54,6 +54,23 @@ export function SubmissionDetailModal({
     );
     const [isSaving, setIsSaving] = useState(false);
 
+    const hasSubmission = Boolean(submission.submission_id);
+    // Helper empty state node
+    const EmptySubmission = (
+        <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
+                <span className="text-2xl">📭</span>
+            </div>
+            <h4 className="mb-1 text-lg font-semibold text-slate-800">
+                Belum Ada Submission
+            </h4>
+            <p className="text-sm text-slate-500">
+                Ketua kelompok belum mengumpulkan tugas akhir untuk kelompok
+                ini.
+            </p>
+        </div>
+    );
+
     if (!isOpen || !submission) return null;
 
     const handleSaveGrade = () => {
@@ -91,6 +108,12 @@ export function SubmissionDetailModal({
                         <p className="text-sm text-indigo-100">
                             {submission.group_code || 'No Code'}
                         </p>
+                        {!hasSubmission && (
+                            <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white/90">
+                                <span>⌛</span>
+                                <span>Belum Dikumpulkan</span>
+                            </div>
+                        )}
                     </div>
                     <button
                         onClick={onClose}
@@ -120,6 +143,11 @@ export function SubmissionDetailModal({
                         onClick={() => setActiveTab('grade')}
                         className={cn(
                             'flex-1 px-6 py-3 text-sm font-semibold transition',
+                            !hasSubmission
+                                ? 'cursor-not-allowed text-slate-400 opacity-60'
+                                : activeTab === 'grade'
+                                  ? 'border-b-2 border-indigo-500 bg-white text-indigo-600'
+                                  : 'text-slate-600 hover:bg-slate-100',
                             activeTab === 'grade'
                                 ? 'border-b-2 border-indigo-500 bg-white text-indigo-600'
                                 : 'text-slate-600 hover:bg-slate-100',
@@ -133,208 +161,223 @@ export function SubmissionDetailModal({
                 <div className="max-h-[calc(90vh-180px)] overflow-y-auto p-6">
                     {activeTab === 'code' && (
                         <div className="space-y-6">
-                            {/* Members */}
-                            <div>
-                                <h4 className="mb-3 text-sm font-bold text-slate-700">
-                                    👥 Anggota Kelompok
-                                </h4>
-                                <div className="flex flex-wrap gap-3">
-                                    {submission.members.map((member) => (
-                                        <div
-                                            key={member.id}
-                                            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                                        >
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-xs font-bold text-white">
-                                                {member.name
-                                                    .charAt(0)
-                                                    .toUpperCase()}
-                                            </div>
-                                            <span className="text-sm font-medium text-slate-700">
-                                                {member.name}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* ✅ NEW: Likes & Feedbacks Stats Row */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Likes Count */}
-                                {submission.likes_count !== undefined && (
-                                    <div className="rounded-xl border border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50 p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-md">
-                                                <Heart className="h-6 w-6 fill-current" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-slate-600">
-                                                    Total Likes
-                                                </p>
-                                                <p className="text-2xl font-black text-pink-700">
-                                                    {submission.likes_count}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Feedbacks Count */}
-                                {submission.feedbacks !== undefined && (
-                                    <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md">
-                                                <MessageCircle className="h-6 w-6" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-slate-600">
-                                                    Total Feedback
-                                                </p>
-                                                <p className="text-2xl font-black text-blue-700">
-                                                    {
-                                                        submission.feedbacks
-                                                            .length
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Flowchart/File */}
-                            {submission.file_path && (
-                                <div>
-                                    <h4 className="mb-3 text-sm font-bold text-slate-700">
-                                        📊 Flowchart / Dokumen
-                                    </h4>
-                                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                                        {submission.file_path.endsWith(
-                                            '.pdf',
-                                        ) ? (
-                                            <div className="flex items-center gap-3 p-4">
-                                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-500 text-white">
-                                                    <span className="text-xl">
-                                                        📄
-                                                    </span>
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-slate-700">
-                                                        PDF Document
-                                                    </p>
-                                                    <a
-                                                        href={`/storage/${submission.file_path}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-sm text-indigo-600 hover:underline"
-                                                    >
-                                                        Buka di Tab Baru →
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <img
-                                                src={`/storage/${submission.file_path}`}
-                                                alt="Flowchart"
-                                                className="w-full"
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Code Answer */}
-                            {submission.code_answer && (
-                                <div>
-                                    <h4 className="mb-3 text-sm font-bold text-slate-700">
-                                        💻 Source Code
-                                    </h4>
-                                    <div className="overflow-hidden rounded-xl border border-slate-300 bg-slate-900">
-                                        <div className="border-b border-slate-700 bg-slate-800 px-4 py-2">
-                                            <span className="text-xs font-medium text-slate-300">
-                                                Code
-                                            </span>
-                                        </div>
-                                        <pre className="overflow-x-auto p-4 text-sm text-green-400">
-                                            {submission.code_answer}
-                                        </pre>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ✅ NEW: Feedbacks List */}
-                            {submission.feedbacks &&
-                                submission.feedbacks.length > 0 && (
+                            {!hasSubmission ? (
+                                EmptySubmission
+                            ) : (
+                                <>
+                                    {/* Members */}
                                     <div>
                                         <h4 className="mb-3 text-sm font-bold text-slate-700">
-                                            💬 Feedback dari Siswa (
-                                            {submission.feedbacks.length})
+                                            👥 Anggota Kelompok
                                         </h4>
-                                        <div className="space-y-3">
-                                            {submission.feedbacks.map(
-                                                (feedback) => (
+                                        <div className="flex flex-wrap gap-3">
+                                            {submission.members.map(
+                                                (member) => (
                                                     <div
-                                                        key={feedback.id}
-                                                        className="rounded-xl border border-blue-200 bg-blue-50 p-4"
+                                                        key={member.id}
+                                                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
                                                     >
-                                                        <div className="mb-2 flex items-center gap-2">
-                                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 text-sm font-bold text-white">
-                                                                {feedback.user_name.charAt(
-                                                                    0,
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold text-blue-900">
-                                                                    {
-                                                                        feedback.user_name
-                                                                    }
-                                                                </p>
-                                                                <p className="text-xs text-blue-600">
-                                                                    dari{' '}
-                                                                    {
-                                                                        feedback.group_name
-                                                                    }
-                                                                </p>
-                                                            </div>
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-xs font-bold text-white">
+                                                            {member.name
+                                                                .charAt(0)
+                                                                .toUpperCase()}
                                                         </div>
-                                                        <p className="text-sm text-blue-800">
-                                                            {feedback.message}
-                                                        </p>
-                                                        <p className="mt-2 text-xs text-blue-600">
-                                                            {new Date(
-                                                                feedback.created_at,
-                                                            ).toLocaleDateString(
-                                                                'id-ID',
-                                                                {
-                                                                    day: 'numeric',
-                                                                    month: 'short',
-                                                                    year: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                },
-                                                            )}
-                                                        </p>
+                                                        <span className="text-sm font-medium text-slate-700">
+                                                            {member.name}
+                                                        </span>
                                                     </div>
                                                 ),
                                             )}
                                         </div>
                                     </div>
-                                )}
 
-                            {/* Submission Date */}
-                            {submission.submitted_at && (
-                                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                                    <p className="text-sm text-slate-600">
-                                        <span className="font-semibold">
-                                            Dikumpulkan pada:
-                                        </span>{' '}
-                                        {new Date(
-                                            submission.submitted_at,
-                                        ).toLocaleString('id-ID', {
-                                            dateStyle: 'long',
-                                            timeStyle: 'short',
-                                        })}
-                                    </p>
-                                </div>
+                                    {/* Likes & Feedbacks */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="rounded-xl border border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50 p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-md">
+                                                    <Heart className="h-6 w-6 fill-current" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-600">
+                                                        Total Likes
+                                                    </p>
+                                                    <p className="text-2xl font-black text-pink-700">
+                                                        {submission.likes_count ??
+                                                            0}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Feedbacks Count / Placeholder */}
+                                        <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md">
+                                                    <MessageCircle className="h-6 w-6" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-600">
+                                                        Total Feedback
+                                                    </p>
+                                                    <p className="text-2xl font-black text-blue-700">
+                                                        {submission.feedbacks
+                                                            ?.length ?? 0}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Flowchart/File */}
+                                    {submission.file_path ? (
+                                        <div>
+                                            <h4 className="mb-3 text-sm font-bold text-slate-700">
+                                                📊 Flowchart / Dokumen
+                                            </h4>
+                                            <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                                                {submission.file_path.endsWith(
+                                                    '.pdf',
+                                                ) ? (
+                                                    <div className="flex items-center gap-3 p-4">
+                                                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-500 text-white">
+                                                            <span className="text-xl">
+                                                                📄
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="font-medium text-slate-700">
+                                                                PDF Document
+                                                            </p>
+                                                            <a
+                                                                href={`/storage/${submission.file_path}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-sm text-indigo-600 hover:underline"
+                                                            >
+                                                                Buka di Tab Baru
+                                                                →
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <img
+                                                        src={`/storage/${submission.file_path}`}
+                                                        alt="Flowchart"
+                                                        className="w-full"
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : null}
+
+                                    {/* Code Answer */}
+                                    {submission.code_answer ? (
+                                        <div>
+                                            <h4 className="mb-3 text-sm font-bold text-slate-700">
+                                                💻 Source Code
+                                            </h4>
+                                            <div className="overflow-hidden rounded-xl border border-slate-300 bg-slate-900">
+                                                <div className="border-b border-slate-700 bg-slate-800 px-4 py-2">
+                                                    <span className="text-xs font-medium text-slate-300">
+                                                        Code
+                                                    </span>
+                                                </div>
+                                                <pre className="overflow-x-auto p-4 text-sm text-green-400">
+                                                    {submission.code_answer}
+                                                </pre>
+                                            </div>
+                                        </div>
+                                    ) : null}
+
+                                    {/* Feedbacks List or empty placeholder */}
+                                    <div>
+                                        <h4 className="mb-3 text-sm font-bold text-slate-700">
+                                            💬 Feedback dari Siswa (
+                                            {submission.feedbacks?.length ?? 0})
+                                        </h4>
+                                        {submission.feedbacks &&
+                                        submission.feedbacks.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {submission.feedbacks.map(
+                                                    (feedback) => (
+                                                        <div
+                                                            key={feedback.id}
+                                                            className="rounded-xl border border-blue-200 bg-blue-50 p-4"
+                                                        >
+                                                            <div className="mb-2 flex items-center gap-2">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 text-sm font-bold text-white">
+                                                                    {feedback.user_name.charAt(
+                                                                        0,
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-bold text-blue-900">
+                                                                        {
+                                                                            feedback.user_name
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-xs text-blue-600">
+                                                                        dari{' '}
+                                                                        {
+                                                                            feedback.group_name
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-sm text-blue-800">
+                                                                {
+                                                                    feedback.message
+                                                                }
+                                                            </p>
+                                                            <p className="mt-2 text-xs text-blue-600">
+                                                                {new Date(
+                                                                    feedback.created_at,
+                                                                ).toLocaleDateString(
+                                                                    'id-ID',
+                                                                    {
+                                                                        day: 'numeric',
+                                                                        month: 'short',
+                                                                        year: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                    },
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+                                                <span className="mb-2 block text-2xl">
+                                                    📝
+                                                </span>
+                                                <p className="text-sm text-slate-500">
+                                                    Belum ada feedback untuk
+                                                    karya ini
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Submission Date */}
+                                    {submission.submitted_at && (
+                                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                            <p className="text-sm text-slate-600">
+                                                <span className="font-semibold">
+                                                    Dikumpulkan pada:
+                                                </span>{' '}
+                                                {new Date(
+                                                    submission.submitted_at,
+                                                ).toLocaleString('id-ID', {
+                                                    dateStyle: 'long',
+                                                    timeStyle: 'short',
+                                                })}
+                                            </p>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}
@@ -426,8 +469,13 @@ export function SubmissionDetailModal({
                                 {/* Save Button */}
                                 <button
                                     onClick={handleSaveGrade}
-                                    disabled={isSaving}
-                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:from-amber-700 hover:to-yellow-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                    disabled={isSaving || !hasSubmission}
+                                    className={cn(
+                                        'inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white shadow-lg transition',
+                                        !hasSubmission
+                                            ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+                                            : 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700',
+                                    )}
                                 >
                                     {isSaving ? (
                                         <>
@@ -457,6 +505,11 @@ export function SubmissionDetailModal({
                                         <>
                                             <Save className="h-5 w-5" />
                                             <span>Simpan Nilai</span>
+                                            <span>
+                                                {!hasSubmission
+                                                    ? 'Tidak Tersedia'
+                                                    : 'Simpan Nilai'}
+                                            </span>
                                         </>
                                     )}
                                 </button>
