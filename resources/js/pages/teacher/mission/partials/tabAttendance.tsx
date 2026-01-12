@@ -50,7 +50,11 @@ export function TabAttendance({
         setAttendance(all);
     };
     const clearAll = () => {
-        setAttendance({});
+        const all: Record<number, boolean> = {};
+        students.forEach((s) => {
+            all[s.id] = false;
+        });
+        setAttendance(all);
     };
 
     const [isSaving, setIsSaving] = useState(false);
@@ -62,7 +66,7 @@ export function TabAttendance({
         }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const data = Object.entries(attendance).map(
             ([studentId, isPresent]) => ({
                 student_id: Number(studentId),
@@ -70,18 +74,53 @@ export function TabAttendance({
             }),
         );
 
+        const extractErrorMessage = (err: unknown): string | null => {
+            if (!err) return null;
+            if (typeof err === 'string') return err;
+            if (Array.isArray(err)) return err.join('; ');
+            if (typeof err === 'object') {
+                for (const v of Object.values(err)) {
+                    if (typeof v === 'string') return v;
+                    if (Array.isArray(v) && v.length > 0) return v[0];
+                }
+            }
+            return null;
+        };
+
         setIsSaving(true);
+
         router.post(
             `/teacher/mission/${missionId}/attendance`,
             { attendance: data },
             {
-                onSuccess: () => {
+                onSuccess: async () => {
                     setIsSaving(false);
+                    const SwalModule = await import('sweetalert2');
+                    await import('sweetalert2/dist/sweetalert2.min.css');
+                    await SwalModule.default.fire({
+                        icon: 'success',
+                        title: 'Kehadiran Disimpan',
+                        text: 'Kehadiran berhasil disimpan.',
+                        timer: 1400,
+                        showConfirmButton: false,
+                        customClass: { popup: 'rounded-xl' },
+                    });
                     router.reload();
                 },
-                onError: (errors) => {
+                onError: async (errors) => {
                     console.error('attendance errors', errors);
                     setIsSaving(false);
+                    const SwalModule = await import('sweetalert2');
+                    await import('sweetalert2/dist/sweetalert2.min.css');
+                    const message =
+                        extractErrorMessage(errors) ||
+                        'Gagal menyimpan kehadiran. Coba lagi.';
+                    await SwalModule.default.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan',
+                        text: message,
+                        customClass: { popup: 'rounded-xl' },
+                    });
                 },
             },
         );
