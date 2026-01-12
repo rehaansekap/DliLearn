@@ -1,6 +1,7 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import TeacherLayout from '@/layouts/teacher-layout';
 import { User } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { AlertCircle, ArrowLeft, ArrowRight, Save } from 'lucide-react';
 import { useState } from 'react';
 import { MissionFormStepper } from './partials/missionFormStepper';
@@ -24,6 +25,7 @@ interface CreateProps {
 }
 
 export default function Create({ auth, classrooms, ownMissions }: CreateProps) {
+    const isMobile = useIsMobile();
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -174,26 +176,38 @@ export default function Create({ auth, classrooms, ownMissions }: CreateProps) {
 
             <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-5xl space-y-8">
-                    {/* Back Button */}
-                    <a
-                        href="/teacher/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-indigo-600"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span>Kembali ke Dashboard</span>
-                    </a>
-
                     {/* Page Title */}
                     <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 sm:p-8">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-3xl shadow-lg">
+                        {isMobile && (
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    href="/teacher/dashboard"
+                                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/70 backdrop-blur-sm transition hover:bg-purple-500/90"
+                                >
+                                    <ArrowLeft className="h-5 w-5 text-white" />
+                                </Link>
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
+                                    🎯
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                            <div className="hidden sm:flex">
+                                <Link
+                                    href="/teacher/dashboard"
+                                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/70 backdrop-blur-sm transition hover:bg-purple-500/90"
+                                >
+                                    <ArrowLeft className="h-5 w-5 text-white" />
+                                </Link>
+                            </div>
+                            <div className="mb-3 hidden h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:flex sm:h-16 sm:w-16 sm:text-3xl">
                                 🎯
                             </div>
                             <div>
-                                <h1 className="text-2xl font-black text-slate-800 sm:text-3xl">
+                                <h1 className="text-xl font-black text-slate-800 sm:text-3xl">
                                     Buat Misi Pembelajaran Baru
                                 </h1>
-                                <p className="mt-1 text-sm text-slate-600">
+                                <p className="mt-1 text-xs text-slate-600 sm:block sm:text-sm">
                                     Ikuti 4 langkah untuk merancang misi PBL
                                     yang menarik
                                 </p>

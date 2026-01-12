@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { AlertCircle, Calendar, ChevronDown, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -58,6 +59,7 @@ export function Step1BasicInfo({
     missions,
     onChange,
 }: Step1BasicInfoProps) {
+    const isMobile = useIsMobile();
     const [isClassroomOpen, setIsClassroomOpen] = useState(false);
     const [classroomQuery, setClassroomQuery] = useState('');
     const classroomDropdownRef = useRef<HTMLDivElement>(null);
@@ -133,16 +135,46 @@ export function Step1BasicInfo({
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6">
+            <div
+                className={cn(
+                    'rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50',
+                    isMobile ? 'p-4' : 'p-6',
+                )}
+            >
+                {isMobile && (
+                    <div
+                        className={cn(
+                            'flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg',
+                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                        )}
+                    >
+                        📝
+                    </div>
+                )}
                 <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg">
+                    <div
+                        className={cn(
+                            'hidden items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:flex',
+                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                        )}
+                    >
                         📝
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800">
+                        <h2
+                            className={cn(
+                                'font-bold text-slate-800',
+                                isMobile ? 'text-lg' : 'text-xl',
+                            )}
+                        >
                             Informasi Dasar Misi
                         </h2>
-                        <p className="text-sm text-slate-600">
+                        <p
+                            className={cn(
+                                'text-slate-600',
+                                isMobile ? 'text-xs' : 'text-sm',
+                            )}
+                        >
                             Tentukan judul, deskripsi, dan tingkat kesulitan
                             misi
                         </p>
@@ -151,7 +183,12 @@ export function Step1BasicInfo({
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
+            <div
+                className={cn(
+                    'space-y-6 rounded-2xl border border-slate-200 bg-white shadow-lg',
+                    isMobile ? 'p-4' : 'p-6',
+                )}
+            >
                 {/* Classroom Selection (styled like dashboard dropdown) */}
                 <div>
                     <label className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-700">

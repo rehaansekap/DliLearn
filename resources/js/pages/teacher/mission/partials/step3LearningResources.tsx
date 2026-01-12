@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import {
     AlertCircle,
@@ -23,6 +24,7 @@ export function Step3LearningResources({
     errors,
     onChange,
 }: Step3LearningResourcesProps) {
+    const isMobile = useIsMobile();
     const [isDragging, setIsDragging] = useState(false);
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -56,15 +58,40 @@ export function Step3LearningResources({
         <div className="space-y-6">
             {/* Header */}
             <div className="rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 p-6">
+                {isMobile && (
+                    <div
+                        className={cn(
+                            'flex items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 text-2xl shadow-lg',
+                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                        )}
+                    >
+                        🎬
+                    </div>
+                )}
                 <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 text-2xl shadow-lg">
+                    <div
+                        className={cn(
+                            'hidden items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 text-2xl shadow-lg sm:flex',
+                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                        )}
+                    >
                         📚
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800">
+                        <h2
+                            className={cn(
+                                'font-bold text-slate-800',
+                                isMobile ? 'text-lg' : 'text-xl',
+                            )}
+                        >
                             Materi & Resources (Tahap 3 PBL)
                         </h2>
-                        <p className="text-sm text-slate-600">
+                        <p
+                            className={cn(
+                                'text-slate-600',
+                                isMobile ? 'text-xs' : 'text-sm',
+                            )}
+                        >
                             Upload materi pembelajaran dan konfigurasi simulator
                         </p>
                     </div>

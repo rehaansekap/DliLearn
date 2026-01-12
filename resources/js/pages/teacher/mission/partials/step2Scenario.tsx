@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { AlertCircle, Video } from 'lucide-react';
 import { useMemo } from 'react';
@@ -20,6 +21,7 @@ function extractYoutubeVideoId(url: string): string | null {
 }
 
 export function Step2Scenario({ data, errors, onChange }: Step2ScenarioProps) {
+    const isMobile = useIsMobile();
     const videoId = useMemo(
         () => extractYoutubeVideoId(data.video_url),
         [data.video_url],
@@ -29,15 +31,40 @@ export function Step2Scenario({ data, errors, onChange }: Step2ScenarioProps) {
         <div className="space-y-6">
             {/* Header */}
             <div className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+                {isMobile && (
+                    <div
+                        className={cn(
+                            'flex items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-2xl shadow-lg',
+                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                        )}
+                    >
+                        🎬
+                    </div>
+                )}
                 <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-2xl shadow-lg">
+                    <div
+                        className={cn(
+                            'hidden items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-2xl shadow-lg sm:flex',
+                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                        )}
+                    >
                         🎬
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800">
+                        <h2
+                            className={cn(
+                                'font-bold text-slate-800',
+                                isMobile ? 'text-lg' : 'text-xl',
+                            )}
+                        >
                             Skenario & Narasi Kasus (Tahap 1 PBL)
                         </h2>
-                        <p className="text-sm text-slate-600">
+                        <p
+                            className={cn(
+                                'text-slate-600',
+                                isMobile ? 'text-xs' : 'text-sm',
+                            )}
+                        >
                             Berikan konteks masalah yang akan diselesaikan siswa
                         </p>
                     </div>

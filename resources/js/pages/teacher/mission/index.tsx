@@ -150,24 +150,31 @@ export default function Show({
 
             <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl space-y-8">
-                    {/* Back Button */}
-                    <Link
-                        href="/teacher/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-indigo-600"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span>Kembali ke Dashboard</span>
-                    </Link>
-
                     {/* Mission Header */}
                     <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 sm:p-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             {isMobile && (
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
-                                    🎯
+                                <div className="flex items-center gap-3">
+                                    <Link
+                                        href="/teacher/dashboard"
+                                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 backdrop-blur-sm"
+                                    >
+                                        <ArrowLeft className="h-5 w-5 text-white" />
+                                    </Link>
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
+                                        🎯
+                                    </div>
                                 </div>
                             )}
                             <div className="flex items-center gap-3">
+                                <div className="hidden">
+                                    <Link
+                                        href="/teacher/dashboard"
+                                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 backdrop-blur-sm"
+                                    >
+                                        <ArrowLeft className="h-5 w-5 text-white" />
+                                    </Link>
+                                </div>
                                 <div className="hidden h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:flex sm:h-16 sm:w-16 sm:text-3xl">
                                     🎯
                                 </div>
