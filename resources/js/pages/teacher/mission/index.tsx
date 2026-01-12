@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import TeacherLayout from '@/layouts/teacher-layout';
 import { User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -110,6 +111,7 @@ export default function Show({
     allReflections = [],
     classroom,
 }: ShowProps) {
+    const isMobile = useIsMobile();
     const [activeTab, setActiveTab] = useState<
         'attendance' | 'groups' | 'monitoring'
     >('attendance');
@@ -158,17 +160,22 @@ export default function Show({
                     </Link>
 
                     {/* Mission Header */}
-                    <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 sm:p-8">
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-3xl shadow-lg">
+                    <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 sm:p-8">
+                        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                            {isMobile && (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
+                                    🎯
+                                </div>
+                            )}
+                            <div className="flex items-center gap-3">
+                                <div className="hidden h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:flex sm:h-16 sm:w-16 sm:text-3xl">
                                     🎯
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl font-black text-slate-800 sm:text-3xl">
+                                    <h1 className="text-xl font-black text-slate-800 sm:text-3xl">
                                         {mission.title}
                                     </h1>
-                                    <p className="mt-1 text-sm text-slate-600">
+                                    <p className="mt-1 text-xs text-slate-600 sm:block sm:text-sm">
                                         {mission.description}
                                     </p>
                                     <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 text-xs font-semibold text-indigo-700">
@@ -184,9 +191,7 @@ export default function Show({
                                 className="inline-flex items-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50"
                             >
                                 <Edit className="h-4 w-4" />
-                                <span className="hidden sm:inline">
-                                    Edit Misi
-                                </span>
+                                <span className="sm:inline">Edit Misi</span>
                             </Link>
                         </div>
                     </div>
