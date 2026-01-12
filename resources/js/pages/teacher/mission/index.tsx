@@ -95,6 +95,7 @@ interface ShowProps {
     stats: Stats;
     initialAttendance?: { student_id: number; is_present: boolean }[];
     allReflections?: Reflection[]; // ✅ NEW
+    classroom?: { id: number; name: string; join_code?: string | null }; // ✅ NEW
 }
 
 export default function Show({
@@ -107,6 +108,7 @@ export default function Show({
     stats,
     initialAttendance = [],
     allReflections = [],
+    classroom,
 }: ShowProps) {
     const [activeTab, setActiveTab] = useState<
         'attendance' | 'groups' | 'monitoring'
@@ -210,6 +212,7 @@ export default function Show({
                                 students={students}
                                 missionId={mission.id}
                                 initialAttendance={initialAttendance}
+                                classroom={classroom} // ✅ NEW
                             />
                         )}
 

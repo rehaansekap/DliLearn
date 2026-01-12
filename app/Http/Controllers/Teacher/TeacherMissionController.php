@@ -287,11 +287,12 @@ class TeacherMissionController extends Controller
             'classroom' => [
                 'id' => $classroom->id,
                 'name' => $classroom->name,
+                'join_code' => $classroom->join_code,
             ],
             'students' => $students,
             'groups' => $groups,
             'groupsMonitoring' => $groupsMonitoring,
-            'allReflections' => $allReflectionsForMission, // ✅ NEW: Semua refleksi (termasuk yang belum punya kelompok)
+            'allReflections' => $allReflectionsForMission,
             'voteResults' => $voteResults,
             'initialAttendance' => DB::table('attendances')
                 ->where('mission_id', $mission->id)
