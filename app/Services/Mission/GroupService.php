@@ -35,7 +35,7 @@ class GroupService
             ->where('user_id', $userId)
             ->value('role');
 
-        return $role === 'Ketua';
+        return $role === 'Leader';
     }
 
     /**

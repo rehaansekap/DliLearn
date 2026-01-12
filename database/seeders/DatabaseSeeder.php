@@ -130,7 +130,7 @@ class DatabaseSeeder extends Seeder
 
             foreach ($groupMembers as $key => $member) {
 
-                $initialRole = ($key === 0) ? 'Ketua' : 'Anggota';
+                $initialRole = ($key === 0) ? 'Leader' : 'Presenter';
 
                 DB::table('group_members')->insert([
                     'group_id' => $group->id,
@@ -182,7 +182,7 @@ class DatabaseSeeder extends Seeder
 
             foreach ($groupMembers as $key => $member) {
 
-                $initialRole = ($key === 0) ? 'Ketua' : 'Anggota';
+                $initialRole = ($key === 0) ? 'Leader' : 'Presenter';
 
                 DB::table('group_members')->insert([
                     'group_id' => $group->id,

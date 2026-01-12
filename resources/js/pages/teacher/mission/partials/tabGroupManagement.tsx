@@ -19,7 +19,7 @@ interface Student {
 }
 
 interface GroupMember extends Student {
-    role: 'Ketua' | 'Programmer' | 'Designer' | 'Notulis' | 'Anggota';
+    role: 'Leader' | 'Problem Analyzer' | 'Algorithm Designer' | 'Presenter';
 }
 
 interface Group {
@@ -36,11 +36,18 @@ interface TabGroupManagementProps {
 }
 
 const AVAILABLE_ROLES = [
-    { value: 'Ketua', label: 'Ketua', color: 'bg-indigo-500' },
-    { value: 'Programmer', label: 'Programmer', color: 'bg-blue-500' },
-    { value: 'Designer', label: 'Designer', color: 'bg-pink-500' },
-    { value: 'Notulis', label: 'Notulis', color: 'bg-green-500' },
-    { value: 'Anggota', label: 'Anggota', color: 'bg-slate-500' },
+    { value: 'Leader', label: 'Leader', color: 'bg-indigo-500' },
+    {
+        value: 'Algorithm Designer',
+        label: 'Algorithm Designer',
+        color: 'bg-blue-500',
+    },
+    {
+        value: 'Problem Analyzer',
+        label: 'Problem Analyzer',
+        color: 'bg-pink-500',
+    },
+    { value: 'Presenter', label: 'Presenter', color: 'bg-green-500' },
 ] as const;
 
 export function TabGroupManagement({
@@ -123,7 +130,7 @@ export function TabGroupManagement({
                     ...group,
                     members: [
                         ...group.members,
-                        { ...student, role: 'Anggota' },
+                        { ...student, role: 'Presenter' },
                     ],
                 };
             }),
@@ -161,7 +168,7 @@ export function TabGroupManagement({
                 group_code: groups[i]?.group_code || `GRP-${i + 1}`,
                 members: groupMembers.map((s, idx) => ({
                     ...s,
-                    role: idx === 0 ? 'Ketua' : 'Anggota',
+                    role: idx === 0 ? 'Leader' : 'Presenter',
                 })),
             });
         }

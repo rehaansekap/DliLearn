@@ -92,7 +92,7 @@ class MissionController extends Controller
         }
 
         $unreviewedSubmissions = [];
-        if ($groupMember && $groupMember->role === 'Ketua') {
+        if ($groupMember && $groupMember->role === 'Leader') {
             $allOtherSubmissions = $allSubmissions->filter(fn($s) => $s['group_code'] !== $myGroupCode);
             foreach ($allOtherSubmissions as $sub) {
                 $hasFeedback = DB::table('feedbacks')
@@ -111,7 +111,7 @@ class MissionController extends Controller
         $excludeGroupId = $groupMember?->group_id ?? 0;
         $votableGroups = $this->voteService->getVotableGroups($mission->id, $excludeGroupId);
 
-        if ($groupMember && $groupMember->role === 'Ketua') {
+        if ($groupMember && $groupMember->role === 'Leader') {
             $hasVoted = $this->voteService->hasVoted($groupMember->group_id, $mission->id);
             $myVote = $this->voteService->getGroupVote($groupMember->group_id, $mission->id);
         } else {
@@ -174,8 +174,8 @@ class MissionController extends Controller
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
         }
 
-        if ($groupMember->role !== 'Ketua') {
-            abort(403, 'Hanya Ketua Kelompok yang dapat memberikan vote!');
+        if ($groupMember->role !== 'Leader') {
+            abort(403, 'Hanya Leader Kelompok yang dapat memberikan vote!');
         }
 
         $validated = $request->validated();
@@ -199,14 +199,14 @@ class MissionController extends Controller
         $user = Auth::user();
 
         if (!$this->groupService->isUserLeader($user->id)) {
-            abort(403, 'Hanya Ketua Kelompok yang boleh mengubah peran anggota!');
+            abort(403, 'Hanya Leader Kelompok yang boleh mengubah peran anggota!');
         }
 
         $validated = $request->validated();
         $targetRole = $this->groupService->getMemberRole($validated['target_user_id']);
 
-        if ($targetRole === 'Ketua') {
-            return redirect()->back()->with('error', 'Peran Ketua tidak bisa diubah di sini. Hubungi Guru.');
+        if ($targetRole === 'Leader') {
+            return redirect()->back()->with('error', 'Peran Leader tidak bisa diubah di sini. Hubungi Guru.');
         }
 
         $this->groupService->updateMemberRole($validated['target_user_id'], $validated['role']);
@@ -255,8 +255,8 @@ class MissionController extends Controller
             return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
         }
 
-        if ($groupMember->role !== 'Ketua') {
-            abort(403, 'Hanya Ketua Kelompok yang dapat mengumpulkan tugas akhir!');
+        if ($groupMember->role !== 'Leader') {
+            abort(403, 'Hanya Leader Kelompok yang dapat mengumpulkan tugas akhir!');
         }
 
         $existing = Submission::where('group_id', $groupMember->group_id)
@@ -265,7 +265,7 @@ class MissionController extends Controller
             ->first();
 
         if ($existing) {
-            return redirect()->back()->with('error', 'Tugas akhir sudah dikumpulkan oleh kelompok ini. Ketua tidak dapat mengirim ulang.');
+            return redirect()->back()->with('error', 'Tugas akhir sudah dikumpulkan oleh kelompok ini. Leader tidak dapat mengirim ulang.');
         }
 
         $validated = $request->validated();

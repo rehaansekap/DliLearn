@@ -50,7 +50,7 @@ export default function Show({
 
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
-    const amILeader = currentUserRole === 'Ketua';
+    const amILeader = currentUserRole === 'Leader';
     const collaborationLink = mission.collab_url;
 
     const handleSubmitReflection = (reflection: string) => {
@@ -396,7 +396,7 @@ export default function Show({
                                                 router.visit(route('dashboard'))
                                             }
                                             amILeader={
-                                                currentUserRole === 'Ketua'
+                                                currentUserRole === 'Leader'
                                             }
                                             unreviewedSubmissions={
                                                 unreviewedSubmissions

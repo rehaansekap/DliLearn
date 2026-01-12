@@ -31,22 +31,25 @@ interface Phase2OrganizationProps {
     onNext?: () => void;
 }
 
-const AVAILABLE_ROLES = ['Coder', 'Designer', 'Notulis', 'Anggota'];
+const AVAILABLE_ROLES = [
+    'Problem Analyzer',
+    'Algorithm Designer',
+    'Presenter',
+    // 'Leader',
+];
 
 const ROLE_ICONS = {
-    Ketua: '👑',
-    Coder: '💻',
-    Designer: '🎨',
-    Notulis: '📝',
-    Anggota: '👤',
+    Leader: '👑',
+    'Problem Analyzer': '💻',
+    'Algorithm Designer': '📝',
+    Presenter: '👤',
 };
 
 const ROLE_COLORS = {
-    Ketua: 'from-yellow-400 to-amber-500',
-    Coder: 'from-blue-400 to-cyan-500',
-    Designer: 'from-pink-400 to-rose-500',
-    Notulis: 'from-green-400 to-emerald-500',
-    Anggota: 'from-slate-400 to-slate-500',
+    Leader: 'from-yellow-400 to-amber-500',
+    'Problem Analyzer': 'from-blue-400 to-cyan-500',
+    'Algorithm Designer': 'from-green-400 to-emerald-500',
+    Presenter: 'from-slate-400 to-slate-500',
 };
 
 export default function Phase2Organization({

@@ -65,7 +65,7 @@ class TeacherMissionController extends Controller
                         'name' => $m->name,
                         'username' => $m->username,
                         'avatar' => $m->avatar,
-                        'role' => $m->role ?? 'Anggota',
+                        'role' => $m->role ?? 'Presenter',
                     ])
                     ->toArray();
 
@@ -102,7 +102,7 @@ class TeacherMissionController extends Controller
                         'id' => $m->id,
                         'name' => $m->name,
                         'avatar' => $m->avatar,
-                        'role' => $m->role ?? 'Anggota',
+                        'role' => $m->role ?? 'Presenter',
                     ])
                     ->toArray();
 

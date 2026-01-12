@@ -32,7 +32,7 @@ export function TeamMemberCard({
     onCancelEdit,
     onRoleSelect,
 }: TeamMemberCardProps) {
-    const isLeader = member.role === 'Ketua';
+    const isLeader = member.role === 'Leader';
 
     return (
         <div
@@ -84,19 +84,36 @@ export function TeamMemberCard({
                             <p className="text-xs font-medium text-slate-600">
                                 Pilih Peran:
                             </p>
-                            <div className="grid grid-cols-2 gap-2">
-                                {availableRoles.map((role) => (
-                                    <button
-                                        key={role}
-                                        onClick={() =>
-                                            onRoleSelect(member.user_id, role)
-                                        }
-                                        className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-all hover:border-indigo-400 hover:bg-indigo-50"
-                                    >
-                                        <span>{roleIcons[role]}</span>
-                                        <span>{role}</span>
-                                    </button>
-                                ))}
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                {availableRoles.map((role) => {
+                                    const displayRole = role
+                                        .replace(/_/g, ' ')
+                                        .replace(/\b\w/g, (c) =>
+                                            c.toUpperCase(),
+                                        );
+
+                                    return (
+                                        <button
+                                            key={role}
+                                            onClick={() =>
+                                                onRoleSelect(
+                                                    member.user_id,
+                                                    role,
+                                                )
+                                            }
+                                            title={displayRole}
+                                            aria-label={`Pilih peran ${displayRole}`}
+                                            className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-xs font-medium break-words text-slate-700 transition-all hover:border-indigo-400 hover:bg-indigo-50 sm:text-sm"
+                                        >
+                                            <span className="text-sm">
+                                                {roleIcons[role] || '👤'}
+                                            </span>
+                                            <span className="whitespace-normal">
+                                                {displayRole}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                             <MissionButton
                                 onClick={onCancelEdit}
@@ -112,7 +129,7 @@ export function TeamMemberCard({
                             <span
                                 className={cn(
                                     'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md',
-                                    `bg-gradient-to-r ${roleColors[member.role] || roleColors.Anggota}`,
+                                    `bg-gradient-to-r ${roleColors[member.role] || roleColors.Presenter}`,
                                 )}
                             >
                                 {roleIcons[member.role] || '👤'} {member.role}

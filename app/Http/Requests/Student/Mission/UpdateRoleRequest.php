@@ -15,7 +15,7 @@ class UpdateRoleRequest extends FormRequest
     {
         return [
             'target_user_id' => ['required', 'exists:users,id'],
-            'role' => ['required', 'string', 'in:Coder,Designer,Notulis,Anggota'],
+            'role' => ['required', 'string', 'in:Problem Analyzer,Algorithm Designer,Presenter,Leader'],
         ];
     }
 

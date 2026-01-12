@@ -27,7 +27,7 @@ interface Student {
 }
 
 interface GroupMember extends Student {
-    role: 'Ketua' | 'Programmer' | 'Designer' | 'Notulis' | 'Anggota';
+    role: 'Leader' | 'Problem Analyzer' | 'Algorithm Designer' | 'Presenter';
 }
 
 interface Group {
