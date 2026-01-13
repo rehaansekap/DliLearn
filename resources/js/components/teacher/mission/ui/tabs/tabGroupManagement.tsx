@@ -61,7 +61,6 @@ export function TabGroupManagement({
     const [groupCount, setGroupCount] = useState(4);
     const [showAddModal, setShowAddModal] = useState(false);
 
-    // Calculate unassigned students
     const assignedStudentIds = groups.flatMap((g) =>
         g.members.map((m) => m.id),
     );
@@ -87,7 +86,7 @@ export function TabGroupManagement({
             newGroups.push({
                 group_id: groups[i]?.group_id || Date.now() + i,
                 group_name: groups[i]?.group_name || `Kelompok ${i + 1}`,
-                group_code: groups[i]?.group_code || `GRP-${i + 1}`,
+                group_code: groups[i]?.group_code || `CLS-${i + 1}`,
                 collab_url: groups[i]?.collab_url || null,
                 members: groupMembers.map((s, idx) => ({
                     ...s,
@@ -95,6 +94,13 @@ export function TabGroupManagement({
                 })),
             });
         }
+
+        newGroups.forEach((g, idx) => {
+            g.group_name = `Kelompok ${idx + 1}`;
+            if (!g.group_code) {
+                g.group_code = `CLS-${idx + 1}`;
+            }
+        });
 
         setGroups(newGroups);
     };
@@ -107,7 +113,7 @@ export function TabGroupManagement({
         const newGroup: Group = {
             group_id: Date.now(),
             group_name: `Kelompok ${groups.length + 1}`,
-            group_code: `GRP-${groups.length + 1}`,
+            group_code: `CLS-${groups.length + 1}`,
             members: [],
         };
         setGroups([...groups, newGroup]);

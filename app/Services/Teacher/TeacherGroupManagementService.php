@@ -4,6 +4,7 @@ namespace App\Services\Teacher;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class TeacherGroupManagementService
 {
@@ -15,6 +16,44 @@ class TeacherGroupManagementService
         Log::info('Updating groups', ['mission_id' => $missionId, 'groups' => $groupsData]);
 
         $classroomId = DB::table('missions')->where('id', $missionId)->value('classroom_id');
+
+        $submittedGroupIds = collect($groupsData)->pluck('group_id')->filter(function ($id) {
+            return is_numeric($id) && $id < 9999999999;
+        })->toArray();
+
+        $existingGroups = DB::table('groups')
+            ->join('group_progress', 'groups.id', '=', 'group_progress.group_id')
+            ->where('group_progress.mission_id', $missionId)
+            ->where('groups.classroom_id', $classroomId)
+            ->pluck('groups.id')
+            ->toArray();
+
+        $groupsToDelete = array_diff($existingGroups, $submittedGroupIds);
+
+        if (!empty($groupsToDelete)) {
+            Log::info('Deleting groups not in payload', ['groups_to_delete' => $groupsToDelete]);
+
+            DB::table('group_members')->whereIn('group_id', $groupsToDelete)->delete();
+
+            DB::table('group_progress')
+                ->whereIn('group_id', $groupsToDelete)
+                ->where('mission_id', $missionId)
+                ->delete();
+
+            DB::table('submissions')
+                ->whereIn('group_id', $groupsToDelete)
+                ->where('mission_id', $missionId)
+                ->delete();
+
+            DB::table('groups')
+                ->whereIn('id', $groupsToDelete)
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('group_progress')
+                        ->whereColumn('group_progress.group_id', 'groups.id');
+                })
+                ->delete();
+        }
 
         $createdMapping = [];
 
@@ -32,10 +71,15 @@ class TeacherGroupManagementService
                         'updated_at' => now(),
                     ]);
             } else {
+                $groupCode = $groupData['group_code'];
+
+                if (DB::table('groups')->where('group_code', $groupCode)->exists()) {
+                    $groupCode = $this->generateUniqueGroupCode($classroomId);
+                }
 
                 $groupId = DB::table('groups')->insertGetId([
                     'name' => $groupData['group_name'],
-                    'group_code' => $groupData['group_code'],
+                    'group_code' => $groupCode,
                     'classroom_id' => $classroomId,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -50,6 +94,7 @@ class TeacherGroupManagementService
                     'current_step' => 1,
                     'status' => 'locked',
                     'collab_url' => $groupData['collab_url'] ?? null,
+                    'updated_at' => now(),
                     'created_at' => now()
                 ]
             );
@@ -72,6 +117,18 @@ class TeacherGroupManagementService
         }
 
         return $createdMapping;
+    }
+
+    /**
+     * Generate unique group code
+     */
+    private function generateUniqueGroupCode(int $classroomId): string
+    {
+        do {
+            $code = 'CLS' . $classroomId . '-' . strtoupper(Str::random(2));
+        } while (DB::table('groups')->where('group_code', $code)->exists());
+
+        return $code;
     }
 
     /**
