@@ -1,12 +1,7 @@
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Database, HardDrive, Package } from 'lucide-react';
 
-interface SystemHealthProps {
-    // Untuk sekarang kita pakai dummy data
-    // Nanti bisa diperluas dengan real system checks
-}
-
-export function SystemHealth({}: SystemHealthProps) {
+export function SystemHealth() {
     const healthItems = [
         {
             label: 'Database',
