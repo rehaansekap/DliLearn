@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['student', 'teacher'])->default('student');
+            $table->enum('role', ['student', 'teacher', 'admin'])->default('student');
 
             $table->integer('xp')->default(0);
             $table->integer('level')->default(1);

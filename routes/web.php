@@ -7,6 +7,7 @@ use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\MissionController;
 use App\Http\Controllers\Teacher\TeacherDashboardController;
 use App\Http\Controllers\Teacher\TeacherMissionController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -40,6 +41,11 @@ Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('tea
     Route::post('/mission/{mission}/attendance', [TeacherMissionController::class, 'saveAttendance'])->name('mission.attendance');
     Route::post('/mission/{mission}/update-groups', [TeacherMissionController::class, 'updateGroups'])->name('mission.update-groups');
     Route::post('/submission/{submission}/grade', [TeacherMissionController::class, 'saveGrade'])->name('submission.grade');
+});
+
+// Admin Routes
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {
