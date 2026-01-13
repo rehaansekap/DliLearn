@@ -78,19 +78,9 @@ class TeacherMissionController extends Controller
     {
         $user = Auth::user();
 
-
-        $missionsForClassroom = Mission::where('teacher_id', $user->id)
-            ->select('classroom_id')
-            ->distinct()
-            ->get();
-
-        $missionClassroomIds = $missionsForClassroom->pluck('classroom_id')->filter()->unique()->values()->all();
-
-        $classrooms = Classroom::whereIn('id', $missionClassroomIds)
-            ->select('id', 'name', 'academic_year')
+        $classrooms = Classroom::select('id', 'name', 'academic_year')
             ->orderBy('name')
             ->get();
-
 
         $ownMissions = Mission::where('teacher_id', $user->id)
             ->select('id', 'title', 'slug')
