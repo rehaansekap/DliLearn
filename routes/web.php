@@ -53,6 +53,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/users/{user}/edit', [App\Http\Controllers\Admin\AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [App\Http\Controllers\Admin\AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [App\Http\Controllers\Admin\AdminUserController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/classrooms', [App\Http\Controllers\Admin\AdminClassroomController::class, 'index'])->name('classrooms.index');
+    Route::get('/classrooms/create', [App\Http\Controllers\Admin\AdminClassroomController::class, 'create'])->name('classrooms.create');
+    Route::post('/classrooms', [App\Http\Controllers\Admin\AdminClassroomController::class, 'store'])->name('classrooms.store');
+    Route::get('/classrooms/{classroom}/edit', [App\Http\Controllers\Admin\AdminClassroomController::class, 'edit'])->name('classrooms.edit');
+    Route::put('/classrooms/{classroom}', [App\Http\Controllers\Admin\AdminClassroomController::class, 'update'])->name('classrooms.update');
+    Route::delete('/classrooms/{classroom}', [App\Http\Controllers\Admin\AdminClassroomController::class, 'destroy'])->name('classrooms.destroy');
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {
