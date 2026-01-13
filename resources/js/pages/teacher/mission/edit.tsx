@@ -29,7 +29,6 @@ interface Mission {
     video_url: string;
     case_narrative: string;
     material_pdf: string | null;
-    collab_url: string;
     simulator_config: string;
     prerequisite_mission_id?: number | null;
     started_at?: string | null;
@@ -76,7 +75,6 @@ export default function Edit({
             video_url: mission.video_url,
             case_narrative: mission.case_narrative,
             material_pdf: mission.material_pdf,
-            collab_url: mission.collab_url || '',
             simulator_config: mission.simulator_config || '',
             prerequisite_mission_id: mission.prerequisite_mission_id ?? null,
             started_at: mission.started_at ?? '',

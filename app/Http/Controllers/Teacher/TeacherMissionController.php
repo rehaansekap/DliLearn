@@ -155,7 +155,6 @@ class TeacherMissionController extends Controller
                 'video_url' => $mission->video_url,
                 'case_narrative' => $mission->case_narrative,
                 'material_pdf' => $mission->material_pdf,
-                'collab_url' => $mission->collab_url,
                 'simulator_config' => $mission->simulator_config,
                 'prerequisite_mission_id' => $mission->prerequisite_mission_id,
                 'started_at' => $mission->started_at,
@@ -204,7 +203,6 @@ class TeacherMissionController extends Controller
     public function destroy(Mission $mission)
     {
         $user = Auth::user();
-
 
         if ($mission->teacher_id !== $user->id) {
             abort(403, 'Unauthorized');

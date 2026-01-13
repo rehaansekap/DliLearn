@@ -25,7 +25,6 @@ class Mission extends Model
         'case_narrative',
         'material_pdf',
         'simulator_config',
-        'collab_url',
     ];
 
     protected $casts = [

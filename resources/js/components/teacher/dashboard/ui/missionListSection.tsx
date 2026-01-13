@@ -32,6 +32,11 @@ interface MissionListSectionProps {
     onSearchChange: (value: string) => void;
     onClassroomChange: (id: number | null) => void;
     onPageChange: (page: number) => void;
+    onDeleteMission: (mission: {
+        id: number;
+        title: string;
+        slug: string;
+    }) => void;
 }
 
 export function MissionListSection({
@@ -48,6 +53,7 @@ export function MissionListSection({
     onSearchChange,
     onClassroomChange,
     onPageChange,
+    onDeleteMission,
 }: MissionListSectionProps) {
     const subtitle = selectedClassroomId
         ? `Menampilkan misi untuk ${classrooms.find((c) => c.id === selectedClassroomId)?.name}`
@@ -69,7 +75,10 @@ export function MissionListSection({
 
             {paginatedMissions.length > 0 ? (
                 <>
-                    <MissionGrid missions={paginatedMissions} />
+                    <MissionGrid
+                        missions={paginatedMissions}
+                        onDelete={onDeleteMission}
+                    />
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}

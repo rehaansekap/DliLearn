@@ -17,13 +17,18 @@ interface Mission {
 
 interface MissionGridProps {
     missions: Mission[];
+    onDelete: (mission: { id: number; title: string; slug: string }) => void;
 }
 
-export function MissionGrid({ missions }: MissionGridProps) {
+export function MissionGrid({ missions, onDelete }: MissionGridProps) {
     return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {missions.map((mission) => (
-                <MissionCard key={mission.id} mission={mission} />
+                <MissionCard
+                    key={mission.id}
+                    mission={mission}
+                    onDelete={onDelete}
+                />
             ))}
         </div>
     );

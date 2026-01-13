@@ -20,7 +20,6 @@ interface Step4ReviewProps {
         video_url: string;
         case_narrative: string;
         material_pdf: File | string | null;
-        collab_url: string;
         simulator_config: string;
         prerequisite_mission_id?: number | null;
         started_at?: string | null;

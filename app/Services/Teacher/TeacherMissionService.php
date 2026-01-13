@@ -35,7 +35,6 @@ class TeacherMissionService
             'video_url' => $data['video_url'],
             'case_narrative' => $data['case_narrative'],
             'material_pdf' => $pdfPath,
-            'collab_url' => $data['collab_url'] ?? null,
             'simulator_config' => $data['simulator_config'] ?? null,
             'prerequisite_mission_id' => $data['prerequisite_mission_id'] ?? null,
             'started_at' => $data['started_at'] ?? null,
@@ -78,7 +77,6 @@ class TeacherMissionService
             'video_url' => $data['video_url'],
             'case_narrative' => $data['case_narrative'],
             'material_pdf' => $pdfPath,
-            'collab_url' => $data['collab_url'] ?? null,
             'simulator_config' => $data['simulator_config'] ?? null,
             'prerequisite_mission_id' => $data['prerequisite_mission_id'] ?? null,
             'started_at' => $data['started_at'] ?? null,
@@ -93,11 +91,54 @@ class TeacherMissionService
      */
     public function deleteMission(Mission $mission): bool
     {
-
         if ($mission->material_pdf) {
             Storage::disk('public')->delete($mission->material_pdf);
         }
 
+        DB::table('grades')
+            ->whereIn('submission_id', function ($query) use ($mission) {
+                $query->select('id')
+                    ->from('submissions')
+                    ->where('mission_id', $mission->id);
+            })
+            ->delete();
+
+        DB::table('feedbacks')
+            ->whereIn('submission_id', function ($query) use ($mission) {
+                $query->select('id')
+                    ->from('submissions')
+                    ->where('mission_id', $mission->id);
+            })
+            ->delete();
+
+        DB::table('likes')
+            ->whereIn('submission_id', function ($query) use ($mission) {
+                $query->select('id')
+                    ->from('submissions')
+                    ->where('mission_id', $mission->id);
+            })
+            ->delete();
+
+        DB::table('submissions')->where('mission_id', $mission->id)->delete();
+        DB::table('reflections')->where('mission_id', $mission->id)->delete();
+        DB::table('best_group_votes')->where('mission_id', $mission->id)->delete();
+        DB::table('attendances')->where('mission_id', $mission->id)->delete();
+
+        $groupIds = DB::table('group_progress')
+            ->where('mission_id', $mission->id)
+            ->pluck('group_id');
+
+        DB::table('group_members')->whereIn('group_id', $groupIds)->delete();
+        DB::table('group_progress')->where('mission_id', $mission->id)->delete();
+
+        DB::table('groups')
+            ->whereIn('id', $groupIds)
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('group_progress')
+                    ->whereColumn('group_progress.group_id', 'groups.id');
+            })
+            ->delete();
 
         return $mission->delete();
     }

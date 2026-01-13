@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { AlertCircle, CheckCircle2, Users } from 'lucide-react';
+import { DeleteMissionButton } from './ui/deleteMissionButton';
 
 interface ClassroomMission {
     id: number;
@@ -19,6 +20,7 @@ interface ClassroomMission {
 
 interface MissionCardProps {
     mission: ClassroomMission;
+    onDelete: (mission: { id: number; title: string; slug: string }) => void;
 }
 
 const levelColors = {
@@ -44,7 +46,7 @@ const levelColors = {
     },
 };
 
-export function MissionCard({ mission }: MissionCardProps) {
+export function MissionCard({ mission, onDelete }: MissionCardProps) {
     const colors =
         levelColors[mission.difficulty_level as keyof typeof levelColors] ||
         levelColors[1];
@@ -73,7 +75,6 @@ export function MissionCard({ mission }: MissionCardProps) {
                     <h3 className="mb-1 line-clamp-2 text-lg font-bold text-white">
                         {mission.title}
                     </h3>
-                    {/* Description */}
                     <p className="mb-4 line-clamp-2 text-sm text-indigo-100">
                         {mission.description}
                     </p>
@@ -159,6 +160,15 @@ export function MissionCard({ mission }: MissionCardProps) {
                     >
                         Edit
                     </Link>
+                    <DeleteMissionButton
+                        onClick={() =>
+                            onDelete({
+                                id: mission.id,
+                                title: mission.title,
+                                slug: mission.slug,
+                            })
+                        }
+                    />
                 </div>
             </div>
         </div>

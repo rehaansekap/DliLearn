@@ -1,9 +1,12 @@
-import { WelcomeBanner } from '@/components/teacher/dashboard';
 import {
     DashboardLayout,
     MissionListSection,
     StatsGrid,
 } from '@/components/teacher/dashboard/ui';
+import { WelcomeBanner } from '@/components/teacher/dashboard/welcomeBanner';
+import { DeleteMissionModal } from '@/components/teacher/mission/ui/delete/deleteMissionModal';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useDeleteMission } from '@/hooks/useDeleteMission';
 import TeacherLayout from '@/layouts/teacher-layout';
 import { User } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -15,7 +18,7 @@ interface Classroom {
     academic_year: string;
 }
 
-interface ClassroomMission {
+interface Mission {
     id: number;
     title: string;
     description: string;
@@ -41,7 +44,7 @@ interface DashboardProps {
     auth: {
         user: User;
     };
-    missions: ClassroomMission[];
+    missions: Mission[];
     classrooms: Classroom[];
     stats: Stats;
 }
@@ -52,6 +55,7 @@ export default function Dashboard({
     classrooms,
     stats,
 }: DashboardProps) {
+    const isMobile = useIsMobile();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedClassroomId, setSelectedClassroomId] = useState<
         number | null
@@ -59,55 +63,49 @@ export default function Dashboard({
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
 
-    // Calculate mission counts per classroom
+    const {
+        showDeleteModal,
+        missionToDelete,
+        openDeleteModal,
+        closeDeleteModal,
+    } = useDeleteMission();
+
+    const filteredMissions = useMemo(() => {
+        return missions.filter((mission) => {
+            const matchesSearch =
+                mission.title
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                mission.description
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase());
+
+            const matchesClassroom =
+                selectedClassroomId === null ||
+                mission.classroom_id === selectedClassroomId;
+
+            return matchesSearch && matchesClassroom;
+        });
+    }, [missions, searchQuery, selectedClassroomId]);
+
+    const totalPages = Math.ceil(filteredMissions.length / itemsPerPage);
+
+    const paginatedMissions = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredMissions.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredMissions, currentPage, itemsPerPage]);
+
     const missionCounts = useMemo(() => {
-        return missions.reduce(
-            (acc, mission) => {
-                acc[mission.classroom_id] =
-                    (acc[mission.classroom_id] || 0) + 1;
+        return classrooms.reduce(
+            (acc, classroom) => {
+                acc[classroom.id] = missions.filter(
+                    (m) => m.classroom_id === classroom.id,
+                ).length;
                 return acc;
             },
             {} as Record<number, number>,
         );
-    }, [missions]);
-
-    // Filter missions
-    const filteredMissions = missions.filter((mission) => {
-        const matchesSearch =
-            mission.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            mission.classroom_name
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-
-        const matchesClassroom =
-            selectedClassroomId === null ||
-            mission.classroom_id === selectedClassroomId;
-
-        return matchesSearch && matchesClassroom;
-    });
-
-    // Paginate missions
-    const totalPages = Math.ceil(filteredMissions.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedMissions = filteredMissions.slice(
-        startIndex,
-        startIndex + itemsPerPage,
-    );
-
-    // Handlers
-    const handleSearchChange = (value: string) => {
-        setSearchQuery(value);
-        setCurrentPage(1);
-    };
-
-    const handleClassroomChange = (id: number | null) => {
-        setSelectedClassroomId(id);
-        setCurrentPage(1);
-    };
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-    };
+    }, [classrooms, missions]);
 
     return (
         <TeacherLayout
@@ -115,10 +113,10 @@ export default function Dashboard({
             header={
                 <div className="hidden sm:block">
                     <h2 className="text-lg font-bold text-slate-800">
-                        Dashboard Guru
+                        Dashboard
                     </h2>
                     <p className="text-xs text-slate-500">
-                        Kelola misi pembelajaran untuk kelas Anda
+                        Kelola misi dan pantau progress pembelajaran
                     </p>
                 </div>
             }
@@ -126,13 +124,8 @@ export default function Dashboard({
             <Head title="Dashboard Guru" />
 
             <DashboardLayout>
-                {/* Welcome Banner */}
                 <WelcomeBanner user={auth.user} />
-
-                {/* Stats Grid */}
                 <StatsGrid stats={stats} />
-
-                {/* Mission List Section */}
                 <MissionListSection
                     missions={missions}
                     paginatedMissions={paginatedMissions}
@@ -144,11 +137,22 @@ export default function Dashboard({
                     totalPages={totalPages}
                     itemsPerPage={itemsPerPage}
                     missionCounts={missionCounts}
-                    onSearchChange={handleSearchChange}
-                    onClassroomChange={handleClassroomChange}
-                    onPageChange={handlePageChange}
+                    onSearchChange={setSearchQuery}
+                    onClassroomChange={setSelectedClassroomId}
+                    onPageChange={setCurrentPage}
+                    onDeleteMission={openDeleteModal}
                 />
             </DashboardLayout>
+
+            {/* Delete Confirmation Modal */}
+            {missionToDelete && (
+                <DeleteMissionModal
+                    isOpen={showDeleteModal}
+                    onClose={closeDeleteModal}
+                    mission={missionToDelete}
+                    isMobile={isMobile}
+                />
+            )}
         </TeacherLayout>
     );
 }

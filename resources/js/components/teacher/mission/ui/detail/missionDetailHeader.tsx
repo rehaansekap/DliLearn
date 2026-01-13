@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 
 interface MissionDetailHeaderProps {
     mission: {
@@ -10,11 +10,13 @@ interface MissionDetailHeaderProps {
         difficulty_level: number;
     };
     isMobile?: boolean;
+    onDelete?: () => void;
 }
 
 export function MissionDetailHeader({
     mission,
     isMobile = false,
+    onDelete,
 }: MissionDetailHeaderProps) {
     return (
         <div
@@ -78,17 +80,25 @@ export function MissionDetailHeader({
                     </div>
                 </div>
 
-                {/* Edit Button */}
-                <Link
-                    href={`/teacher/mission/${mission.slug}/edit`}
-                    className={cn(
-                        'inline-flex items-center gap-2 rounded-xl border border-indigo-300 bg-white font-semibold text-indigo-700 transition hover:bg-indigo-50',
-                        isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2 text-sm',
+                {/* Edit & Delete Buttons */}
+                <div className="flex gap-2">
+                    <Link
+                        href={`/teacher/mission/${mission.slug}/edit`}
+                        className="rounded-lg border-2 border-indigo-200 bg-white px-3 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50"
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Link>
+                    {onDelete && (
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            title="Delete mission"
+                            className="rounded-lg border-2 border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
                     )}
-                >
-                    <Edit className="h-4 w-4" />
-                    <span>Edit Misi</span>
-                </Link>
+                </div>
             </div>
         </div>
     );

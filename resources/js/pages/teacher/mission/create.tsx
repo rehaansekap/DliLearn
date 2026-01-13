@@ -54,7 +54,6 @@ export default function Create({ auth, classrooms, ownMissions }: CreateProps) {
             video_url: '',
             case_narrative: '',
             material_pdf: null,
-            collab_url: '',
             simulator_config: '',
             prerequisite_mission_id: null,
             started_at: '',

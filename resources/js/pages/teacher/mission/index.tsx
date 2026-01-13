@@ -1,3 +1,4 @@
+import { DeleteMissionModal } from '@/components/teacher/mission/ui/delete/deleteMissionModal';
 import {
     BackgroundPattern,
     MissionDetailHeader,
@@ -12,6 +13,7 @@ import {
     TabMonitoring,
 } from '@/components/teacher/mission/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useDeleteMission } from '@/hooks/useDeleteMission';
 import TeacherLayout from '@/layouts/teacher-layout';
 import { User } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -130,6 +132,12 @@ export default function Show({
     const [selectedSubmission, setSelectedSubmission] =
         useState<GroupMonitoring | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const {
+        showDeleteModal,
+        missionToDelete,
+        openDeleteModal,
+        closeDeleteModal,
+    } = useDeleteMission();
 
     const handleViewSubmission = (groupId: number) => {
         const group = groupsMonitoring.find((g) => g.group_id === groupId);
@@ -160,7 +168,17 @@ export default function Show({
 
             <PageContainer>
                 {/* Mission Header */}
-                <MissionDetailHeader mission={mission} isMobile={isMobile} />
+                <MissionDetailHeader
+                    mission={mission}
+                    isMobile={isMobile}
+                    onDelete={() =>
+                        openDeleteModal({
+                            id: mission.id,
+                            title: mission.title,
+                            slug: mission.slug,
+                        })
+                    }
+                />
 
                 {/* Statistics */}
                 <MissionStats
@@ -202,6 +220,17 @@ export default function Show({
                     )}
                 </div>
             </PageContainer>
+
+            {/* Delete Modal */}
+            {missionToDelete && (
+                <DeleteMissionModal
+                    isOpen={showDeleteModal}
+                    onClose={closeDeleteModal}
+                    mission={missionToDelete}
+                    isMobile={isMobile}
+                    redirectTo="/teacher/dashboard"
+                />
+            )}
 
             {/* Submission Detail Modal */}
             {selectedSubmission && (
