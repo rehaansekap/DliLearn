@@ -1,17 +1,9 @@
-import { DifficultyLevelSelector } from '@/components/teacher/mission/ui/difficultyLevelSelector';
 import {
-    DateTimeInput,
-    FormField,
-    FormHint,
-    InputError,
-    InputLabel,
-    TextAreaInput,
-    TextInput,
-} from '@/components/teacher/mission/ui/form';
-import { SearchableDropdown } from '@/components/teacher/mission/ui/searchableDropdown';
+    BasicInfoFormFields,
+    BasicInfoHeader,
+} from '@/components/teacher/mission/ui/basicInfo';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { Calendar } from 'lucide-react';
 
 interface Step1BasicInfoProps {
     data: {
@@ -84,212 +76,65 @@ export function Step1BasicInfo({
         icon: '🎯',
     }));
 
+    // Handler functions
+    const handleClassroomChange = (value: number | null) => {
+        onChange('classroom_id', value);
+    };
+
+    const handleTitleChange = (value: string) => {
+        onChange('title', value);
+    };
+
+    const handleDescriptionChange = (value: string) => {
+        onChange('description', value);
+    };
+
+    const handleDifficultyChange = (level: number) => {
+        onChange('difficulty_level', level);
+    };
+
+    const handlePrerequisiteChange = (value: number | null) => {
+        onChange('prerequisite_mission_id', value);
+    };
+
+    const handleStartedAtChange = (value: string | null) => {
+        onChange('started_at', value);
+    };
+
+    const handleFinishedAtChange = (value: string | null) => {
+        onChange('finished_at', value);
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div
-                className={cn(
-                    'rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50',
-                    isMobile ? 'p-4' : 'p-6',
-                )}
-            >
-                {isMobile && (
+            <BasicInfoHeader isMobile={isMobile} />
+
+            {/* Main Content - Two Column Layout on Desktop */}
+            <div className="gap-6">
+                {/* Left Column - Form Fields (2/3 width) */}
+                <div className="space-y-6 lg:col-span-2">
                     <div
                         className={cn(
-                            'flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg',
-                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
+                            'space-y-6 rounded-2xl border border-slate-200 bg-white shadow-lg',
+                            isMobile ? 'p-4' : 'p-6',
                         )}
                     >
-                        📝
-                    </div>
-                )}
-                <div className="flex items-center gap-4">
-                    <div
-                        className={cn(
-                            'hidden items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:flex',
-                            isMobile ? 'h-10 w-10 text-xl' : 'h-14 w-14',
-                        )}
-                    >
-                        📝
-                    </div>
-                    <div>
-                        <h2
-                            className={cn(
-                                'font-bold text-slate-800',
-                                isMobile ? 'text-lg' : 'text-xl',
-                            )}
-                        >
-                            Informasi Dasar Misi
-                        </h2>
-                        <p
-                            className={cn(
-                                'text-slate-600',
-                                isMobile ? 'text-xs' : 'text-sm',
-                            )}
-                        >
-                            Tentukan judul, deskripsi, dan tingkat kesulitan
-                            misi
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Form Fields */}
-            <div
-                className={cn(
-                    'space-y-6 rounded-2xl border border-slate-200 bg-white shadow-lg',
-                    isMobile ? 'p-4' : 'p-6',
-                )}
-            >
-                {/* Classroom Selection */}
-                <FormField>
-                    <InputLabel
-                        value="Pilih Kelas"
-                        icon="🏫"
-                        required
-                        htmlFor="classroom-select"
-                    />
-                    <SearchableDropdown
-                        value={data.classroom_id}
-                        options={classroomOptions}
-                        placeholder="Pilih kelas untuk misi ini..."
-                        noResultsText="Tidak ada kelas ditemukan"
-                        onChange={(value) => onChange('classroom_id', value)}
-                        isError={!!errors.classroom_id}
-                    />
-                    <InputError message={errors.classroom_id} />
-                </FormField>
-
-                {/* Title */}
-                <FormField>
-                    <InputLabel
-                        value="Judul Misi"
-                        icon="🎯"
-                        required
-                        htmlFor="title-input"
-                    />
-                    <TextInput
-                        id="title-input"
-                        type="text"
-                        value={data.title}
-                        onChange={(e) => onChange('title', e.target.value)}
-                        placeholder="Contoh: Misi 1: Sistem Parkir Otomatis"
-                        isError={!!errors.title}
-                    />
-                    <InputError message={errors.title} />
-                    <FormHint>Buat judul yang menarik dan deskriptif</FormHint>
-                </FormField>
-
-                {/* Description */}
-                <FormField>
-                    <InputLabel
-                        value="Deskripsi Singkat"
-                        icon="📋"
-                        required
-                        htmlFor="description-input"
-                    />
-                    <TextAreaInput
-                        id="description-input"
-                        value={data.description}
-                        onChange={(e) =>
-                            onChange('description', e.target.value)
-                        }
-                        placeholder="Jelaskan secara singkat apa yang akan dipelajari siswa dalam misi ini..."
-                        rows={4}
-                        isError={!!errors.description}
-                    />
-                    <InputError message={errors.description} />
-                    <FormHint>{data.description.length}/500 karakter</FormHint>
-                </FormField>
-
-                {/* Difficulty Level */}
-                <FormField>
-                    <InputLabel value="Tingkat Kesulitan" icon="⭐" required />
-                    <DifficultyLevelSelector
-                        value={data.difficulty_level}
-                        levels={difficultyLevels}
-                        onChange={(level) =>
-                            onChange('difficulty_level', level)
-                        }
-                    />
-                    <InputError message={errors.difficulty_level} />
-                </FormField>
-
-                {/* Prerequisite Mission */}
-                <FormField>
-                    <InputLabel
-                        value="Misi Prasyarat (Opsional)"
-                        icon="🔗"
-                        htmlFor="prerequisite-select"
-                    />
-                    <SearchableDropdown
-                        value={data.prerequisite_mission_id ?? null}
-                        options={missionOptions}
-                        placeholder="Tidak ada prasyarat"
-                        noResultsText="Tidak ada misi ditemukan"
-                        emptyOption={{
-                            label: 'Tidak Ada Prasyarat',
-                            icon: '⭕',
-                        }}
-                        onChange={(value) =>
-                            onChange('prerequisite_mission_id', value)
-                        }
-                        isError={!!errors.prerequisite_mission_id}
-                    />
-                    <InputError message={errors.prerequisite_mission_id} />
-                    <FormHint>
-                        Siswa harus menyelesaikan misi ini terlebih dahulu
-                        sebelum mengakses misi yang sedang dibuat.
-                    </FormHint>
-                </FormField>
-
-                {/* Start / Finish DateTime */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {/* Started At */}
-                    <FormField>
-                        <InputLabel
-                            value="Tanggal Mulai (Opsional)"
-                            htmlFor="started-at-input"
-                        >
-                            <Calendar className="h-4 w-4 text-green-600" />
-                        </InputLabel>
-                        <DateTimeInput
-                            id="started-at-input"
-                            value={data.started_at ?? ''}
-                            onChange={(e) =>
-                                onChange('started_at', e.target.value || null)
-                            }
-                            isError={!!errors.started_at}
-                            className="hover:border-green-300 focus:border-green-500 focus:ring-green-100"
+                        <BasicInfoFormFields
+                            data={data}
+                            errors={errors}
+                            classroomOptions={classroomOptions}
+                            missionOptions={missionOptions}
+                            difficultyLevels={difficultyLevels}
+                            onClassroomChange={handleClassroomChange}
+                            onTitleChange={handleTitleChange}
+                            onDescriptionChange={handleDescriptionChange}
+                            onDifficultyChange={handleDifficultyChange}
+                            onPrerequisiteChange={handlePrerequisiteChange}
+                            onStartedAtChange={handleStartedAtChange}
+                            onFinishedAtChange={handleFinishedAtChange}
                         />
-                        <InputError message={errors.started_at} />
-                        <FormHint>
-                            Misi akan aktif pada tanggal & waktu ini
-                        </FormHint>
-                    </FormField>
-
-                    {/* Finished At */}
-                    <FormField>
-                        <InputLabel
-                            value="Tanggal Selesai (Opsional)"
-                            htmlFor="finished-at-input"
-                        >
-                            <Calendar className="h-4 w-4 text-red-600" />
-                        </InputLabel>
-                        <DateTimeInput
-                            id="finished-at-input"
-                            value={data.finished_at ?? ''}
-                            onChange={(e) =>
-                                onChange('finished_at', e.target.value || null)
-                            }
-                            isError={!!errors.finished_at}
-                            className="hover:border-red-300 focus:border-red-500 focus:ring-red-100"
-                        />
-                        <InputError message={errors.finished_at} />
-                        <FormHint>
-                            Misi akan ditutup pada tanggal & waktu ini
-                        </FormHint>
-                    </FormField>
+                    </div>
                 </div>
             </div>
         </div>
