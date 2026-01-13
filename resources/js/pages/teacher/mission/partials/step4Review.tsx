@@ -1,6 +1,16 @@
+import {
+    CodeBlock,
+    ConfirmationBox,
+    DateDisplay,
+    DifficultyBadge,
+    ExternalLink,
+    FileBadge,
+    ReviewCard,
+    ReviewItem,
+} from '@/components/teacher/mission/ui/review';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, FileText, Video } from 'lucide-react';
+import { BookOpen, Code2, Info } from 'lucide-react';
 
 interface Step4ReviewProps {
     data: {
@@ -13,6 +23,9 @@ interface Step4ReviewProps {
         material_pdf: File | string | null;
         collab_url: string;
         simulator_config: string;
+        prerequisite_mission_id?: number | null;
+        started_at?: string | null;
+        finished_at?: string | null;
     };
     classrooms: Array<{ id: number; name: string }>;
 }
@@ -40,7 +53,12 @@ export function Step4Review({ data, classrooms }: Step4ReviewProps) {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
+            <div
+                className={cn(
+                    'rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50',
+                    isMobile ? 'p-4' : 'p-6',
+                )}
+            >
                 {isMobile && (
                     <div
                         className={cn(
@@ -82,144 +100,117 @@ export function Step4Review({ data, classrooms }: Step4ReviewProps) {
             </div>
 
             {/* Review Cards */}
-            <div className="space-y-4">
-                {/* Step 1 Review */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center gap-3 border-b border-slate-200 pb-3">
-                        <CheckCircle2 className="h-6 w-6 text-indigo-600" />
-                        <h3 className="text-lg font-bold text-slate-800">
-                            Informasi Dasar
-                        </h3>
-                    </div>
-                    <dl className="space-y-3">
-                        <div className="flex justify-between">
-                            <dt className="font-medium text-slate-600">
-                                Kelas:
-                            </dt>
-                            <dd className="font-bold text-slate-800">
-                                {selectedClassroom?.name || '-'}
-                            </dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="font-medium text-slate-600">
-                                Judul:
-                            </dt>
-                            <dd className="font-bold text-slate-800">
+            <div className="space-y-6">
+                {/* Card 1: Basic Information */}
+                <ReviewCard
+                    title="Informasi Dasar"
+                    icon={<Info className="h-6 w-6 text-indigo-600" />}
+                    borderColor="border-indigo-100"
+                    bgColor="bg-indigo-50/30"
+                >
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <ReviewItem label="Kelas">
+                            <div className="flex items-center gap-2">
+                                <span className="text-base">🏫</span>
+                                <span className="font-semibold">
+                                    {selectedClassroom?.name || '-'}
+                                </span>
+                            </div>
+                        </ReviewItem>
+
+                        <ReviewItem label="Tingkat Kesulitan">
+                            <DifficultyBadge
+                                level={data.difficulty_level}
+                                label={difficultyLabels[data.difficulty_level]}
+                            />
+                        </ReviewItem>
+
+                        <ReviewItem
+                            label="Judul Misi"
+                            className="md:col-span-2"
+                        >
+                            <p className="rounded-lg bg-white/60 p-3 text-base font-semibold text-slate-800">
                                 {data.title || '-'}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="mb-1 font-medium text-slate-600">
-                                Deskripsi:
-                            </dt>
-                            <dd className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                            </p>
+                        </ReviewItem>
+
+                        <ReviewItem label="Deskripsi" className="md:col-span-2">
+                            <p className="rounded-lg bg-white/60 p-3 text-sm leading-relaxed text-slate-700">
                                 {data.description || '-'}
-                            </dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="font-medium text-slate-600">
-                                Tingkat Kesulitan:
-                            </dt>
-                            <dd className="font-bold text-slate-800">
-                                Level {data.difficulty_level} -{' '}
-                                {difficultyLabels[data.difficulty_level]}
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
+                            </p>
+                        </ReviewItem>
 
-                {/* Step 2 Review */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center gap-3 border-b border-slate-200 pb-3">
-                        <Video className="h-6 w-6 text-purple-600" />
-                        <h3 className="text-lg font-bold text-slate-800">
-                            Skenario PBL
-                        </h3>
+                        {(data.started_at || data.finished_at) && (
+                            <>
+                                <ReviewItem label="Tanggal Mulai">
+                                    <DateDisplay
+                                        date={data.started_at}
+                                        type="start"
+                                    />
+                                </ReviewItem>
+
+                                <ReviewItem label="Tanggal Selesai">
+                                    <DateDisplay
+                                        date={data.finished_at}
+                                        type="end"
+                                    />
+                                </ReviewItem>
+                            </>
+                        )}
                     </div>
-                    <dl className="space-y-3">
-                        <div>
-                            <dt className="mb-1 font-medium text-slate-600">
-                                Video URL:
-                            </dt>
-                            <dd className="rounded-lg bg-slate-50 p-3 font-mono text-sm break-all text-slate-700">
+                </ReviewCard>
+
+                {/* Card 2: Scenario & Problem */}
+                <ReviewCard
+                    title="Skenario & Masalah (PBL)"
+                    icon={<BookOpen className="h-6 w-6 text-pink-600" />}
+                    borderColor="border-pink-100"
+                    bgColor="bg-pink-50/30"
+                >
+                    <div className="space-y-4">
+                        <ReviewItem label="Video Orientasi (YouTube)">
+                            <ExternalLink href={data.video_url}>
                                 {data.video_url || '-'}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="mb-1 font-medium text-slate-600">
-                                Narasi Kasus:
-                            </dt>
-                            <dd className="rounded-lg bg-slate-50 p-3 text-sm whitespace-pre-wrap text-slate-700">
-                                {data.case_narrative || '-'}
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
+                            </ExternalLink>
+                        </ReviewItem>
 
-                {/* Step 3 Review */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center gap-3 border-b border-slate-200 pb-3">
-                        <FileText className="h-6 w-6 text-cyan-600" />
-                        <h3 className="text-lg font-bold text-slate-800">
-                            Materi & Resources
-                        </h3>
+                        <ReviewItem label="Narasi Kasus / Problem Statement">
+                            <div className="rounded-lg border border-pink-200 bg-white/50 p-4">
+                                <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-700">
+                                    {data.case_narrative || '-'}
+                                </p>
+                            </div>
+                        </ReviewItem>
                     </div>
-                    <dl className="space-y-3">
-                        <div className="flex justify-between">
-                            <dt className="font-medium text-slate-600">
-                                Materi PDF:
-                            </dt>
-                            <dd className="font-bold text-slate-800">
-                                {fileName ? (
-                                    <span className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-3 py-1 text-sm text-green-700">
-                                        <FileText className="h-4 w-4" />
-                                        {fileName}
-                                    </span>
-                                ) : (
-                                    <span className="text-slate-400">
-                                        Tidak ada
-                                    </span>
-                                )}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="mb-1 font-medium text-slate-600">
-                                Link Kolaborasi:
-                            </dt>
-                            <dd className="rounded-lg bg-slate-50 p-3 font-mono text-sm break-all text-slate-700">
+                </ReviewCard>
+
+                {/* Card 3: Resources & Simulator */}
+                <ReviewCard
+                    title="Sumber Daya & Simulator"
+                    icon={<Code2 className="h-6 w-6 text-amber-600" />}
+                    borderColor="border-amber-100"
+                    bgColor="bg-amber-50/30"
+                >
+                    <div className="space-y-4">
+                        <ReviewItem label="Materi Pembelajaran (PDF)">
+                            <FileBadge fileName={fileName} />
+                        </ReviewItem>
+
+                        <ReviewItem label="Link Kolaborasi (FigJam/Miro)">
+                            <ExternalLink href={data.collab_url}>
                                 {data.collab_url || '-'}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="mb-1 font-medium text-slate-600">
-                                Simulator Config:
-                            </dt>
-                            <dd className="rounded-lg bg-slate-900 p-3 font-mono text-xs text-green-400">
-                                {data.simulator_config || '{}'}
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
+                            </ExternalLink>
+                        </ReviewItem>
+
+                        <ReviewItem label="Konfigurasi Simulator (JSON)">
+                            <CodeBlock code={data.simulator_config} />
+                        </ReviewItem>
+                    </div>
+                </ReviewCard>
             </div>
 
-            {/* Summary Box */}
-            <div className="rounded-xl border-2 border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
-                <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-2xl shadow">
-                        ℹ️
-                    </div>
-                    <div>
-                        <h4 className="mb-2 font-bold text-emerald-900">
-                            Siap untuk disimpan!
-                        </h4>
-                        <p className="text-sm text-emerald-800">
-                            Pastikan semua informasi sudah benar. Klik tombol
-                            "Simpan Misi" di bawah untuk menyimpan ke database.
-                            Anda masih bisa mengedit misi setelah disimpan.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            {/* Confirmation Box */}
+            <ConfirmationBox />
         </div>
     );
 }
