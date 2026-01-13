@@ -236,27 +236,6 @@ export function Step2Scenario({ data, errors, onChange }: Step2ScenarioProps) {
                             </div>
                         </div>
 
-                        {/* Info Card */}
-                        <div className="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg">
-                            <div className="border-b border-amber-200 bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xl">ℹ️</span>
-                                    <h3 className="font-bold text-white">
-                                        Catatan
-                                    </h3>
-                                </div>
-                            </div>
-                            <div className="p-4">
-                                <p className="text-sm text-amber-900">
-                                    <strong>Video & Narasi</strong> adalah dua
-                                    elemen kunci dalam Tahap 1 PBL (Orientasi
-                                    Masalah). Pastikan keduanya saling
-                                    melengkapi untuk memberikan gambaran yang
-                                    jelas kepada siswa.
-                                </p>
-                            </div>
-                        </div>
-
                         {/* Best Practice Example */}
                         <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg">
                             <div className="border-b border-indigo-200 bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-3">
