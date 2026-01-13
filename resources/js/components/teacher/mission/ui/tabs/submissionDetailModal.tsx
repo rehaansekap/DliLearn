@@ -71,9 +71,8 @@ export function SubmissionDetailModal({
 
     const hasSubmission = Boolean(submission.submission_id);
 
-    const handleSaveGrade = () => {
+    const handleSaveGrade = async () => {
         if (!submission.submission_id) return;
-
         setIsSaving(true);
         router.post(
             `/teacher/submission/${submission.submission_id}/grade`,
@@ -82,12 +81,34 @@ export function SubmissionDetailModal({
                 teacher_notes: teacherNotes,
             },
             {
-                onSuccess: () => {
+                onSuccess: async () => {
                     setIsSaving(false);
+                    onClose();
+                    const SwalModule = await import('sweetalert2');
+                    await import('sweetalert2/dist/sweetalert2.min.css');
+                    await SwalModule.default.fire({
+                        icon: 'success',
+                        title: 'Nilai Disimpan!',
+                        text: 'Penilaian berhasil disimpan.',
+                        timer: 1400,
+                        showConfirmButton: false,
+                        customClass: { popup: 'rounded-xl' },
+                    });
                     router.reload();
                 },
-                onError: () => {
+                onError: async (errors) => {
                     setIsSaving(false);
+                    onClose();
+                    const SwalModule = await import('sweetalert2');
+                    await import('sweetalert2/dist/sweetalert2.min.css');
+                    await SwalModule.default.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan',
+                        text:
+                            (errors && (errors.message || errors.error)) ||
+                            'Gagal menyimpan nilai. Coba lagi.',
+                        customClass: { popup: 'rounded-xl' },
+                    });
                 },
             },
         );

@@ -55,16 +55,18 @@ export function TabMonitoring({
     allReflections = [],
     onViewSubmission,
 }: TabMonitoringProps) {
-    // Calculate stats
     const activeGroups = groups.filter(
-        (g) => g.current_step > 1 && g.current_step < 5,
-    ).length;
-    const completedGroups = groups.filter((g) => g.current_step === 5).length;
-    const needsReview = groups.filter(
-        (g) => g.step4_status === 'completed' && g.step5_status !== 'completed',
+        (g) => g.current_step >= 2 && g.current_step < 5,
     ).length;
 
-    // Combine and sort vote results
+    const completedGroups = groups.filter((g) => g.current_step === 5).length;
+
+    const needsReview = groups.filter(
+        (g) =>
+            g.step4_status === 'completed' &&
+            (g.step5_status !== 'completed' || g.current_step < 5),
+    ).length;
+
     const voteMap = useMemo(() => {
         const m = new Map<number, number>();
         voteResults.forEach((v) => m.set(v.group_id, v.vote_count));
@@ -148,7 +150,7 @@ export function TabMonitoring({
                 </div>
 
                 {/* Right Column - Sidebar (1/4 width) */}
-                <div className="space-y-6 lg:col-span-1">
+                <div className="sticky top-4 space-y-6 lg:col-span-1">
                     {/* Leaderboard */}
                     <LeaderboardCard
                         results={combinedResults}
