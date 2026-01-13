@@ -1,15 +1,21 @@
+import {
+    BackgroundPattern,
+    MissionDetailHeader,
+    MissionStats,
+    MissionTabs,
+    PageContainer,
+} from '@/components/teacher/mission/ui/detail';
+import {
+    SubmissionDetailModal,
+    TabAttendance,
+    TabGroupManagement,
+    TabMonitoring,
+} from '@/components/teacher/mission/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import TeacherLayout from '@/layouts/teacher-layout';
 import { User } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { MissionStats } from './partials/missionStats';
-import { MissionTabs } from './partials/missionTabs';
-import { SubmissionDetailModal } from './partials/submissionDetailModal';
-import { TabAttendance } from './partials/tabAttendance';
-import { TabGroupManagement } from './partials/tabGroupManagement';
-import { TabMonitoring } from './partials/tabMonitoring';
 
 interface Mission {
     id: number;
@@ -51,6 +57,11 @@ interface Feedback {
     group_name: string;
     message: string;
     created_at: string;
+}
+
+interface Grade {
+    score: number;
+    teacher_notes: string | null;
 }
 
 interface GroupMonitoring extends Group {
@@ -144,109 +155,52 @@ export default function Show({
             <Head title={`Kelola: ${mission.title}`} />
 
             {/* Background Pattern */}
-            <div className="fixed inset-0 -z-10 bg-slate-50">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
-            </div>
+            <BackgroundPattern />
 
-            <div className="px-4 py-8 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-7xl space-y-8">
-                    {/* Mission Header */}
-                    <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 sm:p-8">
-                        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                            {isMobile && (
-                                <div className="flex items-center gap-3">
-                                    <Link
-                                        href="/teacher/dashboard"
-                                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 backdrop-blur-sm"
-                                    >
-                                        <ArrowLeft className="h-5 w-5 text-white" />
-                                    </Link>
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
-                                        🎯
-                                    </div>
-                                </div>
-                            )}
-                            <div className="flex items-center gap-3">
-                                <div className="hidden">
-                                    <Link
-                                        href="/teacher/dashboard"
-                                        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 backdrop-blur-sm"
-                                    >
-                                        <ArrowLeft className="h-5 w-5 text-white" />
-                                    </Link>
-                                </div>
-                                <div className="hidden h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-2xl shadow-lg sm:flex sm:h-16 sm:w-16 sm:text-3xl">
-                                    🎯
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-black text-slate-800 sm:text-3xl">
-                                        {mission.title}
-                                    </h1>
-                                    <p className="mt-1 text-xs text-slate-600 sm:block sm:text-sm">
-                                        {mission.description}
-                                    </p>
-                                    <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 text-xs font-semibold text-indigo-700">
-                                        <span>⭐</span>
-                                        <span>
-                                            Level {mission.difficulty_level}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <Link
-                                href={`/teacher/mission/${mission.slug}/edit`}
-                                className="inline-flex items-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50"
-                            >
-                                <Edit className="h-4 w-4" />
-                                <span className="sm:inline">Edit Misi</span>
-                            </Link>
-                        </div>
-                    </div>
+            <PageContainer>
+                {/* Mission Header */}
+                <MissionDetailHeader mission={mission} isMobile={isMobile} />
 
-                    {/* Statistics */}
-                    <MissionStats
-                        totalGroups={stats.totalGroups}
-                        completedGroups={stats.completedGroups}
-                        inProgressGroups={stats.inProgressGroups}
-                        notStartedGroups={stats.notStartedGroups}
-                    />
+                {/* Statistics */}
+                <MissionStats
+                    totalGroups={stats.totalGroups}
+                    completedGroups={stats.completedGroups}
+                    inProgressGroups={stats.inProgressGroups}
+                    notStartedGroups={stats.notStartedGroups}
+                />
 
-                    {/* Tab Navigation */}
-                    <MissionTabs
-                        activeTab={activeTab}
-                        onTabChange={setActiveTab}
-                    />
+                {/* Tab Navigation */}
+                <MissionTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                    {/* Tab Content */}
-                    <div>
-                        {activeTab === 'attendance' && (
-                            <TabAttendance
-                                students={students}
-                                missionId={mission.id}
-                                initialAttendance={initialAttendance}
-                                classroom={classroom}
-                            />
-                        )}
+                {/* Tab Content */}
+                <div>
+                    {activeTab === 'attendance' && (
+                        <TabAttendance
+                            students={students}
+                            missionId={mission.id}
+                            initialAttendance={initialAttendance}
+                            classroom={classroom}
+                        />
+                    )}
 
-                        {activeTab === 'groups' && (
-                            <TabGroupManagement
-                                students={students}
-                                groups={groups}
-                                missionId={mission.id}
-                            />
-                        )}
+                    {activeTab === 'groups' && (
+                        <TabGroupManagement
+                            students={students}
+                            groups={groups}
+                            missionId={mission.id}
+                        />
+                    )}
 
-                        {activeTab === 'monitoring' && (
-                            <TabMonitoring
-                                groups={groupsMonitoring}
-                                voteResults={voteResults}
-                                allReflections={allReflections}
-                                onViewSubmission={handleViewSubmission}
-                            />
-                        )}
-                    </div>
+                    {activeTab === 'monitoring' && (
+                        <TabMonitoring
+                            groups={groupsMonitoring}
+                            voteResults={voteResults}
+                            allReflections={allReflections}
+                            onViewSubmission={handleViewSubmission}
+                        />
+                    )}
                 </div>
-            </div>
+            </PageContainer>
 
             {/* Submission Detail Modal */}
             {selectedSubmission && (
