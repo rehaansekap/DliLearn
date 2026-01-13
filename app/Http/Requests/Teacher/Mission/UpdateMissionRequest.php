@@ -30,7 +30,6 @@ class UpdateMissionRequest extends FormRequest
             'video_url' => ['required', 'url', 'regex:/youtube\.com|youtu\.be/'],
             'case_narrative' => ['required', 'string', 'max:1000'],
             'material_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-            'collab_url' => ['nullable', 'url'],
             'simulator_config' => ['nullable', 'string'],
             'prerequisite_mission_id' => ['nullable', 'exists:missions,id'],
             'started_at' => ['nullable', 'date'],
@@ -60,7 +59,6 @@ class UpdateMissionRequest extends FormRequest
             'material_pdf.file' => 'File harus berupa dokumen',
             'material_pdf.mimes' => 'File harus berformat PDF',
             'material_pdf.max' => 'Ukuran file maksimal 10MB',
-            'collab_url.url' => 'Format URL kolaborasi tidak valid',
             'prerequisite_mission_id.exists' => 'Misi prasyarat tidak valid',
             'started_at.date' => 'Format tanggal mulai tidak valid',
             'finished_at.date' => 'Format tanggal selesai tidak valid',
@@ -78,7 +76,6 @@ class UpdateMissionRequest extends FormRequest
         }
 
         $this->merge([
-            'collab_url' => $this->collab_url ?: null,
             'simulator_config' => $this->simulator_config ?: null,
             'prerequisite_mission_id' => $this->prerequisite_mission_id ?: null,
             'started_at' => $this->started_at ?: null,

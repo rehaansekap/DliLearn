@@ -1,4 +1,6 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Trash2 } from 'lucide-react';
+import { CollabUrlInput } from './collabUrlInput';
 import { MemberItem } from './memberItem';
 
 interface GroupMember {
@@ -13,6 +15,7 @@ interface Group {
     group_name: string;
     group_code: string;
     members: GroupMember[];
+    collab_url?: string | null;
 }
 
 interface GroupCardProps {
@@ -23,6 +26,7 @@ interface GroupCardProps {
         color: string;
     }>;
     onGroupNameChange: (groupId: number, newName: string) => void;
+    onCollabUrlChange: (groupId: number, newUrl: string) => void;
     onRemoveGroup: (groupId: number) => void;
     onRoleChange: (groupId: number, studentId: number, role: string) => void;
     onRemoveMember: (groupId: number, studentId: number) => void;
@@ -32,10 +36,12 @@ export function GroupCard({
     group,
     availableRoles,
     onGroupNameChange,
+    onCollabUrlChange,
     onRemoveGroup,
     onRoleChange,
     onRemoveMember,
 }: GroupCardProps) {
+    const isMobile = useIsMobile();
     return (
         <div className="overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg transition-all hover:shadow-xl">
             {/* Header */}
@@ -64,35 +70,44 @@ export function GroupCard({
                 </button>
             </div>
 
+            {/* Collaboration URL Input */}
+            <CollabUrlInput
+                value={group.collab_url}
+                onChange={(newUrl) => onCollabUrlChange(group.group_id, newUrl)}
+                isMobile={isMobile}
+            />
+
             {/* Members List */}
             <div className="space-y-2 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-700">
+                        Anggota Kelompok
+                    </h3>
+                    <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
+                        {group.members.length} orang
+                    </span>
+                </div>
                 {group.members.length === 0 ? (
-                    <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+                    <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center">
                         <span className="mb-2 block text-3xl">👤</span>
                         <p className="text-sm text-slate-500">
                             Belum ada anggota
                         </p>
                     </div>
                 ) : (
-                    group.members.map((member) => (
-                        <MemberItem
-                            key={member.id}
-                            member={member}
-                            groupId={group.group_id}
-                            availableRoles={availableRoles}
-                            onRoleChange={onRoleChange}
-                            onRemove={onRemoveMember}
-                        />
-                    ))
+                    <div className="space-y-2">
+                        {group.members.map((member) => (
+                            <MemberItem
+                                key={member.id}
+                                member={member}
+                                groupId={group.group_id}
+                                availableRoles={availableRoles}
+                                onRoleChange={onRoleChange}
+                                onRemove={onRemoveMember}
+                            />
+                        ))}
+                    </div>
                 )}
-            </div>
-
-            {/* Footer Stats */}
-            <div className="border-t border-slate-200 bg-slate-50 px-4 py-2">
-                <p className="text-xs text-slate-600">
-                    <span className="font-bold">{group.members.length}</span>{' '}
-                    anggota
-                </p>
             </div>
         </div>
     );

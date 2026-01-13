@@ -1,5 +1,4 @@
 import {
-    CodeBlock,
     ConfirmationBox,
     DateDisplay,
     DifficultyBadge,
@@ -194,16 +193,6 @@ export function Step4Review({ data, classrooms }: Step4ReviewProps) {
                     <div className="space-y-4">
                         <ReviewItem label="Materi Pembelajaran (PDF)">
                             <FileBadge fileName={fileName} />
-                        </ReviewItem>
-
-                        <ReviewItem label="Link Kolaborasi (FigJam/Miro)">
-                            <ExternalLink href={data.collab_url}>
-                                {data.collab_url || '-'}
-                            </ExternalLink>
-                        </ReviewItem>
-
-                        <ReviewItem label="Konfigurasi Simulator (JSON)">
-                            <CodeBlock code={data.simulator_config} />
                         </ReviewItem>
                     </div>
                 </ReviewCard>

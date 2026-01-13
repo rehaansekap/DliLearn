@@ -26,6 +26,7 @@ interface Group {
     group_name: string;
     group_code: string;
     members: GroupMember[];
+    collab_url?: string | null;
 }
 
 interface TabGroupManagementProps {
@@ -68,10 +69,8 @@ export function TabGroupManagement({
         (s) => !assignedStudentIds.includes(s.id),
     );
 
-    // Handlers
     const handleShuffle = () => {
         const allStudents = [...students];
-        // Fisher-Yates shuffle
         for (let i = allStudents.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allStudents[i], allStudents[j]] = [allStudents[j], allStudents[i]];
@@ -89,6 +88,7 @@ export function TabGroupManagement({
                 group_id: groups[i]?.group_id || Date.now() + i,
                 group_name: groups[i]?.group_name || `Kelompok ${i + 1}`,
                 group_code: groups[i]?.group_code || `GRP-${i + 1}`,
+                collab_url: groups[i]?.collab_url || null,
                 members: groupMembers.map((s, idx) => ({
                     ...s,
                     role: idx === 0 ? 'Leader' : 'Presenter',
@@ -117,6 +117,14 @@ export function TabGroupManagement({
         setGroups((prev) =>
             prev.map((g) =>
                 g.group_id === groupId ? { ...g, group_name: newName } : g,
+            ),
+        );
+    };
+
+    const handleCollabUrlChange = (groupId: number, newUrl: string) => {
+        setGroups((prev) =>
+            prev.map((g) =>
+                g.group_id === groupId ? { ...g, collab_url: newUrl } : g,
             ),
         );
     };
@@ -182,6 +190,7 @@ export function TabGroupManagement({
             group_id: group.group_id,
             group_name: group.group_name,
             group_code: group.group_code,
+            collab_url: group.collab_url || null,
             members: group.members.map((m) => ({
                 user_id: m.id,
                 role: m.role,
@@ -294,6 +303,7 @@ export function TabGroupManagement({
                             group={group}
                             availableRoles={AVAILABLE_ROLES}
                             onGroupNameChange={handleGroupNameChange}
+                            onCollabUrlChange={handleCollabUrlChange}
                             onRemoveGroup={handleRemoveGroup}
                             onRoleChange={handleRoleChange}
                             onRemoveMember={handleRemoveMember}

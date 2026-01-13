@@ -41,6 +41,7 @@ interface Group {
     group_name: string;
     group_code: string;
     members: GroupMember[];
+    collab_url?: string | null;
 }
 
 interface Reflection {

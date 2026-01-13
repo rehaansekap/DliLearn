@@ -14,7 +14,6 @@ class TeacherGroupManagementService
     {
         Log::info('Updating groups', ['mission_id' => $missionId, 'groups' => $groupsData]);
 
-
         $classroomId = DB::table('missions')->where('id', $missionId)->value('classroom_id');
 
         $createdMapping = [];
@@ -42,16 +41,18 @@ class TeacherGroupManagementService
                     'updated_at' => now(),
                 ]);
 
-
-                DB::table('group_progress')->updateOrInsert(
-                    ['group_id' => $groupId, 'mission_id' => $missionId],
-                    ['current_step' => 1, 'status' => 'locked', 'updated_at' => now(), 'created_at' => now()]
-                );
-
-
                 $createdMapping[(string)$originalId] = $groupId;
             }
 
+            DB::table('group_progress')->updateOrInsert(
+                ['group_id' => $groupId, 'mission_id' => $missionId],
+                [
+                    'current_step' => 1,
+                    'status' => 'locked',
+                    'collab_url' => $groupData['collab_url'] ?? null,
+                    'created_at' => now()
+                ]
+            );
 
             DB::table('group_members')->where('group_id', $groupId)->delete();
 

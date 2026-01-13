@@ -10,7 +10,6 @@ import { useState } from 'react';
 interface Step3LearningResourcesProps {
     data: {
         material_pdf: File | string | null;
-        collab_url: string;
         simulator_config: string;
     };
     errors: Record<string, string>;
@@ -60,10 +59,6 @@ export function Step3LearningResources({
         onChange('material_pdf', null);
     };
 
-    const handleCollabUrlChange = (value: string) => {
-        onChange('collab_url', value);
-    };
-
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -81,12 +76,10 @@ export function Step3LearningResources({
                     >
                         <ResourcesFormFields
                             materialPdf={data.material_pdf}
-                            collabUrl={data.collab_url}
                             errors={errors}
                             isDragging={isDragging}
                             onFileSelect={handleFileSelect}
                             onRemoveFile={handleRemoveFile}
-                            onCollabUrlChange={handleCollabUrlChange}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
