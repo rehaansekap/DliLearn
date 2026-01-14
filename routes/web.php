@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -10,9 +11,17 @@ use App\Http\Controllers\Teacher\TeacherMissionController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+
+    $role = Auth::user()?->role;
+
+    return match ($role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'teacher' => redirect()->route('teacher.dashboard'),
+        default => redirect()->route('dashboard'),
+    };
 })->name('home');
 
 Route::middleware(['auth', 'verified', 'student'])->group(function () {
