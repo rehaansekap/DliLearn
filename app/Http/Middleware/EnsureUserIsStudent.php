@@ -24,6 +24,9 @@ class EnsureUserIsStudent
                 if ($role === 'teacher') {
                     return redirect()->route('teacher.dashboard');
                 }
+                if ($role === 'admin') {
+                    return redirect()->route('admin.dashboard');
+                }
 
                 abort(403, 'Unauthorized access. Students only.');
             }

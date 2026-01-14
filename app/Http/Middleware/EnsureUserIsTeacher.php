@@ -17,6 +17,9 @@ class EnsureUserIsTeacher
     {
         $user = $request->user();
         if ($user && $user->role !== 'teacher') {
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
             abort(403, 'Unauthorized access. Teachers only.');
         }
 
