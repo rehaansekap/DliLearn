@@ -12,6 +12,35 @@ export default function CreateUser({ auth }: CreateUserProps) {
     const handleSubmit = (formData: FormData) => {
         router.post('/admin/users', formData, {
             forceFormData: true,
+            onSuccess: async () => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                await SwalModule.default.fire({
+                    icon: 'success',
+                    title: 'User Berhasil Ditambahkan! ✅',
+                    text: 'User baru telah berhasil ditambahkan ke sistem.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
+            onError: async (errors) => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                const errorMessage =
+                    errors.error ||
+                    'Gagal menambahkan user. Periksa kembali data yang Anda masukkan.';
+
+                await SwalModule.default.fire({
+                    icon: 'error',
+                    title: 'Gagal Menambahkan User',
+                    text: errorMessage,
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
         });
     };
 

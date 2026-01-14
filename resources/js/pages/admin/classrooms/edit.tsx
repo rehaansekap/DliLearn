@@ -31,7 +31,37 @@ export default function EditClassroom({
     teachers,
 }: EditClassroomProps) {
     const handleSubmit = (data: Record<string, unknown>) => {
-        router.put(`/admin/classrooms/${classroom.id}`, data);
+        router.put(`/admin/classrooms/${classroom.id}`, data, {
+            onSuccess: async () => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                await SwalModule.default.fire({
+                    icon: 'success',
+                    title: 'Kelas Berhasil Diperbarui! ✅',
+                    text: 'Informasi kelas telah berhasil diperbarui.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
+            onError: async (errors) => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                const errorMessage =
+                    errors.error ||
+                    'Gagal memperbarui kelas. Periksa kembali data yang Anda masukkan.';
+
+                await SwalModule.default.fire({
+                    icon: 'error',
+                    title: 'Gagal Memperbarui Kelas',
+                    text: errorMessage,
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
+        });
     };
 
     return (

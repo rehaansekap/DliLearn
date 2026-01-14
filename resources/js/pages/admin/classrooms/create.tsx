@@ -20,7 +20,37 @@ export default function CreateClassroom({
     teachers,
 }: CreateClassroomProps) {
     const handleSubmit = (data: Record<string, unknown>) => {
-        router.post('/admin/classrooms', data);
+        router.post('/admin/classrooms', data, {
+            onSuccess: async () => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                await SwalModule.default.fire({
+                    icon: 'success',
+                    title: 'Kelas Berhasil Ditambahkan! ✅',
+                    text: 'Kelas baru telah berhasil dibuat.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
+            onError: async (errors) => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                const errorMessage =
+                    errors.error ||
+                    'Gagal menambahkan kelas. Periksa kembali data yang Anda masukkan.';
+
+                await SwalModule.default.fire({
+                    icon: 'error',
+                    title: 'Gagal Menambahkan Kelas',
+                    text: errorMessage,
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
+        });
     };
 
     return (

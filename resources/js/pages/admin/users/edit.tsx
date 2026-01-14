@@ -24,6 +24,35 @@ export default function EditUser({ auth, user }: EditUserProps) {
 
         router.post(`/admin/users/${user.id}`, formData, {
             forceFormData: true,
+            onSuccess: async () => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                await SwalModule.default.fire({
+                    icon: 'success',
+                    title: 'User Berhasil Diperbarui! ✅',
+                    text: 'Informasi user telah berhasil diperbarui.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
+            onError: async (errors) => {
+                const SwalModule = await import('sweetalert2');
+                await import('sweetalert2/dist/sweetalert2.min.css');
+
+                const errorMessage =
+                    errors.error ||
+                    'Gagal memperbarui user. Periksa kembali data yang Anda masukkan.';
+
+                await SwalModule.default.fire({
+                    icon: 'error',
+                    title: 'Gagal Memperbarui User',
+                    text: errorMessage,
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'rounded-xl' },
+                });
+            },
         });
     };
 
