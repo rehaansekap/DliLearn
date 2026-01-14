@@ -86,7 +86,7 @@ export default function CreateClassroom({
                     </a>
 
                     {/* Page Header */}
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
+                    <div className="overflow-visible rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
                         <div className="mb-6 flex items-center gap-4">
                             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl shadow-lg">
                                 🏫

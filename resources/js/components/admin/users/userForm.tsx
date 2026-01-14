@@ -1,8 +1,9 @@
 import { InputError } from '@/components/admin/users/ui/inputError';
-import { cn } from '@/lib/utils';
+import { SelectInput, TextInput } from '@/components/teacher/mission/ui/form';
 import { useForm } from '@inertiajs/react';
 import { Camera, Loader2 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+
 
 interface UserFormData {
     name: string;
@@ -150,18 +151,13 @@ export function UserForm({
                     >
                         Nama Lengkap <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <TextInput
                         id="name"
                         type="text"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         placeholder="Masukkan nama lengkap"
-                        className={cn(
-                            'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                            errors.name
-                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                        )}
+                        isError={!!errors.name}
                     />
                     <InputError message={errors.name} />
                 </div>
@@ -174,18 +170,13 @@ export function UserForm({
                     >
                         Username <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <TextInput
                         id="username"
                         type="text"
                         value={data.username}
                         onChange={(e) => setData('username', e.target.value)}
                         placeholder="username_unik"
-                        className={cn(
-                            'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                            errors.username
-                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                        )}
+                        isError={!!errors.username}
                     />
                     <InputError message={errors.username} />
                 </div>
@@ -198,18 +189,13 @@ export function UserForm({
                     >
                         Email <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <TextInput
                         id="email"
                         type="email"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         placeholder="user@sekolah.id"
-                        className={cn(
-                            'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                            errors.email
-                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                        )}
+                        isError={!!errors.email}
                     />
                     <InputError message={errors.email} />
                 </div>
@@ -222,7 +208,7 @@ export function UserForm({
                     >
                         Role <span className="text-red-500">*</span>
                     </label>
-                    <select
+                    <SelectInput
                         id="role"
                         value={data.role}
                         onChange={(e) =>
@@ -234,19 +220,13 @@ export function UserForm({
                                     | 'admin',
                             )
                         }
-                        className={cn(
-                            'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                            errors.role
-                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                        )}
-                    >
-                        {roles.map((role) => (
-                            <option key={role.value} value={role.value}>
-                                {role.label}
-                            </option>
-                        ))}
-                    </select>
+                        options={roles.map((r) => ({
+                            value: r.value,
+                            label: r.label,
+                        }))}
+                        isError={!!errors.role}
+                        placeholder="Pilih role"
+                    />
                     <InputError message={errors.role} />
                 </div>
 
@@ -259,7 +239,7 @@ export function UserForm({
                         Password{' '}
                         {!isEdit && <span className="text-red-500">*</span>}
                     </label>
-                    <input
+                    <TextInput
                         id="password"
                         type="password"
                         value={data.password}
@@ -269,12 +249,7 @@ export function UserForm({
                                 ? 'Kosongkan jika tidak diubah'
                                 : 'Min. 8 karakter'
                         }
-                        className={cn(
-                            'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                            errors.password
-                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                        )}
+                        isError={!!errors.password}
                     />
                     <InputError message={errors.password} />
                 </div>
@@ -288,7 +263,7 @@ export function UserForm({
                         Konfirmasi Password{' '}
                         {!isEdit && <span className="text-red-500">*</span>}
                     </label>
-                    <input
+                    <TextInput
                         id="password_confirmation"
                         type="password"
                         value={data.password_confirmation}
@@ -296,59 +271,9 @@ export function UserForm({
                             setData('password_confirmation', e.target.value)
                         }
                         placeholder="Ulangi password"
-                        className={cn(
-                            'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                            errors.password_confirmation
-                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                        )}
+                        isError={!!errors.password_confirmation}
                     />
                     <InputError message={errors.password_confirmation} />
-                </div>
-
-                {/* XP */}
-                <div>
-                    <label
-                        htmlFor="xp"
-                        className="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        XP (Opsional)
-                    </label>
-                    <input
-                        id="xp"
-                        type="number"
-                        value={data.xp}
-                        onChange={(e) =>
-                            setData('xp', parseInt(e.target.value) || 0)
-                        }
-                        min="0"
-                        placeholder="0"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
-                    />
-                    <InputError message={errors.xp} />
-                </div>
-
-                {/* Level */}
-                <div>
-                    <label
-                        htmlFor="level"
-                        className="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Level (Opsional)
-                    </label>
-                    <input
-                        id="level"
-                        type="number"
-                        value={data.level}
-                        onChange={(e) =>
-                            setData('level', parseInt(e.target.value) || 1)
-                        }
-                        min="1"
-                        max="100"
-                        placeholder="1"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
-                    />
-                    <InputError message={errors.level} />
                 </div>
             </div>
 

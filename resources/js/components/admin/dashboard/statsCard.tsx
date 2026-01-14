@@ -4,27 +4,17 @@ interface StatsCardProps {
     title: string;
     value: number;
     icon: string;
-    color: 'slate' | 'blue' | 'emerald' | 'amber';
-    trend?: {
-        value: number;
-        isPositive: boolean;
-    };
+    color: 'indigo' | 'emerald' | 'amber' | 'rose';
+    subtitle?: string;
 }
 
 const colorStyles = {
-    slate: {
-        bg: 'from-slate-50 to-gray-50',
-        border: 'border-slate-200',
-        iconBg: 'from-slate-600 to-gray-700',
-        text: 'text-slate-900',
-        subtitle: 'text-slate-600',
-    },
-    blue: {
-        bg: 'from-blue-50 to-cyan-50',
-        border: 'border-blue-200',
-        iconBg: 'from-blue-500 to-cyan-500',
-        text: 'text-blue-900',
-        subtitle: 'text-blue-600',
+    indigo: {
+        bg: 'from-indigo-50 to-purple-50',
+        border: 'border-indigo-200',
+        iconBg: 'from-indigo-500 to-purple-500',
+        text: 'text-indigo-900',
+        subtitle: 'text-indigo-600',
     },
     emerald: {
         bg: 'from-emerald-50 to-teal-50',
@@ -40,6 +30,13 @@ const colorStyles = {
         text: 'text-amber-900',
         subtitle: 'text-amber-600',
     },
+    rose: {
+        bg: 'from-rose-50 to-pink-50',
+        border: 'border-rose-200',
+        iconBg: 'from-rose-500 to-pink-500',
+        text: 'text-rose-900',
+        subtitle: 'text-rose-600',
+    },
 };
 
 export function StatsCard({
@@ -47,7 +44,7 @@ export function StatsCard({
     value,
     icon,
     color,
-    trend,
+    subtitle,
 }: StatsCardProps) {
     const styles = colorStyles[color];
 
@@ -65,37 +62,27 @@ export function StatsCard({
             <div className="relative z-10 flex items-center gap-3 sm:gap-4">
                 <div
                     className={cn(
-                        'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg sm:h-14 sm:w-14',
+                        'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg sm:h-14 sm:w-14',
                         styles.iconBg,
                     )}
                 >
-                    <span className="text-lg text-white sm:text-2xl">
-                        {icon}
-                    </span>
+                    <span className="text-2xl sm:text-3xl">{icon}</span>
                 </div>
                 <div>
-                    <p className="text-xs font-medium text-slate-500 sm:text-sm">
+                    <p className="text-sm font-medium text-slate-700">
                         {title}
                     </p>
                     <p
                         className={cn(
-                            'text-xl font-black sm:text-3xl',
+                            'text-3xl font-black sm:text-4xl',
                             styles.text,
                         )}
                     >
                         {value.toLocaleString()}
                     </p>
-                    {trend && (
-                        <p
-                            className={cn(
-                                'text-xs',
-                                trend.isPositive
-                                    ? 'text-green-600'
-                                    : 'text-red-600',
-                            )}
-                        >
-                            {trend.isPositive ? '↑' : '↓'}{' '}
-                            {Math.abs(trend.value)}%
+                    {subtitle && (
+                        <p className={cn('text-xs', styles.subtitle)}>
+                            {subtitle}
                         </p>
                     )}
                 </div>

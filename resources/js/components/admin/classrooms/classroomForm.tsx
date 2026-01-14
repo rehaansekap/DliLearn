@@ -1,5 +1,6 @@
 import { InputError } from '@/components/admin/users/ui/inputError';
-import { cn } from '@/lib/utils';
+import { TextInput } from '@/components/teacher/mission/ui/form';
+import { SearchableDropdown } from '@/components/teacher/mission/ui/searchableDropdown';
 import { useForm } from '@inertiajs/react';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { FormEvent, useState } from 'react';
@@ -13,7 +14,7 @@ interface Teacher {
 interface ClassroomFormData {
     name: string;
     academic_year: string;
-    teacher_id: number | string;
+    teacher_id: number | null;
     regenerate_code?: boolean;
 }
 
@@ -37,7 +38,7 @@ export function ClassroomForm({
     const { data, setData, errors, processing } = useForm<ClassroomFormData>({
         name: initialData?.name || '',
         academic_year: initialData?.academic_year || '',
-        teacher_id: initialData?.teacher_id || '',
+        teacher_id: initialData?.teacher_id ?? null,
         regenerate_code: false,
     });
 
@@ -56,40 +57,38 @@ export function ClassroomForm({
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Classroom Name */}
             <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                    htmlFor="name"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                     Nama Kelas <span className="text-red-500">*</span>
                 </label>
-                <input
+                <TextInput
+                    id="name"
                     type="text"
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
                     placeholder="Contoh: X RPL 1"
-                    className={cn(
-                        'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                        errors.name
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                            : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                    )}
+                    isError={!!errors.name}
                 />
                 <InputError message={errors.name} />
             </div>
 
             {/* Academic Year */}
             <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                <label
+                    htmlFor="academic_year"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                >
                     Tahun Ajaran <span className="text-red-500">*</span>
                 </label>
-                <input
+                <TextInput
+                    id="academic_year"
                     type="text"
                     value={data.academic_year}
                     onChange={(e) => setData('academic_year', e.target.value)}
                     placeholder="Contoh: 2024/2025"
-                    className={cn(
-                        'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                        errors.academic_year
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                            : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                    )}
+                    isError={!!errors.academic_year}
                 />
                 <InputError message={errors.academic_year} />
                 <p className="mt-1 text-xs text-slate-500">
@@ -105,24 +104,17 @@ export function ClassroomForm({
                 >
                     Guru Pengajar <span className="text-red-500">*</span>
                 </label>
-                <select
-                    id="teacher_id"
-                    value={data.teacher_id}
-                    onChange={(e) => setData('teacher_id', e.target.value)}
-                    className={cn(
-                        'w-full rounded-xl border px-4 py-2.5 text-sm transition focus:ring-2 focus:outline-none',
-                        errors.teacher_id
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                            : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20',
-                    )}
-                >
-                    <option value="">Pilih Guru</option>
-                    {teachers.map((teacher) => (
-                        <option key={teacher.id} value={teacher.id}>
-                            {teacher.name}
-                        </option>
-                    ))}
-                </select>
+                <SearchableDropdown
+                    value={data.teacher_id ?? null}
+                    options={teachers.map((t) => ({
+                        id: t.id,
+                        label: t.name,
+                        icon: '👩‍🏫',
+                    }))}
+                    onChange={(v) => setData('teacher_id', v)}
+                    placeholder="Pilih guru pengajar"
+                    isError={!!errors.teacher_id}
+                />
                 <InputError message={errors.teacher_id} />
 
                 {/* Selected Teacher Info */}

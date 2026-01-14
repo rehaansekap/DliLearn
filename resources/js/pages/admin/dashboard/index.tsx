@@ -57,21 +57,51 @@ export default function AdminDashboard({
 
             <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl space-y-8">
-                    {/* Welcome Banner */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-700 via-gray-700 to-slate-800 p-8 shadow-2xl sm:p-12">
+                    {/* Welcome Banner - Sesuai dengan Teacher Dashboard */}
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 p-6 shadow-2xl sm:p-10">
                         {/* Decorative Pattern */}
                         <div className="absolute inset-0 opacity-10">
                             <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:250px_250px]" />
                         </div>
 
-                        <div className="relative z-10">
-                            <h1 className="mb-2 text-3xl font-black text-white sm:text-4xl">
-                                Halo, {auth.user.name}! 👋
-                            </h1>
-                            <p className="max-w-2xl text-base text-slate-200 sm:text-lg">
-                                Selamat datang di panel admin. Kelola user,
-                                kelas, dan misi dengan mudah.
-                            </p>
+                        {/* Decorative Circles */}
+                        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+                        <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
+
+                        <div className="relative z-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                            <div>
+                                <p className="mb-1 text-sm font-medium text-indigo-200">
+                                    Selamat datang kembali,
+                                </p>
+                                <h1 className="mb-2 text-2xl font-black text-white sm:text-3xl lg:text-4xl">
+                                    {auth.user.name}! 👋
+                                </h1>
+                                <p className="max-w-lg text-sm text-indigo-100 sm:text-base">
+                                    Kelola user, kelas, dan misi pembelajaran
+                                    dengan mudah dari panel admin.
+                                </p>
+                            </div>
+
+                            {/* Quick Action Button */}
+                            <a
+                                href="/admin/users"
+                                className="inline-flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/30 sm:px-6"
+                            >
+                                <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                                <span>Kelola User</span>
+                            </a>
                         </div>
                     </div>
 

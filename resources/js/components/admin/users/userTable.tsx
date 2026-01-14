@@ -20,7 +20,7 @@ interface UserTableProps {
 }
 
 const roleColors = {
-    student: 'bg-blue-100 text-blue-700 border-blue-200',
+    student: 'bg-indigo-100 text-indigo-700 border-indigo-200',
     teacher: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     admin: 'bg-purple-100 text-purple-700 border-purple-200',
 };
@@ -50,6 +50,21 @@ export function UserTable({ users, onDelete }: UserTableProps) {
 
     return (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+            {/* Header */}
+            <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800 sm:text-xl">
+                            👥 Daftar User
+                        </h3>
+                        <p className="text-xs text-slate-600 sm:text-sm">
+                            Kelola semua user sistem
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Table */}
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead className="bg-slate-50 text-xs font-semibold tracking-wide text-slate-600 uppercase">
@@ -82,7 +97,7 @@ export function UserTable({ users, onDelete }: UserTableProps) {
                             >
                                 <td className="px-4 py-3 sm:px-6">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white">
+                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white shadow-md">
                                             {user.name.charAt(0)}
                                         </div>
                                         <div>
@@ -104,7 +119,7 @@ export function UserTable({ users, onDelete }: UserTableProps) {
                                 <td className="px-4 py-3 text-center sm:px-6">
                                     <span
                                         className={cn(
-                                            'inline-flex rounded-full border px-2 py-1 text-xs font-semibold',
+                                            'inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold',
                                             roleColors[user.role],
                                         )}
                                     >

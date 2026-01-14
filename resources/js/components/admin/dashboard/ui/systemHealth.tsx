@@ -9,13 +9,15 @@ export function SystemHealth() {
             icon: Database,
             color: 'text-emerald-600',
             bgColor: 'bg-emerald-50',
+            borderColor: 'border-emerald-200',
         },
         {
             label: 'Cache',
             status: 'Active',
             icon: HardDrive,
-            color: 'text-blue-600',
-            bgColor: 'bg-blue-50',
+            color: 'text-indigo-600',
+            bgColor: 'bg-indigo-50',
+            borderColor: 'border-indigo-200',
         },
         {
             label: 'App Version',
@@ -23,13 +25,14 @@ export function SystemHealth() {
             icon: Package,
             color: 'text-amber-600',
             bgColor: 'bg-amber-50',
+            borderColor: 'border-amber-200',
         },
     ];
 
     return (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
             {/* Header */}
-            <div className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-gray-50 p-4 sm:p-6">
+            <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 sm:p-6">
                 <h3 className="text-lg font-bold text-slate-800">
                     ⚙️ Status Sistem
                 </h3>
@@ -43,13 +46,16 @@ export function SystemHealth() {
                 {healthItems.map((item, index) => (
                     <div
                         key={index}
-                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:shadow-md"
+                        className={cn(
+                            'flex items-center justify-between rounded-xl border-2 p-3 transition-all hover:shadow-md',
+                            item.bgColor,
+                            item.borderColor,
+                        )}
                     >
                         <div className="flex items-center gap-3">
                             <div
                                 className={cn(
-                                    'flex h-10 w-10 items-center justify-center rounded-lg',
-                                    item.bgColor,
+                                    'flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm',
                                 )}
                             >
                                 <item.icon
@@ -70,9 +76,11 @@ export function SystemHealth() {
                 ))}
 
                 {/* Overall Status */}
-                <div className="mt-4 rounded-xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4">
+                <div className="mt-4 rounded-xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm">
                     <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                            <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+                        </div>
                         <div>
                             <p className="text-sm font-bold text-emerald-900">
                                 Semua Sistem Normal

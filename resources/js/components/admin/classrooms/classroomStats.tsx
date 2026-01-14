@@ -52,31 +52,33 @@ export function ClassroomStats({ stats }: ClassroomStatsProps) {
     ];
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {statItems.map((item, index) => (
                 <div
                     key={index}
                     className={cn(
-                        'group relative overflow-hidden rounded-2xl border-2 bg-gradient-to-br p-4 shadow-lg transition-all hover:scale-105 sm:p-6',
+                        'group relative overflow-hidden rounded-2xl border-2 bg-gradient-to-br p-4 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-6',
                         item.bgColor,
                         item.borderColor,
                     )}
                 >
                     <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/30 blur-2xl transition-all group-hover:scale-150" />
-                    <div className="relative z-10 flex items-center gap-3">
+                    <div className="relative z-10 flex items-center gap-3 sm:gap-4">
                         <div
                             className={cn(
-                                'flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg',
+                                'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg sm:h-14 sm:w-14',
                                 item.color,
                             )}
                         >
-                            <span className="text-2xl">{item.icon}</span>
+                            <span className="text-2xl sm:text-3xl">
+                                {item.icon}
+                            </span>
                         </div>
                         <div>
-                            <p className="text-xs font-medium text-slate-600">
+                            <p className="text-sm font-medium text-slate-700">
                                 {item.label}
                             </p>
-                            <p className="truncate text-xl font-black text-slate-800">
+                            <p className="text-3xl font-black text-slate-900 sm:text-4xl">
                                 {item.value}
                             </p>
                             {item.subtitle && (

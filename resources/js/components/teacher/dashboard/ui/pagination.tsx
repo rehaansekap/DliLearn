@@ -65,9 +65,13 @@ export function Pagination({
                     )}
                 </div>
 
-                {/* Mobile Page Indicator */}
-                <div className="px-2 text-sm text-slate-500 sm:hidden">
-                    {currentPage} / {totalPages}
+                {/* Mobile Page Indicator (updated styling) */}
+                <div className="sm:hidden">
+                    <div className="inline-flex items-center justify-center rounded-full border border-indigo-100 bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm">
+                        <span className="font-medium">{currentPage}</span>
+                        <span className="mx-2 text-slate-400">/</span>
+                        <span className="text-slate-500">{totalPages}</span>
+                    </div>
                 </div>
 
                 {/* Next Button */}

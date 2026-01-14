@@ -18,7 +18,7 @@ export function StatsGrid({ stats }: StatsGridProps) {
                 title="Total Siswa"
                 value={stats.totalStudents}
                 icon="👨‍🎓"
-                color="blue"
+                color="indigo"
             />
             <StatsCard
                 title="Total Guru"
@@ -36,7 +36,7 @@ export function StatsGrid({ stats }: StatsGridProps) {
                 title="Total Misi"
                 value={stats.totalMissions}
                 icon="🎯"
-                color="slate"
+                color="rose"
             />
         </div>
     );

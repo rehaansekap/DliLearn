@@ -4,6 +4,8 @@ import { UserTable } from '@/components/admin/users/userTable';
 import AdminLayout from '@/layouts/admin-layout';
 import { User } from '@/types';
 import { Head, router } from '@inertiajs/react';
+import { Pagination } from '@/components/teacher/dashboard/ui/pagination';
+
 
 interface UserData {
     id: number;
@@ -46,8 +48,6 @@ export default function UsersIndex({
     stats,
     filters,
 }: UsersIndexProps) {
-    // const [deleteUser, setDeleteUser] = useState<UserData | null>(null);
-
     const handleDelete = async (user: UserData) => {
         const SwalModule = await import('sweetalert2');
         await import('sweetalert2/dist/sweetalert2.min.css');
@@ -109,43 +109,26 @@ export default function UsersIndex({
                     {/* Filters */}
                     <UserFilters
                         currentRole={filters.role}
-                        currentSearch={filters.search}
+                        currentSearch={filters.search ?? ''}
                     />
 
                     {/* User Table */}
                     <UserTable users={users.data} onDelete={handleDelete} />
 
-                    {/* Pagination */}
-                    {users.last_page > 1 && (
-                        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-lg">
-                            <p className="text-sm text-slate-600">
-                                Menampilkan {users.data.length} dari{' '}
-                                {users.total} user
-                            </p>
-                            <div className="flex gap-2">
-                                {Array.from(
-                                    { length: users.last_page },
-                                    (_, i) => i + 1,
-                                ).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() =>
-                                            router.get(
-                                                `/admin/users?page=${page}&role=${filters.role}&search=${filters.search}`,
-                                            )
-                                        }
-                                        className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                                            page === users.current_page
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    {/* Pagination - gunakan Pagination dari teacher */}
+                    <Pagination
+                        currentPage={users.current_page}
+                        totalPages={users.last_page}
+                        totalItems={users.total}
+                        itemsPerPage={users.per_page}
+                        onPageChange={(page) =>
+                            router.get(
+                                '/admin/users',
+                                { page, role: filters.role, search: filters.search ?? '' },
+                                { preserveState: true, replace: true },
+                            )
+                        }
+                    />
                 </div>
             </div>
         </AdminLayout>

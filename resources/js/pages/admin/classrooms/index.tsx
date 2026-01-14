@@ -4,6 +4,8 @@ import { ClassroomStats } from '@/components/admin/classrooms/classroomStats';
 import AdminLayout from '@/layouts/admin-layout';
 import { User } from '@/types';
 import { Head, router } from '@inertiajs/react';
+import { Pagination } from '@/components/teacher/dashboard/ui/pagination'; // <- added
+
 
 interface Classroom {
     id: number;
@@ -153,34 +155,24 @@ export default function ClassroomsIndex({
 
                     {/* Pagination */}
                     {classrooms.last_page > 1 && (
-                        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-lg">
-                            <p className="text-sm text-slate-600">
-                                Menampilkan {classrooms.data.length} dari{' '}
-                                {classrooms.total} kelas
-                            </p>
-                            <div className="flex gap-2">
-                                {Array.from(
-                                    { length: classrooms.last_page },
-                                    (_, i) => i + 1,
-                                ).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() =>
-                                            router.get(
-                                                `/admin/classrooms?page=${page}&teacher_id=${filters.teacher_id}&academic_year=${filters.academic_year}&search=${filters.search}`,
-                                            )
-                                        }
-                                        className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                                            page === classrooms.current_page
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={classrooms.current_page}
+                            totalPages={classrooms.last_page}
+                            totalItems={classrooms.total}
+                            itemsPerPage={classrooms.per_page}
+                            onPageChange={(page) =>
+                                router.get(
+                                    '/admin/classrooms',
+                                    {
+                                        page,
+                                        teacher_id: filters.teacher_id,
+                                        academic_year: filters.academic_year,
+                                        search: filters.search ?? '',
+                                    },
+                                    { preserveState: true, replace: true },
+                                )
+                            }
+                        />
                     )}
                 </div>
             </div>
