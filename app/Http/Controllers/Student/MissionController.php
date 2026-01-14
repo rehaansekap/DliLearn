@@ -125,11 +125,14 @@ class MissionController extends Controller
             'votable_groups' => $votableGroups,
         ];
 
-        $groupProgress = DB::table('group_progress')
-            ->where('group_id', $groupMember->group_id)
-            ->where('mission_id', $mission->id)
-            ->select('current_step', 'status', 'collab_url')
-            ->first();
+        $groupProgress = null;
+        if ($groupMember) {
+            $groupProgress = DB::table('group_progress')
+                ->where('group_id', $groupMember->group_id)
+                ->where('mission_id', $mission->id)
+                ->select('current_step', 'status', 'collab_url')
+                ->first();
+        }
 
         return Inertia::render('student/mission/index', [
             'mission' => $mission,
@@ -144,7 +147,7 @@ class MissionController extends Controller
             'groupStatus' => $groupStatus ?? 'locked',
             'unreviewedSubmissions' => $unreviewedSubmissions,
             'voteData' => $voteData,
-            'collaborationLink' => $groupProgress->collab_url ?? $mission->collab_url ?? null,
+            'collaborationLink' => $groupProgress?->collab_url ?? $mission->collab_url ?? null,
         ]);
     }
 

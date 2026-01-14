@@ -100,6 +100,8 @@ class DatabaseSeeder extends Seeder
             'case_narrative' => 'Mall Grand Indonesia mengubah tarif parkirnya. 1 jam pertama Rp5.000, jam berikutnya Rp3.000 flat. Bantu mereka membuat sistem otomatis!',
             'simulator_config' => json_encode(['type' => 'logic', 'answer' => 8000]),
             'prerequisite_mission_id' => null,
+            'teacher_id' => $guru1->id,
+            'classroom_id' => $kelasRPL1->id,
         ]);
 
         $misi2 = Mission::create([
@@ -111,6 +113,8 @@ class DatabaseSeeder extends Seeder
             'case_narrative' => 'Mesin penjual otomatis di sekolah error. Jika tekan tombol A harusnya keluar Teh, tombol B keluar Kopi. Tapi sekarang acak-acakan.',
             'simulator_config' => json_encode(['type' => 'string_match', 'answer' => 'Teh Botol']),
             'prerequisite_mission_id' => $misi1->id,
+            'teacher_id' => $guru1->id,
+            'classroom_id' => $kelasRPL1->id,
         ]);
 
         $misi3 = Mission::create([
@@ -122,6 +126,8 @@ class DatabaseSeeder extends Seeder
             'case_narrative' => 'Guru piket lelah memanggil 40 nama setiap pagi. Buat program yang bisa mengulang panggilan secara otomatis.',
             'simulator_config' => json_encode(['type' => 'loop', 'answer' => 30]),
             'prerequisite_mission_id' => $misi2->id,
+            'teacher_id' => $guru1->id,
+            'classroom_id' => $kelasRPL1->id,
         ]);
 
         $rpl1Students = array_slice($students, 0, 20);
