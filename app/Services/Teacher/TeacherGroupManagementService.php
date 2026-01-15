@@ -85,19 +85,44 @@ class TeacherGroupManagementService
                     'updated_at' => now(),
                 ]);
 
-                $createdMapping[(string)$originalId] = $groupId;
+                $createdMapping[(string) $originalId] = $groupId;
             }
 
-            DB::table('group_progress')->updateOrInsert(
-                ['group_id' => $groupId, 'mission_id' => $missionId],
-                [
-                    'current_step' => 1,
-                    'status' => 'locked',
-                    'collab_url' => $groupData['collab_url'] ?? null,
+            $existingProgress = DB::table('group_progress')
+                ->where('group_id', $groupId)
+                ->where('mission_id', $missionId)
+                ->first();
+
+            $incomingCollabUrl = $groupData['collab_url'] ?? null;
+
+            if (!$existingProgress) {
+                DB::table('group_progress')->insert([
+                    'group_id' => $groupId,
+                    'mission_id' => $missionId,
+                    'current_step' => 2,
+                    'status' => 'in_progress',
+                    'collab_url' => $incomingCollabUrl,
+                    'created_at' => now(),
                     'updated_at' => now(),
-                    'created_at' => now()
-                ]
-            );
+                ]);
+            } else {
+                $currentStep = (int) ($existingProgress->current_step ?? 0);
+                $nextStep = max($currentStep, 2);
+
+                $currentStatus = $existingProgress->status ?? 'locked';
+                $nextStatus = $currentStatus === 'completed'
+                    ? 'completed'
+                    : 'in_progress';
+
+                DB::table('group_progress')
+                    ->where('id', $existingProgress->id)
+                    ->update([
+                        'current_step' => $nextStep,
+                        'status' => $nextStatus,
+                        'collab_url' => $incomingCollabUrl,
+                        'updated_at' => now(),
+                    ]);
+            }
 
             DB::table('group_members')->where('group_id', $groupId)->delete();
 
