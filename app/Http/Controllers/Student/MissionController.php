@@ -52,6 +52,24 @@ class MissionController extends Controller
 
         $myReflection = $this->reflectionService->getUserReflection($user->id, $mission->id);
         $initialReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'initial');
+
+        $groupMember = $initialReflection
+            ? $this->groupService->getUserGroupMemberForMission($user->id, $mission->id)
+            : null;
+
+        if ($groupMember) {
+            $progress = $this->progressService->getGroupProgress($groupMember->group_id, $mission->id);
+            $currentStep = $progress ? (int) $progress->current_step : 1;
+            $myGroupMembers = $this->groupService->getGroupMembers($groupMember->group_id);
+            $currentUserRole = $groupMember->role;
+            $groupStatus = $progress?->status ?? 'locked';
+        } else {
+            $currentStep = 1;
+            $myGroupMembers = collect();
+            $currentUserRole = 'Belum Ada';
+            $groupStatus = 'locked';
+        }
+
         $finalReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
         $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
 
@@ -61,20 +79,8 @@ class MissionController extends Controller
             $groupMember = null;
         }
 
-        if ($groupMember) {
-            $progress = $this->progressService->getGroupProgress($groupMember->group_id, $mission->id);
-            $currentStep = $progress ? $progress->current_step : 1;
-            $myGroupMembers = $this->groupService->getGroupMembers($groupMember->group_id);
-            $currentUserRole = $groupMember->role;
-        } else {
-            $currentStep = 1;
-            $myGroupMembers = collect();
-            $currentUserRole = null;
-        }
-
         $groupHasSubmitted = false;
         if ($groupMember) {
-            $groupStatus = $progress ? $progress->status : null;
             $groupHasSubmitted = Submission::where('group_id', $groupMember->group_id)
                 ->where('mission_id', $mission->id)
                 ->where('is_final', true)
@@ -158,7 +164,7 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
 
         DB::transaction(function () use ($request, $mission, $groupMember, $user) {
             $this->reflectionService->saveReflection($user->id, $mission->id, $request->validated()['reflection']);
@@ -181,7 +187,7 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
 
         if (!$groupMember) {
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
@@ -220,20 +226,33 @@ class MissionController extends Controller
 
     public function updateRole(UpdateRoleRequest $request, $slug)
     {
+        $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
 
-        if (!$this->groupService->isUserLeader($user->id)) {
+        if (!$this->groupService->isUserLeaderForMission($user->id, $mission->id)) {
             abort(403, 'Hanya Leader Kelompok yang boleh mengubah peran anggota!');
         }
 
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
+        if (!$groupMember) {
+            return redirect()->back()->with('error', 'Anda belum memiliki kelompok untuk misi ini!');
+        }
+
         $validated = $request->validated();
-        $targetRole = $this->groupService->getMemberRole($validated['target_user_id']);
+        $targetRole = $this->groupService->getMemberRoleInGroup(
+            $validated['target_user_id'],
+            $groupMember->group_id
+        );
 
         if ($targetRole === 'Leader') {
             return redirect()->back()->with('error', 'Peran Leader tidak bisa diubah di sini. Hubungi Guru.');
         }
 
-        $this->groupService->updateMemberRole($validated['target_user_id'], $validated['role']);
+        $this->groupService->updateMemberRoleInGroup(
+            $validated['target_user_id'],
+            $groupMember->group_id,
+            $validated['role']
+        );
 
         return redirect()->back()->with('success', 'Peran anggota berhasil diperbarui!');
     }
@@ -242,7 +261,11 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
+
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
+        if (!$groupMember) {
+            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok untuk misi ini!');
+        }
 
         $this->progressService->advanceGroupStep($groupMember->group_id, $mission->id, 2, 3);
 
@@ -253,10 +276,10 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
         if (!$groupMember) {
-            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
+            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok untuk misi ini!');
         }
 
         $validated = $request->validated();
@@ -273,10 +296,10 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
         if (!$groupMember) {
-            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok!');
+            return redirect()->route('dashboard')->with('error', 'Anda belum memiliki kelompok untuk misi ini!');
         }
 
         if ($groupMember->role !== 'Leader') {
@@ -314,7 +337,7 @@ class MissionController extends Controller
     {
         $user = Auth::user();
         $submission = Submission::findOrFail($submissionId);
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $submission->mission_id);
 
         if (!$groupMember) {
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
@@ -333,7 +356,7 @@ class MissionController extends Controller
     {
         $user = Auth::user();
         $submission = Submission::findOrFail($submissionId);
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $submission->mission_id);
 
         if (!$groupMember) {
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
@@ -361,10 +384,10 @@ class MissionController extends Controller
     {
         $mission = Mission::where('slug', $slug)->firstOrFail();
         $user = Auth::user();
-        $groupMember = $this->groupService->getUserGroupMember($user->id);
 
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
         if (!$groupMember) {
-            return redirect()->back()->with('error', 'Anda belum memiliki kelompok!');
+            return redirect()->back()->with('error', 'Anda belum memiliki kelompok untuk misi ini!');
         }
 
         $validated = $request->validated();
