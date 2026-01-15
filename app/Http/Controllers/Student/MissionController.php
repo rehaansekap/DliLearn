@@ -74,7 +74,7 @@ class MissionController extends Controller
         $gallerySubmissions = $this->submissionService->getGallerySubmissions($mission->id, $user->id);
 
         if ($initialReflection) {
-            $groupMember = $this->groupService->getUserGroupMember($user->id);
+            $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
         } else {
             $groupMember = null;
         }

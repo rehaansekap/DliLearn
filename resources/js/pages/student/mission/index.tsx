@@ -24,8 +24,11 @@ export default function Show({
     groupStatus,
     unreviewedSubmissions = [],
     voteData = null,
+    collaborationLink: collaborationLinkProp = null,
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
+    const collaborationLink =
+        collaborationLinkProp ?? mission.collab_url ?? null;
 
     const userSubmittedInitial = Boolean(
         initialReflection && initialReflection.length > 0,
@@ -51,7 +54,6 @@ export default function Show({
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
     const amILeader = currentUserRole === 'Leader';
-    const collaborationLink = mission.collab_url;
 
     const handleSubmitReflection = (reflection: string) => {
         router.post(

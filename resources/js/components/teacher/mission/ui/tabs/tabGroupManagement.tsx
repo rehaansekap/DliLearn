@@ -223,12 +223,19 @@ export function TabGroupManagement({
                 onError: async (errors) => {
                     console.error('update-groups errors', errors);
                     setIsSaving(false);
+
                     const SwalModule = await import('sweetalert2');
                     await import('sweetalert2/dist/sweetalert2.min.css');
+
+                    const firstError =
+                        (errors && (errors.error as string)) ||
+                        (errors && Object.values(errors)[0]) ||
+                        'Gagal memperbarui kelompok. Coba lagi.';
+
                     await SwalModule.default.fire({
                         icon: 'error',
                         title: 'Gagal Memperbarui',
-                        text: 'Gagal memperbarui kelompok. Coba lagi.',
+                        text: String(firstError),
                         customClass: { popup: 'rounded-xl' },
                     });
                 },
