@@ -15,7 +15,6 @@ interface Mission {
 interface Phase3CreativeLabProps {
     mission: Mission;
     onSaveCode: (code: string, language: string) => void;
-    hasRunCode: boolean;
     onRunSuccess?: () => void;
 }
 
@@ -35,11 +34,11 @@ function getDefaultCode(): string {
 export default function Phase3CreativeLab({
     mission,
     onSaveCode,
-    hasRunCode,
 }: Phase3CreativeLabProps) {
     const [codeLanguage, setCodeLanguage] = useState('cpp');
     const [codeValue, setCodeValue] = useState(getDefaultCode());
     const [isRunning, setIsRunning] = useState(false);
+    const [hasRunCodeLocal, setHasRunCodeLocal] = useState(false);
     const [terminalOutput, setTerminalOutput] = useState('');
 
     const handleLanguageChange = (newLang: string) => {
@@ -95,6 +94,10 @@ export default function Phase3CreativeLab({
 
             setTerminalOutput(parts.join('\n') + '\n');
 
+            if (res.ok) {
+                setHasRunCodeLocal(true);
+            }
+
             if (typeof onRunSuccess === 'function') {
                 onRunSuccess();
             }
@@ -139,7 +142,7 @@ export default function Phase3CreativeLab({
                     onRun={handleRunCode}
                     onSave={handleSaveCode}
                     isRunning={isRunning}
-                    hasRunCode={hasRunCode}
+                    hasRunCode={hasRunCodeLocal}
                 />
             </div>
 
