@@ -20,6 +20,7 @@ deploy.zip
 .phpunit.result.cache
 .deployment
 deploy-azure.sh
+deploy-zip.sh
 web.config
 Homestead.json
 Homestead.yaml
