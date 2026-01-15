@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified', 'student'])->group(function () {
     Route::post('/submission/{submissionId}/feedback', [MissionController::class, 'submitFeedback'])->name('mission.feedback');
     Route::get('/submission/{submissionId}/feedbacks', [MissionController::class, 'getFeedbacks'])->name('mission.get-feedbacks');
     Route::post('/mission/{slug}/finish', [MissionController::class, 'submitFinalReflection'])->name('mission.finish');
+    Route::post('/mission/{slug}/run-code', [MissionController::class, 'runCode'])->middleware(['auth', 'verified', 'student'])->name('mission.run-code');
 });
 
 Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('teacher.')->group(function () {

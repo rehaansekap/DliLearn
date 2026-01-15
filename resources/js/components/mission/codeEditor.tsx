@@ -66,8 +66,8 @@ export function CodeEditor({
             {/* Monaco Editor */}
             <div className="relative">
                 <Editor
-                    height={height}
-                    className="sm:!h-[400px]"
+                    // height="520px"
+                    className={`sm:!h-[${height}]`}
                     language={language}
                     value={value}
                     onChange={(val) => onValueChange(val || '')}

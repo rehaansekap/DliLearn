@@ -10,6 +10,7 @@ use App\Http\Requests\Student\Mission\SubmitFinalReflectionRequest;
 use App\Http\Requests\Student\Mission\SubmitPhase4Request;
 use App\Http\Requests\Student\Mission\SubmitVoteRequest;
 use App\Http\Requests\Student\Mission\UpdateRoleRequest;
+use App\Http\Requests\Student\Mission\RunCodeRequest;
 use App\Models\Mission;
 use App\Models\Submission;
 use App\Services\Mission\FeedbackService;
@@ -20,6 +21,7 @@ use App\Services\Mission\ReflectionService;
 use App\Services\Mission\RewardService;
 use App\Services\Mission\SubmissionService;
 use App\Services\Mission\VoteService;
+use App\Services\Mission\NativeCppRunnerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +38,7 @@ class MissionController extends Controller
         protected RewardService $rewardService,
         protected MissionLockService $lockService,
         protected VoteService $voteService,
+        protected NativeCppRunnerService $cppRunner,
     ) {}
 
     public function show($slug)
@@ -412,5 +415,30 @@ class MissionController extends Controller
         });
 
         return redirect()->route('dashboard')->with('success', 'Selamat! Misi berhasil diselesaikan. +100 XP!');
+    }
+
+    public function runCode(RunCodeRequest $request, $slug)
+    {
+        $mission = Mission::where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+
+        $groupMember = $this->groupService->getUserGroupMemberForMission($user->id, $mission->id);
+        if (!$groupMember) {
+            return response()->json(['error' => 'Anda belum memiliki kelompok untuk misi ini!'], 403);
+        }
+
+        $progress = $this->progressService->getGroupProgress($groupMember->group_id, $mission->id);
+        if (!$progress || (int) $progress->current_step < 3) {
+            return response()->json(['error' => 'Tahap ini belum terbuka.'], 403);
+        }
+
+        $data = $request->validated();
+
+        if ($data['language'] !== 'cpp') {
+            return response()->json(['error' => 'Hanya C++ yang didukung untuk saat ini.'], 400);
+        }
+
+        $result = $this->cppRunner->run($data['code'], $data['stdin'] ?? null);
+        return response()->json($result);
     }
 }
