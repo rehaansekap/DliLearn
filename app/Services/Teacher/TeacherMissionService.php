@@ -415,9 +415,19 @@ class TeacherMissionService
      */
     private function getVoteResults(int $missionId): array
     {
+        $classroomId = DB::table('missions')
+            ->where('id', $missionId)
+            ->value('classroom_id');
+
         return DB::table('best_group_votes')
             ->join('groups', 'best_group_votes.voted_group_id', '=', 'groups.id')
+            ->join('group_progress', function ($join) use ($missionId) {
+                $join->on('groups.id', '=', 'group_progress.group_id')
+                    ->where('group_progress.mission_id', '=', $missionId);
+            })
+            ->join('missions', 'group_progress.mission_id', '=', 'missions.id')
             ->where('best_group_votes.mission_id', $missionId)
+            ->where('missions.classroom_id', $classroomId)
             ->select(
                 'groups.id as group_id',
                 'groups.name as group_name',

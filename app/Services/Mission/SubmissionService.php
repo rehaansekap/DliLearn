@@ -14,10 +14,21 @@ class SubmissionService
      */
     public function getGallerySubmissions(int $missionId, int $userId)
     {
+        $missionClassroomId = DB::table('missions')
+            ->where('missions.id', $missionId)
+            ->value('classroom_id');
+
         $submissions = DB::table('submissions')
             ->join('groups', 'submissions.group_id', '=', 'groups.id')
+            ->join('group_progress', function ($join) use ($missionId) {
+                $join->on('groups.id', '=', 'group_progress.group_id')
+                    ->where('group_progress.mission_id', '=', $missionId);
+            })
+            ->join('missions', 'group_progress.mission_id', '=', 'missions.id')
             ->where('submissions.mission_id', $missionId)
             ->where('submissions.is_final', true)
+            ->where('missions.classroom_id', $missionClassroomId)
+            ->where('groups.classroom_id', $missionClassroomId)
             ->select(
                 'submissions.id',
                 'groups.name as group_name',
@@ -29,6 +40,7 @@ class SubmissionService
                 DB::raw('(SELECT COUNT(*) FROM likes WHERE likes.submission_id = submissions.id) as likes_count'),
                 DB::raw('(SELECT COUNT(*) FROM feedbacks WHERE feedbacks.submission_id = submissions.id) as feedbacks_count')
             )
+            ->distinct()
             ->get();
 
         return $submissions->map(function ($submission) use ($userId) {

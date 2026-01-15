@@ -40,6 +40,7 @@ interface VoteData {
     has_voted: boolean;
     my_vote: number | null;
     votable_groups: VotableGroup[];
+    all_groups_submitted: boolean;
 }
 
 interface Phase5EvaluationProps {
@@ -344,14 +345,20 @@ export default function Phase5Evaluation({
                 <EmptyGalleryState />
             )}
 
-            {/* Best Group Vote Section */}
-            {sortedSubmissions.length > 0 && voteData && (
+            {/* Best Group Vote Section (locked when no submissions yet) */}
+            {voteData && (
                 <BestGroupVote
                     missionSlug={missionSlug}
                     votableGroups={voteData.votable_groups}
                     hasVoted={voteData.has_voted}
                     myVote={voteData.my_vote}
                     amILeader={amILeader}
+                    locked={!voteData.all_groups_submitted}
+                    lockedMessage={
+                        !voteData.all_groups_submitted
+                            ? 'Voting akan dibuka setelah SEMUA kelompok mengumpulkan karya mereka. Pastikan kelompokmu juga sudah submit!'
+                            : undefined
+                    }
                 />
             )}
 

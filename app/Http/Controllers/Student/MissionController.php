@@ -111,6 +111,8 @@ class MissionController extends Controller
         $excludeGroupId = $groupMember?->group_id ?? 0;
         $votableGroups = $this->voteService->getVotableGroups($mission->id, $excludeGroupId);
 
+        $allGroupsSubmitted = $this->voteService->areAllGroupsSubmitted($mission->id);
+
         if ($groupMember && $groupMember->role === 'Leader') {
             $hasVoted = $this->voteService->hasVoted($groupMember->group_id, $mission->id);
             $myVote = $this->voteService->getGroupVote($groupMember->group_id, $mission->id);
@@ -123,6 +125,7 @@ class MissionController extends Controller
             'has_voted' => $hasVoted,
             'my_vote' => $myVote,
             'votable_groups' => $votableGroups,
+            'all_groups_submitted' => $allGroupsSubmitted,
         ];
 
         $groupProgress = null;
@@ -192,6 +195,17 @@ class MissionController extends Controller
 
         if ($validated['voted_group_id'] == $groupMember->group_id) {
             return redirect()->back()->with('error', 'Tidak dapat memilih kelompok sendiri!');
+        }
+
+        $votedGroupClassroom = DB::table('groups')
+            ->join('group_progress', 'groups.id', '=', 'group_progress.group_id')
+            ->join('missions', 'group_progress.mission_id', '=', 'missions.id')
+            ->where('groups.id', $validated['voted_group_id'])
+            ->where('group_progress.mission_id', $mission->id)
+            ->value('missions.classroom_id');
+
+        if ($votedGroupClassroom !== $mission->classroom_id) {
+            return redirect()->back()->with('error', 'Tidak dapat memilih kelompok dari kelas yang berbeda!');
         }
 
         $this->voteService->submitVote(

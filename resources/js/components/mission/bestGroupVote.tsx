@@ -16,6 +16,8 @@ interface BestGroupVoteProps {
     hasVoted: boolean;
     myVote: number | null;
     amILeader: boolean;
+    locked?: boolean;
+    lockedMessage?: string;
 }
 
 export function BestGroupVote({
@@ -24,11 +26,32 @@ export function BestGroupVote({
     hasVoted,
     myVote,
     amILeader,
+    locked = false,
+    lockedMessage,
 }: BestGroupVoteProps) {
     const [selectedGroupId, setSelectedGroupId] = useState<number | null>(
         myVote,
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (locked) {
+        return (
+            <MissionCard
+                title="Vote Kelompok Terbaik"
+                icon="🏆"
+                headerClassName="bg-gradient-to-r from-amber-400 to-yellow-400 border-amber-200"
+                className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50"
+            >
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
+                    <span className="text-2xl">⏳</span>
+                    <p className="mt-2 text-sm text-amber-800">
+                        {lockedMessage ??
+                            'Tunggu semua kelompok mengumpulkan karya sebelum melakukan vote.'}
+                    </p>
+                </div>
+            </MissionCard>
+        );
+    }
 
     if (!amILeader) {
         return (
