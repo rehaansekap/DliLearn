@@ -16,7 +16,7 @@ interface LeaderboardCardProps {
 export function LeaderboardCard({ results, totalVotes }: LeaderboardCardProps) {
     if (totalVotes === 0) {
         return (
-            <div className="overflow-hidden rounded-2xl border-2 border-amber-200 bg-white shadow-lg">
+            <div className="sticky top-20 overflow-hidden rounded-2xl border-2 border-amber-200 bg-white shadow-lg">
                 <div className="border-b-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-3">
                     <div className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-amber-600" />

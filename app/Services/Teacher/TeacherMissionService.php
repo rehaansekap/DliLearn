@@ -387,13 +387,16 @@ class TeacherMissionService
      */
     private function getAllReflections(Mission $mission): array
     {
+        $sub = DB::raw("(SELECT g.name
+        FROM group_members gm
+        JOIN group_progress gp ON gm.group_id = gp.group_id
+        JOIN groups g ON g.id = gm.group_id
+        WHERE gm.user_id = reflections.user_id
+          AND gp.mission_id = {$mission->id}
+        LIMIT 1) as group_name");
+
         return DB::table('reflections')
             ->join('users', 'reflections.user_id', '=', 'users.id')
-            ->leftJoin('group_members', function ($join) use ($mission) {
-                $join->on('users.id', '=', 'group_members.user_id');
-            })
-            ->leftJoin('groups', 'group_members.group_id', '=', 'groups.id')
-            ->where('reflections.mission_id', $mission->id)
             ->select(
                 'reflections.id',
                 'reflections.user_id',
@@ -402,9 +405,10 @@ class TeacherMissionService
                 'users.avatar',
                 'reflections.content',
                 'reflections.type',
-                'groups.name as group_name',
+                $sub,
                 'reflections.created_at'
             )
+            ->where('reflections.mission_id', $mission->id)
             ->orderBy('reflections.created_at', 'desc')
             ->get()
             ->toArray();

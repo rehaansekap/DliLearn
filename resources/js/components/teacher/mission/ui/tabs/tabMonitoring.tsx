@@ -2,7 +2,7 @@ import {
     GroupProgressCard,
     LeaderboardCard,
     MonitoringStats,
-    ReflectionFeed,
+    ReflectionAccordion,
 } from '@/components/teacher/mission/ui/monitoring';
 import { useMemo } from 'react';
 
@@ -119,8 +119,12 @@ export function TabMonitoring({
 
             {/* Main Content - Two Column Layout */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-                {/* Left Column - Group Progress Cards (3/4 width) */}
+                {/* Left Column - Main Content (3/4 width) */}
                 <div className="space-y-6 lg:col-span-3">
+                    {/* Reflection Accordion - Moved from sidebar */}
+                    <ReflectionAccordion reflections={allReflections} />
+
+                    {/* Group Progress Cards */}
                     {groups.length === 0 ? (
                         <div className="flex min-h-[300px] items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-12">
                             <div className="text-center">
@@ -137,28 +141,35 @@ export function TabMonitoring({
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {groups.map((group) => (
-                                <GroupProgressCard
-                                    key={group.group_id}
-                                    group={group}
-                                    onViewSubmission={onViewSubmission}
-                                />
-                            ))}
+                        <div>
+                            <div className="mb-4 rounded-xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3">
+                                <h3 className="font-bold text-slate-800">
+                                    📋 Progress Kelompok
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    Pantau perkembangan setiap kelompok secara
+                                    real-time
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                {groups.map((group) => (
+                                    <GroupProgressCard
+                                        key={group.group_id}
+                                        group={group}
+                                        onViewSubmission={onViewSubmission}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
 
-                {/* Right Column - Sidebar (1/4 width) */}
-                <div className="sticky top-4 space-y-6 lg:col-span-1">
-                    {/* Leaderboard */}
+                {/* Right Column - Leaderboard Only (1/4 width) */}
+                <div className="lg:col-span-1">
                     <LeaderboardCard
                         results={combinedResults}
                         totalVotes={totalVotes}
                     />
-
-                    {/* Reflection Feed */}
-                    <ReflectionFeed reflections={allReflections} />
                 </div>
             </div>
         </div>
