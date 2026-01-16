@@ -396,20 +396,24 @@ class TeacherMissionService
         LIMIT 1) as group_name");
 
         return DB::table('reflections')
-            ->join('users', 'reflections.user_id', '=', 'users.id')
-            ->select(
-                'reflections.id',
+            ->select([
                 'reflections.user_id',
-                'users.name as user_name',
-                'users.username',
-                'users.avatar',
                 'reflections.content',
+                'reflections.created_at',
                 'reflections.type',
-                $sub,
-                'reflections.created_at'
-            )
+                'users.name as user_name',
+                'groups.name as group_name'
+            ])
+            ->join('users', 'reflections.user_id', '=', 'users.id')
+            ->leftJoin('group_members', 'reflections.user_id', '=', 'group_members.user_id')
+            ->leftJoin('group_progress', function ($join) use ($mission) {
+                $join->on('group_members.group_id', '=', 'group_progress.group_id')
+                    ->where('group_progress.mission_id', '=', $mission->id);
+            })
+            ->leftJoin('groups', 'group_progress.group_id', '=', 'groups.id')
             ->where('reflections.mission_id', $mission->id)
             ->orderBy('reflections.created_at', 'desc')
+            ->distinct()
             ->get()
             ->toArray();
     }
