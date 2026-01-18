@@ -93,6 +93,40 @@ class AdminClassroomService
     }
 
     /**
+     * Get students not assigned to any classroom or only in current classroom
+     */
+    public function getAvailableStudents($currentClassroomId = null)
+    {
+        $query = User::where('role', 'student');
+
+        if ($currentClassroomId) {
+            $query->where(function ($q) use ($currentClassroomId) {
+                $q->whereDoesntHave('classrooms')
+                    ->orWhereHas('classrooms', function ($qq) use ($currentClassroomId) {
+                        $qq->where('classrooms.id', $currentClassroomId);
+                    });
+            });
+        } else {
+            $query->whereDoesntHave('classrooms');
+        }
+
+        return $query->select('id', 'name', 'username', 'avatar')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Update classroom students
+     */
+    public function updateClassroomStudents(Classroom $classroom, array $studentIds)
+    {
+        // Sync students (will remove old ones and add new ones)
+        $classroom->students()->sync($studentIds);
+
+        return $classroom;
+    }
+
+    /**
      * Generate unique join code
      */
     private function generateUniqueJoinCode()

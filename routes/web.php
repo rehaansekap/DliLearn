@@ -70,6 +70,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/classrooms/{classroom}/edit', [App\Http\Controllers\Admin\AdminClassroomController::class, 'edit'])->name('classrooms.edit');
     Route::put('/classrooms/{classroom}', [App\Http\Controllers\Admin\AdminClassroomController::class, 'update'])->name('classrooms.update');
     Route::delete('/classrooms/{classroom}', [App\Http\Controllers\Admin\AdminClassroomController::class, 'destroy'])->name('classrooms.destroy');
+
+    Route::get('/classrooms/{classroom}/students', [App\Http\Controllers\Admin\AdminClassroomController::class, 'manageStudents'])->name('classrooms.students.manage');
+    Route::post('/classrooms/{classroom}/students', [App\Http\Controllers\Admin\AdminClassroomController::class, 'updateStudents'])->name('classrooms.students.update');
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {

@@ -13,6 +13,7 @@
 .azure/
 deploy.zip
 .DS_Store
+*.bak
 .env
 .env.backup
 .env.production

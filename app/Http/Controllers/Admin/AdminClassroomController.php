@@ -150,4 +150,58 @@ class AdminClassroomController extends Controller
                 ->withErrors(['error' => 'Gagal menghapus kelas: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Show manage students page
+     */
+    public function manageStudents(Classroom $classroom)
+    {
+        $classroomStudents = $classroom->students()
+            ->select('users.id', 'users.name', 'users.username', 'users.avatar')
+            ->get();
+        $availableStudents = $this->classroomService->getAvailableStudents($classroom->id);
+
+        return Inertia::render('admin/classrooms/manage-students', [
+            'classroom' => [
+                'id' => $classroom->id,
+                'name' => $classroom->name,
+                'academic_year' => $classroom->academic_year,
+                'join_code' => $classroom->join_code,
+            ],
+            'classroomStudents' => $classroomStudents,
+            'availableStudents' => $availableStudents,
+        ]);
+    }
+
+    /**
+     * Update classroom students
+     */
+    public function updateStudents(Request $request, Classroom $classroom)
+    {
+        $request->validate([
+            'student_ids' => ['required', 'array'],
+            'student_ids.*' => ['exists:users,id'],
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $this->classroomService->updateClassroomStudents(
+                $classroom,
+                $request->student_ids
+            );
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.classrooms.students.manage', $classroom)
+                ->with('success', 'Siswa berhasil diperbarui! ✅');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Gagal memperbarui siswa: ' . $e->getMessage()]);
+        }
+    }
 }

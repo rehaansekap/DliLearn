@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Edit2, Trash2, Users } from 'lucide-react';
+import { Edit2, Trash2, Users, UserPlus } from 'lucide-react';
 
 interface Classroom {
     id: number;
@@ -100,23 +100,34 @@ export function ClassroomCard({ classroom, onDelete }: ClassroomCardProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                    <Link
+                        href={`/admin/classrooms/${classroom.id}/students`}
+                        className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                        title="Kelola Siswa"
+                    >
+                        <UserPlus className="h-4 w-4" />
+                        <span className="hidden sm:inline">Kelola Siswa</span>
+                    </Link>
                     <Link
                         href={`/admin/classrooms/${classroom.id}/edit`}
-                        className="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-blue-600"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
+                        title="Edit Kelas"
                     >
-                        <Edit2 className="mx-auto h-4 w-4" />
+                        <Edit2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Edit</span>
                     </Link>
-                    <button
-                        type="button"
-                        onClick={() => onDelete(classroom)}
-                        className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-red-600"
-                        aria-label="Hapus kelas"
-                        title="Hapus kelas"
-                    >
-                        <Trash2 className="mx-auto h-4 w-4" />
-                    </button>
                 </div>
+                <button
+                    type="button"
+                    onClick={() => onDelete(classroom)}
+                    className="mt-2 w-full rounded-lg bg-red-500 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-red-600"
+                    aria-label="Hapus kelas"
+                    title="Hapus kelas"
+                >
+                    <Trash2 className="mx-auto h-4 w-4 sm:hidden" />
+                    <span className="hidden sm:inline">Hapus Kelas</span>
+                </button>
             </div>
         </div>
     );
