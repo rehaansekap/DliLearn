@@ -57,7 +57,7 @@ export default function StudentLayout({
                                     DliLearn
                                 </h1>
                                 <p className="text-xs text-slate-500">
-                                    Teacher Portal
+                                    Student Portal
                                 </p>
                             </div>
                         </Link>
