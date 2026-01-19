@@ -49,8 +49,8 @@ class DatabaseSeeder extends Seeder
                 'email' => "siswa$i@sekolah.id",
                 'password' => Hash::make('password'),
                 'role' => 'student',
-                'xp' => rand(0, 500),
-                'level' => rand(1, 3),
+                'xp' => rand(0, 0),
+                'level' => rand(1, 1),
                 'avatar' => 'student.png', 
             ]);
 
