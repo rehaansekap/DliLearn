@@ -9,6 +9,7 @@ interface MissionFormData {
     video_url: string;
     case_narrative: string;
     material_pdf: File | string | null;
+    lkpd_pdf?: File | string | null;
     collab_url: string;
     simulator_config: string;
     prerequisite_mission_id?: number | null;
@@ -34,6 +35,7 @@ export function useMissionForm({ initialData }: UseMissionFormOptions) {
             video_url: initialData.video_url ?? '',
             case_narrative: initialData.case_narrative ?? '',
             material_pdf: initialData.material_pdf ?? null,
+            lkpd_pdf: initialData.lkpd_pdf ?? null,
             collab_url: initialData.collab_url ?? '',
             simulator_config: initialData.simulator_config ?? '',
             prerequisite_mission_id:

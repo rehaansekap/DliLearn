@@ -54,6 +54,7 @@ export default function Create({ auth, classrooms, ownMissions }: CreateProps) {
             video_url: '',
             case_narrative: '',
             material_pdf: null,
+            lkpd_pdf: null,
             simulator_config: '',
             prerequisite_mission_id: null,
             started_at: '',
@@ -84,7 +85,12 @@ export default function Create({ auth, classrooms, ownMissions }: CreateProps) {
             delete payload.material_pdf;
         }
 
+        if (!(payload.lkpd_pdf instanceof File)) {
+            delete payload.lkpd_pdf;
+        }
+
         clearErrors('material_pdf');
+        clearErrors('lkpd_pdf');
         setIsSubmitting(true);
 
         post(

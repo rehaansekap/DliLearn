@@ -155,6 +155,7 @@ class TeacherMissionController extends Controller
                 'video_url' => $mission->video_url,
                 'case_narrative' => $mission->case_narrative,
                 'material_pdf' => $mission->material_pdf,
+                'lkpd_pdf' => $mission->lkpd_pdf,
                 'simulator_config' => $mission->simulator_config,
                 'prerequisite_mission_id' => $mission->prerequisite_mission_id,
                 'started_at' => $mission->started_at,

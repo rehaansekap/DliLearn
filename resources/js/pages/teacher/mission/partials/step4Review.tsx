@@ -20,6 +20,7 @@ interface Step4ReviewProps {
         video_url: string;
         case_narrative: string;
         material_pdf: File | string | null;
+        lkpd_pdf?: File | string | null;
         simulator_config: string;
         prerequisite_mission_id?: number | null;
         started_at?: string | null;
