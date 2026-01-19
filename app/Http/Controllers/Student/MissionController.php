@@ -393,10 +393,17 @@ class MissionController extends Controller
             return redirect()->back()->with('error', 'Anda belum memiliki kelompok untuk misi ini!');
         }
 
+        $existingReflection = $this->reflectionService->getUserReflection($user->id, $mission->id, 'final');
+        if ($existingReflection) {
+            return redirect()->back()->with('error', 'Anda sudah mengirim refleksi akhir untuk misi ini.');
+        }
+
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $mission, $groupMember, $user) {
             $this->reflectionService->saveFinalReflection($user->id, $mission->id, $validated['final_reflection']);
+
+            $this->rewardService->awardUserXp($user->id, 100);
 
             $groupMembers = $this->groupService->getGroupMembers($groupMember->group_id);
             $memberIds = $groupMembers->pluck('user_id')->toArray();
@@ -408,13 +415,10 @@ class MissionController extends Controller
 
             if ($submittedCount === count($memberIds)) {
                 $this->progressService->markGroupMissionCompleted($groupMember->group_id, $mission->id);
-                foreach ($memberIds as $memberId) {
-                    $this->rewardService->awardUserXp($memberId, 100);
-                }
             }
         });
 
-        return redirect()->route('dashboard')->with('success', 'Selamat! Misi berhasil diselesaikan. +100 XP!');
+        return redirect()->route('dashboard')->with('success', 'Selamat! Refleksi akhir berhasil dikirim. +100 XP! 🎉');
     }
 
     public function runCode(RunCodeRequest $request, $slug)
