@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
 
         $students = [];
 
-        for ($i = 1; $i <= 50; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
 
             $student = User::create([
                 'name' => fake()->name(),
