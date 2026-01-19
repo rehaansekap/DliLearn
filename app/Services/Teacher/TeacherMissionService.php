@@ -22,6 +22,12 @@ class TeacherMissionService
         }
 
 
+        $lkpdPath = null;
+        if (isset($data['lkpd_pdf']) && $data['lkpd_pdf'] instanceof UploadedFile) {
+            $lkpdPath = $data['lkpd_pdf']->store('lkpd', 'public');
+        }
+
+
         $slug = $this->generateUniqueSlug($data['title']);
 
 
@@ -35,6 +41,7 @@ class TeacherMissionService
             'video_url' => $data['video_url'],
             'case_narrative' => $data['case_narrative'],
             'material_pdf' => $pdfPath,
+            'lkpd_pdf' => $lkpdPath,
             'simulator_config' => $data['simulator_config'] ?? null,
             'prerequisite_mission_id' => $data['prerequisite_mission_id'] ?? null,
             'started_at' => $data['started_at'] ?? null,
@@ -51,7 +58,6 @@ class TeacherMissionService
     {
 
         $pdfPath = $mission->material_pdf;
-
         if (isset($data['material_pdf']) && $data['material_pdf'] instanceof UploadedFile) {
 
             if ($mission->material_pdf) {
@@ -59,6 +65,15 @@ class TeacherMissionService
             }
 
             $pdfPath = $data['material_pdf']->store('materials', 'public');
+        }
+
+
+        $lkpdPath = $mission->lkpd_pdf;
+        if (isset($data['lkpd_pdf']) && $data['lkpd_pdf'] instanceof UploadedFile) {
+            if ($lkpdPath) {
+                Storage::disk('public')->delete($lkpdPath);
+            }
+            $lkpdPath = $data['lkpd_pdf']->store('lkpd', 'public');
         }
 
 
@@ -77,7 +92,7 @@ class TeacherMissionService
             'video_url' => $data['video_url'],
             'case_narrative' => $data['case_narrative'],
             'material_pdf' => $pdfPath,
-            'simulator_config' => $data['simulator_config'] ?? null,
+            'lkpd_pdf' => $lkpdPath,
             'prerequisite_mission_id' => $data['prerequisite_mission_id'] ?? null,
             'started_at' => $data['started_at'] ?? null,
             'finished_at' => $data['finished_at'] ?? null,
@@ -93,6 +108,10 @@ class TeacherMissionService
     {
         if ($mission->material_pdf) {
             Storage::disk('public')->delete($mission->material_pdf);
+        }
+
+        if ($mission->lkpd_pdf) {
+            Storage::disk('public')->delete($mission->lkpd_pdf);
         }
 
         DB::table('grades')

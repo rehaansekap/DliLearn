@@ -24,7 +24,7 @@ export function MaterialViewer({
         <div className="overflow-hidden rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 shadow sm:rounded-2xl">
             <div className="flex items-center justify-between border-b border-violet-200 bg-gradient-to-r from-violet-400 to-purple-400 px-4 py-3 sm:px-6 sm:py-4">
                 <div className="flex items-center gap-2 text-white">
-                    <span className="text-xl sm:text-2xl">📚</span>
+                    {/* <span className="text-xl sm:text-2xl">📚</span> */}
                     <h3 className="text-base font-bold sm:text-lg">{title}</h3>
                 </div>
                 <button

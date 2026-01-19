@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 interface Mission {
     material_pdf?: string | null;
+    lkpd_pdf?: string | null;
     collab_url?: string | null;
     [key: string]: unknown;
 }
@@ -118,7 +119,15 @@ export default function Phase2Organization({
                 ))}
             </div>
 
-            <MaterialViewer materialUrl={mission?.material_pdf} />
+            <MaterialViewer
+                materialUrl={mission?.material_pdf}
+                title="📚 Materi Pembelajaran"
+            />
+
+            <MaterialViewer
+                materialUrl={mission.lkpd_pdf}
+                title="📋 Lembar Kerja Peserta Didik (LKPD)"
+            />
 
             {/* Collaboration Workspace */}
             <CollaborationWorkspace collaborationLink={collaborationLink} />

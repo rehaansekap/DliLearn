@@ -36,6 +36,7 @@ return new class extends Migration
             $table->longText('case_narrative')->nullable();
 
             $table->string('material_pdf')->nullable();
+            $table->string('lkpd_pdf')->nullable();
             $table->json('simulator_config')->nullable();
 
             $table->timestamps();

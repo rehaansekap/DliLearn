@@ -5,6 +5,7 @@ interface PdfUploadZoneProps {
     file: File | string | null;
     isDragging: boolean;
     error?: string;
+    inputId?: string;
     onFileSelect: (file: File) => void;
     onRemoveFile: () => void;
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -16,6 +17,7 @@ export function PdfUploadZone({
     file,
     isDragging,
     error,
+    inputId = 'pdf-upload',
     onFileSelect,
     onRemoveFile,
     onDragOver,
@@ -80,12 +82,12 @@ export function PdfUploadZone({
             )}
         >
             <input
-                id="pdf-upload"
+                id={inputId}
                 type="file"
                 accept=".pdf"
                 onChange={handleFileInput}
                 className="absolute inset-0 cursor-pointer opacity-0"
-                aria-label="Upload materi PDF"
+                aria-label="Upload PDF"
             />
             <div className="pointer-events-none space-y-4">
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-cyan-100 transition-transform duration-300 group-hover:scale-110">

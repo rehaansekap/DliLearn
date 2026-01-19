@@ -29,6 +29,7 @@ interface Mission {
     video_url: string;
     case_narrative: string;
     material_pdf: string | null;
+    lkpd_pdf?: string | null;
     simulator_config: string;
     prerequisite_mission_id?: number | null;
     started_at?: string | null;
@@ -75,6 +76,7 @@ export default function Edit({
             video_url: mission.video_url,
             case_narrative: mission.case_narrative,
             material_pdf: mission.material_pdf,
+            lkpd_pdf: mission.lkpd_pdf,
             simulator_config: mission.simulator_config || '',
             prerequisite_mission_id: mission.prerequisite_mission_id ?? null,
             started_at: mission.started_at ?? '',
@@ -99,6 +101,7 @@ export default function Edit({
         }
 
         clearErrors('material_pdf');
+        clearErrors('lkpd_pdf');
         setIsSubmitting(true);
 
         put(route('teacher.missions.update', mission.id), {
@@ -106,10 +109,15 @@ export default function Edit({
             transform: (formData) => {
                 const next = { ...formData } as typeof formData & {
                     material_pdf?: File | string | null;
+                    lkpd_pdf?: File | string | null;
                 };
 
                 if (!(next.material_pdf instanceof File)) {
                     delete next.material_pdf;
+                }
+
+                if (!(next.lkpd_pdf instanceof File)) {
+                    delete next.lkpd_pdf;
                 }
 
                 return next;

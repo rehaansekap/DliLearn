@@ -24,6 +24,7 @@ class Mission extends Model
         'video_url',
         'case_narrative',
         'material_pdf',
+        'lkpd_pdf',
         'simulator_config',
     ];
 

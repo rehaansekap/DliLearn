@@ -30,6 +30,7 @@ class UpdateMissionRequest extends FormRequest
             'video_url' => ['required', 'url', 'regex:/youtube\.com|youtu\.be/'],
             'case_narrative' => ['required', 'string', 'max:1000'],
             'material_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'lkpd_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
             'simulator_config' => ['nullable', 'string'],
             'prerequisite_mission_id' => ['nullable', 'exists:missions,id'],
             'started_at' => ['nullable', 'date'],
@@ -59,6 +60,9 @@ class UpdateMissionRequest extends FormRequest
             'material_pdf.file' => 'File harus berupa dokumen',
             'material_pdf.mimes' => 'File harus berformat PDF',
             'material_pdf.max' => 'Ukuran file maksimal 10MB',
+            'lkpd_pdf.file' => 'LKPD harus berupa file',
+            'lkpd_pdf.mimes' => 'LKPD harus berformat PDF',
+            'lkpd_pdf.max' => 'Ukuran LKPD maksimal 10MB',
             'prerequisite_mission_id.exists' => 'Misi prasyarat tidak valid',
             'started_at.date' => 'Format tanggal mulai tidak valid',
             'finished_at.date' => 'Format tanggal selesai tidak valid',
@@ -73,6 +77,10 @@ class UpdateMissionRequest extends FormRequest
     {
         if (is_string($this->material_pdf)) {
             $this->request->remove('material_pdf');
+        }
+
+        if (is_string($this->lkpd_pdf)) {
+            $this->request->remove('lkpd_pdf');
         }
 
         $this->merge([

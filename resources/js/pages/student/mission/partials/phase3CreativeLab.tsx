@@ -8,7 +8,9 @@ import { useState } from 'react';
 
 interface Mission {
     material_pdf?: string | null;
+    lkpd_pdf?: string | null;
     collab_url?: string | null;
+    slug: string;
     [key: string]: unknown;
 }
 
@@ -126,7 +128,16 @@ export default function Phase3CreativeLab({
             />
 
             {/* Material PDF Section */}
-            <MaterialViewer materialUrl={mission.material_pdf} />
+            <MaterialViewer
+                materialUrl={mission.material_pdf}
+                title="📚 Materi Pembelajaran"
+            />
+
+            {/* LKPD PDF Section */}
+            <MaterialViewer
+                materialUrl={mission.lkpd_pdf}
+                title="📋 Lembar Kerja Peserta Didik (LKPD)"
+            />
 
             {/* Code Editor Section */}
             <div>

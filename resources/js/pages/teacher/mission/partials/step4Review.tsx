@@ -41,11 +41,18 @@ export function Step4Review({ data, classrooms }: Step4ReviewProps) {
     const selectedClassroom = classrooms.find(
         (c) => c.id === data.classroom_id,
     );
-    const fileName =
+    const materialFileName =
         data.material_pdf instanceof File
             ? data.material_pdf.name
             : data.material_pdf
               ? data.material_pdf.split('/').pop()
+              : null;
+
+    const lkpdFileName =
+        data.lkpd_pdf instanceof File
+            ? data.lkpd_pdf.name
+            : data.lkpd_pdf
+              ? data.lkpd_pdf.split('/').pop()
               : null;
 
     return (
@@ -191,7 +198,17 @@ export function Step4Review({ data, classrooms }: Step4ReviewProps) {
                 >
                     <div className="space-y-4">
                         <ReviewItem label="Materi Pembelajaran (PDF)">
-                            <FileBadge fileName={fileName} />
+                            <FileBadge fileName={materialFileName} />
+                        </ReviewItem>
+
+                        <ReviewItem label="LKPD - Lembar Kerja (PDF)">
+                            {lkpdFileName ? (
+                                <FileBadge fileName={lkpdFileName} />
+                            ) : (
+                                <span className="text-sm text-slate-500">
+                                    Tidak ada LKPD
+                                </span>
+                            )}
                         </ReviewItem>
                     </div>
                 </ReviewCard>

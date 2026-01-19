@@ -10,6 +10,7 @@ import { useState } from 'react';
 interface Step3LearningResourcesProps {
     data: {
         material_pdf: File | string | null;
+        lkpd_pdf: File | string | null;
         simulator_config: string;
     };
     errors: Record<string, string>;
@@ -23,8 +24,9 @@ export function Step3LearningResources({
 }: Step3LearningResourcesProps) {
     const isMobile = useIsMobile();
     const [isDragging, setIsDragging] = useState(false);
+    const [isDraggingLkpd, setIsDraggingLkpd] = useState(false);
 
-    const handleFileSelect = (file: File) => {
+    const handleFileSelect = (file: File, type: 'material' | 'lkpd') => {
         if (file.type !== 'application/pdf') {
             alert('Hanya file PDF yang diperbolehkan');
             return;
@@ -33,7 +35,7 @@ export function Step3LearningResources({
             alert('Ukuran file maksimal 10MB');
             return;
         }
-        onChange('material_pdf', file);
+        onChange(type === 'material' ? 'material_pdf' : 'lkpd_pdf', file);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -41,7 +43,7 @@ export function Step3LearningResources({
         setIsDragging(false);
         const file = e.dataTransfer.files?.[0];
         if (file) {
-            handleFileSelect(file);
+            handleFileSelect(file, 'material');
         }
     };
 
@@ -57,6 +59,29 @@ export function Step3LearningResources({
 
     const handleRemoveFile = () => {
         onChange('material_pdf', null);
+    };
+
+    const handleDropLkpd = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDraggingLkpd(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            handleFileSelect(file, 'lkpd');
+        }
+    };
+
+    const handleDragOverLkpd = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDraggingLkpd(true);
+    };
+
+    const handleDragLeaveLkpd = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDraggingLkpd(false);
+    };
+
+    const handleRemoveFileLkpd = () => {
+        onChange('lkpd_pdf', null);
     };
 
     return (
@@ -76,13 +101,19 @@ export function Step3LearningResources({
                     >
                         <ResourcesFormFields
                             materialPdf={data.material_pdf}
+                            lkpdPdf={data.lkpd_pdf}
                             errors={errors}
                             isDragging={isDragging}
+                            isDraggingLkpd={isDraggingLkpd}
                             onFileSelect={handleFileSelect}
                             onRemoveFile={handleRemoveFile}
+                            onRemoveFileLkpd={handleRemoveFileLkpd}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
+                            onDragOverLkpd={handleDragOverLkpd}
+                            onDragLeaveLkpd={handleDragLeaveLkpd}
+                            onDropLkpd={handleDropLkpd}
                         />
                     </div>
                 </div>
