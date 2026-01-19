@@ -104,7 +104,7 @@ export function TabMonitoring({
                             Monitoring & Refleksi
                         </h2>
                         <p className="text-xs text-slate-600 sm:text-sm">
-                            Pantau progress dan lihat refleksi setiap siswa
+                            Pantau progres dan lihat refleksi setiap siswa
                         </p>
                     </div>
                 </div>

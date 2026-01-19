@@ -156,7 +156,7 @@ export default function Show({
                         Manajemen Kelas & Monitoring
                     </h2>
                     <p className="text-xs text-slate-500">
-                        Kelola kehadiran, kelompok, dan pantau progress siswa
+                        Kelola kehadiran, kelompok, dan pantau progres siswa
                     </p>
                 </div>
             }

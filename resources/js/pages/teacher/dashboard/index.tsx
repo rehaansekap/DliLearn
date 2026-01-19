@@ -116,7 +116,7 @@ export default function Dashboard({
                         Dashboard
                     </h2>
                     <p className="text-xs text-slate-500">
-                        Kelola misi dan pantau progress pembelajaran
+                        Kelola misi dan pantau progres pembelajaran
                     </p>
                 </div>
             }

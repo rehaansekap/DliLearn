@@ -77,7 +77,7 @@ export default function Dashboard({
                             Dashboard Petualangan
                         </h2>
                         <p className="text-xs text-slate-600 sm:text-sm">
-                            Kelola misi dan pantau progress belajarmu
+                            Kelola misi dan pantau progres belajarmu
                         </p>
                     </div>
                     <div className="hidden items-center gap-2 sm:flex">
