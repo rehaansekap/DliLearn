@@ -252,7 +252,7 @@ export function SubmissionDetailModal({
                                                 </p>
                                             </div>
                                         </div>
-                                        <p className="text-sm text-slate-700">
+                                        <p className="text-sm break-words whitespace-pre-wrap text-slate-700">
                                             {feedback.message}
                                         </p>
                                     </div>
