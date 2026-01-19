@@ -55,8 +55,7 @@ export default function Login({ status }: LoginProps) {
                         </h1>
                         <p className="mb-8 max-w-md text-center text-lg text-white/90">
                             Platform pembelajaran berbasis Problem-Based
-                            Learning untuk mengembangkan kemampuan coding dan
-                            problem solving.
+                            Learning untuk meningkatkan critical thinking.
                         </p>
 
                         {/* Features */}
