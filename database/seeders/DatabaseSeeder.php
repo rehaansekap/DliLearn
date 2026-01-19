@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'username' => 'admin',
             'email' => 'admin@sekolah.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('123123123'),
             'role' => 'admin',
             'avatar' => 'admin_male.png',
         ]);
@@ -25,18 +25,16 @@ class DatabaseSeeder extends Seeder
             'name' => 'Pak Budi Santoso',
             'username' => 'guru1',
             'email' => 'budi@sekolah.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('123123123'),
             'role' => 'teacher',
-            'avatar' => 'teacher_male.png',
         ]);
 
         $guru2 = User::create([
             'name' => 'Bu Siti Aminah',
             'username' => 'guru2',
             'email' => 'siti@sekolah.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('123123123'),
             'role' => 'teacher',
-            'avatar' => 'teacher_female.png',
         ]);
 
         $students = [];
@@ -47,11 +45,10 @@ class DatabaseSeeder extends Seeder
                 'name' => fake()->name(),
                 'username' => "siswa$i",
                 'email' => "siswa$i@sekolah.id",
-                'password' => Hash::make('password'),
+                'password' => Hash::make('123123123'),
                 'role' => 'student',
                 'xp' => rand(0, 0),
                 'level' => rand(1, 1),
-                'avatar' => 'student.png', 
             ]);
 
             $students[] = $student;
