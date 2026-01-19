@@ -52,7 +52,7 @@ export default function MissionSidebar({
             className={cn(
                 isMobile
                     ? 'relative z-0 h-full w-full'
-                    : 'sticky top-35 h-full w-full',
+                    : 'sticky top-24 h-full w-full',
                 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg md:w-1/4',
             )}
         >
