@@ -1,4 +1,3 @@
-import { CollaborationWorkspace } from '@/components/mission/collaborationWorkspace';
 import { MaterialViewer } from '@/components/mission/materialViewer';
 import { TeamMemberCard } from '@/components/mission/teamMemberCard';
 import { MissionButton } from '@/components/mission/ui/missionButton';
@@ -24,7 +23,6 @@ interface Phase2OrganizationProps {
     mission: Mission;
     groupMembers: GroupMember[];
     currentUserRole: string;
-    collaborationLink?: string;
     amILeader: boolean;
     onRoleChange: (userId: number, newRole: string) => void;
     onCompleteStep: () => void;
@@ -57,7 +55,6 @@ export default function Phase2Organization({
     mission,
     groupMembers,
     currentUserRole,
-    collaborationLink,
     amILeader,
     onRoleChange,
     onCompleteStep,
@@ -119,18 +116,17 @@ export default function Phase2Organization({
                 ))}
             </div>
 
+            {/* Material PDF Section */}
             <MaterialViewer
                 materialUrl={mission?.material_pdf}
                 title="📚 Materi Pembelajaran"
             />
 
+            {/* LKPD PDF Section */}
             <MaterialViewer
                 materialUrl={mission.lkpd_pdf}
                 title="📋 Lembar Kerja Peserta Didik (LKPD)"
             />
-
-            {/* Collaboration Workspace */}
-            <CollaborationWorkspace collaborationLink={collaborationLink} />
 
             {/* Action Buttons */}
             {amILeader && (

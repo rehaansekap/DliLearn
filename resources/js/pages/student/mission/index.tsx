@@ -338,9 +338,6 @@ export default function Show({
                                             mission={mission}
                                             groupMembers={groupMembers}
                                             currentUserRole={currentUserRole}
-                                            collaborationLink={
-                                                collaborationLink
-                                            }
                                             amILeader={amILeader}
                                             onRoleChange={handleRoleChange}
                                             onCompleteStep={handleCompleteStep2}
@@ -357,6 +354,9 @@ export default function Show({
                                             isRunning={isRunning}
                                             terminalOutput={terminalOutput}
                                             hasRunCode={hasRunCode}
+                                            collaborationLink={
+                                                collaborationLink
+                                            }
                                         />
                                     )}
 

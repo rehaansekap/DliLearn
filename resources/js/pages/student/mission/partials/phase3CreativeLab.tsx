@@ -1,5 +1,6 @@
 import { CodeActionButtons } from '@/components/mission/codeActionButtons';
 import { CodeEditor } from '@/components/mission/codeEditor';
+import { CollaborationWorkspace } from '@/components/mission/collaborationWorkspace';
 import { MaterialViewer } from '@/components/mission/materialViewer';
 import { Terminal } from '@/components/mission/terminal';
 import { MissionCard } from '@/components/mission/ui/missionCard';
@@ -17,6 +18,7 @@ interface Mission {
 interface Phase3CreativeLabProps {
     mission: Mission;
     onSaveCode: (code: string, language: string) => void;
+    collaborationLink?: string;
     onRunSuccess?: () => void;
 }
 
@@ -36,6 +38,7 @@ function getDefaultCode(): string {
 export default function Phase3CreativeLab({
     mission,
     onSaveCode,
+    collaborationLink,
 }: Phase3CreativeLabProps) {
     const [codeLanguage, setCodeLanguage] = useState('cpp');
     const [codeValue, setCodeValue] = useState(getDefaultCode());
@@ -133,11 +136,8 @@ export default function Phase3CreativeLab({
                 title="📚 Materi Pembelajaran"
             />
 
-            {/* LKPD PDF Section */}
-            <MaterialViewer
-                materialUrl={mission.lkpd_pdf}
-                title="📋 Lembar Kerja Peserta Didik (LKPD)"
-            />
+            {/* Collaboration Workspace */}
+            <CollaborationWorkspace collaborationLink={collaborationLink} />
 
             {/* Code Editor Section */}
             <div>
