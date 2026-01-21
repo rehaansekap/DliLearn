@@ -170,5 +170,3 @@ Option B — deploy to your web server (Apache/Nginx) and serve the built assets
 
 - Teacher Monitoring  
   ![Teacher Monitoring Page](documentations/guru-monitoring.jpeg)
-
-If you want, I can add a short "deploy to production" checklist or CI examples (GitHub Actions).
