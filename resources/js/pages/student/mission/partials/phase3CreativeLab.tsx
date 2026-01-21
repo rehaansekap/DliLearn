@@ -5,6 +5,7 @@ import { Terminal } from '@/components/mission/terminal';
 import { MissionCard } from '@/components/mission/ui/missionCard';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
 import { useState } from 'react';
+import { InputModal } from '@/components/mission/inputModal';
 
 interface Mission {
     material_pdf?: string | null;
@@ -25,13 +26,13 @@ const LANGUAGES = [{ value: 'cpp', label: 'C++', icon: '⚙️' }];
 
 function getDefaultCode(): string {
     return `// Tulis kode eksperimenmu di sini
-        #include <bits/stdc++.h>
-        using namespace std;
+#include <bits/stdc++.h>
+using namespace std;
 
-        int main() {
-        cout << "Hello World!" << "\\n";
-        return 0;
-        }`;
+int main() {
+    cout << "Hello World!" << "\\n";
+    return 0;
+}`;
 }
 
 export default function Phase3CreativeLab({
@@ -44,13 +45,15 @@ export default function Phase3CreativeLab({
     const [isRunning, setIsRunning] = useState(false);
     const [hasRunCodeLocal, setHasRunCodeLocal] = useState(false);
     const [terminalOutput, setTerminalOutput] = useState('');
+    const [showInputModal, setShowInputModal] = useState(false);
 
     const handleLanguageChange = (newLang: string) => {
         setCodeLanguage(newLang);
         setCodeValue(getDefaultCode());
     };
 
-    const handleRunCode = async () => {
+    const handleRunCodeWithInput = async (stdinInput: string) => {
+        setShowInputModal(false);
         setIsRunning(true);
         setTerminalOutput('> Compiling & running C++ code...\n');
 
@@ -74,6 +77,7 @@ export default function Phase3CreativeLab({
                 body: JSON.stringify({
                     code: codeValue,
                     language: codeLanguage,
+                    stdin: stdinInput || undefined,
                 }),
             });
 
@@ -87,10 +91,6 @@ export default function Phase3CreativeLab({
             }
 
             const parts = [
-                // `> Status: ${json.status ?? 'Unknown'}`,
-                // json.compile_output
-                //     ? `> Compile Output:\n${json.compile_output}`
-                //     : null,
                 json.stderr ? `> Stderr:\n${json.stderr}` : null,
                 `> Output:\n${json.stdout ?? ''}`,
                 json.time ? `\n\n\n> Execution Time: ${json.time}ms` : null,
@@ -105,13 +105,17 @@ export default function Phase3CreativeLab({
             if (typeof onRunSuccess === 'function') {
                 onRunSuccess();
             }
-        } catch (e: Error) {
+        } catch (e: unknown) {
             setTerminalOutput(
                 `> Error:\n${(e as Error)?.message ?? 'Failed to run code'}\n`,
             );
         } finally {
             setIsRunning(false);
         }
+    };
+
+    const handleRunCode = () => {
+        setShowInputModal(true);
     };
 
     const handleSaveCode = () => {
@@ -187,6 +191,13 @@ export default function Phase3CreativeLab({
                     </div>
                 </div>
             </MissionCard>
+
+            {/* Input Modal */}
+            <InputModal
+                isOpen={showInputModal}
+                onClose={() => setShowInputModal(false)}
+                onSubmit={handleRunCodeWithInput}
+            />
         </div>
     );
 }
