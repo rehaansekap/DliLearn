@@ -31,6 +31,23 @@ export default function Phase4Submission({
         }
     };
 
+    if (groupHasSubmitted) {
+        return (
+            <div className="space-y-6 px-2 sm:px-0">
+                <div className="flex justify-center">
+                    <div className="w-full max-w-xl px-2 sm:px-0">
+                        <StatusCard
+                            type="success"
+                            icon="✅"
+                            title="Tugas Berhasil Dikumpulkan!"
+                            description="Selamat! Kelompok kalian sudah berhasil submit tugas akhir. Lanjut ke tahap evaluasi untuk melihat hasil karya teman-teman."
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (!amILeader) {
         return (
             <div className="space-y-6 px-2 sm:px-0">
@@ -64,23 +81,6 @@ export default function Phase4Submission({
                         </div>
                     )}
                 </StatusCard>
-            </div>
-        );
-    }
-
-    if (groupHasSubmitted) {
-        return (
-            <div className="space-y-6 px-2 sm:px-0">
-                <div className="flex justify-center">
-                    <div className="w-full max-w-xl px-2 sm:px-0">
-                        <StatusCard
-                            type="success"
-                            icon="✅"
-                            title="Tugas Berhasil Dikumpulkan!"
-                            description="Selamat! Kelompok kalian sudah berhasil submit tugas akhir. Lanjut ke tahap evaluasi untuk melihat hasil karya teman-teman."
-                        />
-                    </div>
-                </div>
             </div>
         );
     }

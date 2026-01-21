@@ -1,7 +1,7 @@
 import { MissionHeader } from '@/components/mission/missionHeader';
 import StudentLayout from '@/layouts/student-layout';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import MissionSidebar from './partials/missionSidebar';
 import Phase1Orientation from './partials/phase1Orientation';
@@ -54,6 +54,42 @@ export default function Show({
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
     const amILeader = currentUserRole === 'Leader';
+
+    useEffect(() => {
+        if (!mission?.slug) return;
+        let mounted = true;
+
+        const fetchPartial = () => {
+            router.get(
+                route('mission.show', mission.slug),
+                {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    only: [
+                        'groupHasSubmitted',
+                        'gallerySubmissions',
+                        'voteData',
+                        'unreviewedSubmissions',
+                        'groupStatus',
+                    ],
+                },
+            );
+        };
+
+        if (activeTab === 4 || activeTab === 5 || reflectionLocked) {
+            fetchPartial();
+            const id = setInterval(() => {
+                if (!mounted) return;
+                fetchPartial();
+            }, 3000);
+
+            return () => {
+                mounted = false;
+                clearInterval(id);
+            };
+        }
+    }, [mission?.slug, activeTab, reflectionLocked]);
 
     const handleSubmitReflection = (reflection: string) => {
         router.post(
