@@ -1,7 +1,6 @@
 import { CodeActionButtons } from '@/components/mission/codeActionButtons';
 import { CodeEditor } from '@/components/mission/codeEditor';
 import { CollaborationWorkspace } from '@/components/mission/collaborationWorkspace';
-import { MaterialViewer } from '@/components/mission/materialViewer';
 import { Terminal } from '@/components/mission/terminal';
 import { MissionCard } from '@/components/mission/ui/missionCard';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
@@ -128,12 +127,6 @@ export default function Phase3CreativeLab({
                 subtitle="Eksperimen dengan berbagai pendekatan dan algoritma. Jangan takut mencoba!"
                 icon="💡"
                 color="blue"
-            />
-
-            {/* Material PDF Section */}
-            <MaterialViewer
-                materialUrl={mission.material_pdf}
-                title="📚 Materi Pembelajaran"
             />
 
             {/* Collaboration Workspace */}
