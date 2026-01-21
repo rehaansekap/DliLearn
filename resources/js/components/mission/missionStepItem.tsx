@@ -28,7 +28,9 @@ export function MissionStepItem({
                 'relative flex w-full items-center gap-4 rounded-xl p-4 text-left transition-all duration-300',
                 isActive &&
                     'scale-105 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-md ring-2 ring-indigo-500',
-                !isActive && !isLocked && 'hover:bg-slate-50',
+                !isActive &&
+                    !isLocked &&
+                    'hover:bg-slate-100 hover:shadow-sm hover:ring-1 hover:ring-slate-300',
                 isLocked && 'cursor-not-allowed opacity-60',
             )}
             aria-label={`${label} - ${status === 'active' ? 'Sedang Aktif' : status === 'completed' ? 'Selesai' : status === 'locked' ? 'Terkunci' : 'Siap Dimulai'}`}
