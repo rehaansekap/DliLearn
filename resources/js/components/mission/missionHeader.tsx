@@ -35,7 +35,7 @@ export function MissionHeader({
                             {title}
                         </h1>
                         {description && (
-                            <p className="text-sm text-slate-700 sm:text-base">
+                            <p className="text-sm break-words whitespace-normal text-slate-700 sm:text-base">
                                 {description}
                             </p>
                         )}
