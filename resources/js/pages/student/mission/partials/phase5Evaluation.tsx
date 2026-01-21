@@ -1,13 +1,15 @@
 import { BestGroupVote } from '@/components/mission/bestGroupVote';
+import { CompleteMissionButton } from '@/components/mission/completeMissionButton';
 import { CompletionStatusCard } from '@/components/mission/completionStatusCard';
-import { FinalReflectionForm } from '@/components/mission/finalReflectionForm';
+import { FinalReflectionModal } from '@/components/mission/finalReflectionModal';
 import { GalleryCard } from '@/components/mission/galleryCard';
 import { SubmissionDetailModal } from '@/components/mission/submissionDetailModal';
 import { EmptyGalleryState } from '@/components/mission/ui/emptyGalleryState';
 import { MissionButton } from '@/components/mission/ui/missionButton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
+import { route } from 'ziggy-js';
 
 interface GallerySubmission {
     id: number;
@@ -72,6 +74,7 @@ export default function Phase5Evaluation({
     const [selectedSubmission, setSelectedSubmission] =
         useState<GallerySubmission | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showReflectionModal, setShowReflectionModal] = useState(false);
     const [isSubmittingReflection, setIsSubmittingReflection] = useState(false);
 
     const itemsPerPage = isMobile ? 3 : 6;
@@ -91,6 +94,10 @@ export default function Phase5Evaluation({
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
     );
+
+    // Cek apakah misi dapat diselesaikan
+    const canCompleteMission =
+        voteData?.has_voted === true && unreviewedSubmissions.length === 0;
 
     const handleLike = (submissionId: number) => {
         router.post(
@@ -150,63 +157,53 @@ export default function Phase5Evaluation({
         );
     };
 
-    const handleFinalReflectionSubmit = async (reflection: string) => {
-        if (amILeader && unreviewedSubmissions.length > 0) {
-            const SwalModule = await import('sweetalert2');
-            await import('sweetalert2/dist/sweetalert2.min.css');
-            const Swal = SwalModule.default;
+    const handleOpenReflectionModal = () => {
+        setShowReflectionModal(true);
+    };
 
-            const htmlList = unreviewedSubmissions
-                .map(
-                    (s) =>
-                        `<span style="display:inline-block;margin:2px 0;padding:2px 8px;border-radius:8px;background:#fbbf24;color:#78350f;font-weight:bold;">${s.group_name} (${s.group_code})</span>`,
-                )
-                .join('<br/>');
-
-            await Swal.fire({
-                icon: 'error',
-                title: 'Belum Semua Feedback!',
-                html:
-                    'Kamu harus memberikan feedback pada semua karya kelompok lain sebelum submit refleksi akhir.<br><br>' +
-                    htmlList,
-                confirmButtonText: 'OK',
-                customClass: {
-                    popup: 'rounded-xl',
-                    title: 'font-bold',
-                    confirmButton:
-                        'bg-gradient-to-r from-indigo-600 to-purple-600',
-                },
-            });
-            return;
-        }
-
-        if (amILeader && voteData && !voteData.has_voted) {
-            const SwalModule = await import('sweetalert2');
-            await import('sweetalert2/dist/sweetalert2.min.css');
-            const Swal = SwalModule.default;
-
-            await Swal.fire({
-                icon: 'warning',
-                title: 'Belum Vote!',
-                text: 'Sebagai ketua, kamu harus memberikan vote untuk kelompok terbaik sebelum menyelesaikan misi.',
-                confirmButtonText: 'OK',
-                customClass: {
-                    popup: 'rounded-xl',
-                    title: 'font-bold',
-                    confirmButton:
-                        'bg-gradient-to-r from-amber-500 to-yellow-500',
-                },
-            });
-            return;
-        }
-
+    const handleFinalReflectionSubmit = (reflection: string) => {
         setIsSubmittingReflection(true);
         onSubmitFinalReflection(reflection);
     };
 
     useEffect(() => {
-        setCurrentPage(1);
+        startTransition(() => {
+            setCurrentPage(1);
+        });
     }, [gallerySubmissions.length, isMobile]);
+
+    useEffect(() => {
+        if (!missionSlug) return;
+        let mounted = true;
+
+        const fetchPartial = () => {
+            router.get(
+                route('mission.show', missionSlug),
+                {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    only: [
+                        'gallerySubmissions',
+                        'voteData',
+                        'unreviewedSubmissions',
+                        'groupStatus',
+                    ],
+                },
+            );
+        };
+
+        fetchPartial();
+        const id = setInterval(() => {
+            if (!mounted) return;
+            fetchPartial();
+        }, 3000);
+
+        return () => {
+            mounted = false;
+            clearInterval(id);
+        };
+    }, [missionSlug]);
 
     return (
         <div className="space-y-6 px-2 sm:space-y-8 sm:px-0">
@@ -345,7 +342,7 @@ export default function Phase5Evaluation({
                 <EmptyGalleryState />
             )}
 
-            {/* Best Group Vote Section (locked when no submissions yet) */}
+            {/* Best Group Vote Section */}
             {voteData && (
                 <BestGroupVote
                     missionSlug={missionSlug}
@@ -362,7 +359,7 @@ export default function Phase5Evaluation({
                 />
             )}
 
-            {/* Final Reflection Section */}
+            {/* Complete Mission Section */}
             {submittedPreviously ? (
                 groupStatus === 'completed' ? (
                     <CompletionStatusCard
@@ -404,12 +401,28 @@ export default function Phase5Evaluation({
                     </CompletionStatusCard>
                 )
             ) : (
-                <FinalReflectionForm
-                    initialValue={initialFinalReflection || ''}
-                    isSubmitting={isSubmittingReflection}
-                    onSubmit={handleFinalReflectionSubmit}
+                <CompleteMissionButton
+                    isLocked={!canCompleteMission}
+                    lockReason={
+                        !canCompleteMission
+                            ? 'Ketua kelompok harus menyelesaikan semua persyaratan terlebih dahulu.'
+                            : undefined
+                    }
+                    amILeader={amILeader}
+                    hasVoted={voteData?.has_voted || false}
+                    unreviewedCount={unreviewedSubmissions.length}
+                    onClick={handleOpenReflectionModal}
                 />
             )}
+
+            {/* Final Reflection Modal */}
+            <FinalReflectionModal
+                isOpen={showReflectionModal}
+                onClose={() => setShowReflectionModal(false)}
+                initialValue={initialFinalReflection || ''}
+                isSubmitting={isSubmittingReflection}
+                onSubmit={handleFinalReflectionSubmit}
+            />
 
             {/* Detail Modal */}
             {selectedSubmission && (

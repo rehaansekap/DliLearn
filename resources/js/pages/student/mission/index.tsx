@@ -271,9 +271,9 @@ export default function Show({
                     <h2 className="text-lg font-bold text-slate-800">
                         {mission.title}
                     </h2>
-                    <p className="text-xs text-slate-500">
+                    {/* <p className="text-xs text-slate-500">
                         {mission.description}
-                    </p>
+                    </p> */}
                 </div>
             }
             fullWidth={true}
