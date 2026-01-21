@@ -40,8 +40,8 @@ export function useMissionForm({ initialData }: UseMissionFormOptions) {
             simulator_config: initialData.simulator_config ?? '',
             prerequisite_mission_id:
                 initialData.prerequisite_mission_id ?? null,
-            started_at: initialData.started_at ?? '',
-            finished_at: initialData.finished_at ?? '',
+            started_at: initialData.started_at ?? null,
+            finished_at: initialData.finished_at ?? null,
         });
 
     const handleChange = (
@@ -64,8 +64,8 @@ export function useMissionForm({ initialData }: UseMissionFormOptions) {
             if (!data.title.trim()) newErrors.title = 'Judul misi wajib diisi';
             if (!data.description.trim())
                 newErrors.description = 'Deskripsi wajib diisi';
-            if (data.description.length > 500)
-                newErrors.description = 'Deskripsi maksimal 500 karakter';
+            if (data.description.length > 5000)
+                newErrors.description = 'Deskripsi maksimal 5000 karakter';
             if (!data.difficulty_level)
                 newErrors.difficulty_level = 'Tingkat kesulitan wajib dipilih';
         }

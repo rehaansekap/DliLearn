@@ -119,7 +119,7 @@ export function BasicInfoFormFields({
                     isError={!!errors.description}
                 />
                 <InputError message={errors.description} />
-                <FormHint>{data.description.length}/500 karakter</FormHint>
+                <FormHint>{data.description.length}/5000 karakter</FormHint>
             </FormField>
 
             {/* Difficulty Level */}

@@ -22,7 +22,7 @@ class StoreMissionRequest extends FormRequest
         return [
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string', 'max:500'],
+            'description' => ['required', 'string', 'max:5000'],
             'difficulty_level' => ['required', 'integer', 'between:1,5'],
             'video_url' => ['required', 'url', 'regex:/youtube\.com|youtu\.be/'],
             'case_narrative' => ['required', 'string', 'max:1000'],
@@ -46,7 +46,7 @@ class StoreMissionRequest extends FormRequest
             'title.required' => 'Judul misi wajib diisi',
             'title.max' => 'Judul maksimal 255 karakter',
             'description.required' => 'Deskripsi wajib diisi',
-            'description.max' => 'Deskripsi maksimal 500 karakter',
+            'description.max' => 'Deskripsi maksimal 5000 karakter',
             'difficulty_level.required' => 'Tingkat kesulitan wajib dipilih',
             'difficulty_level.between' => 'Tingkat kesulitan harus antara 1-5',
             'video_url.required' => 'URL video wajib diisi',
