@@ -143,7 +143,7 @@ export function SubmissionDetailModal({
                         {/* Flowchart Preview */}
                         <div>
                             <h4 className="mb-3 font-bold text-slate-800">
-                                📊 Flowchart
+                                📊 Flowchart/Dokumen
                             </h4>
                             <div className="overflow-hidden rounded-xl border border-slate-200">
                                 {/\.(jpg|jpeg|png|gif)$/i.test(
