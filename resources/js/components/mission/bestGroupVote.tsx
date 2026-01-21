@@ -54,6 +54,25 @@ export function BestGroupVote({
     }
 
     if (!amILeader) {
+        if (locked) {
+            return (
+                <MissionCard
+                    title="Vote Kelompok Terbaik"
+                    icon="🏆"
+                    headerClassName="bg-gradient-to-r from-amber-400 to-yellow-400 border-amber-200"
+                    className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50"
+                >
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
+                        <span className="text-2xl">🔒</span>
+                        <p className="mt-2 text-sm text-amber-800">
+                            Hanya ketua kelompok yang dapat memberikan vote
+                            untuk kelompok terbaik.
+                        </p>
+                    </div>
+                </MissionCard>
+            );
+        }
+
         return (
             <MissionCard
                 title="Vote Kelompok Terbaik"
@@ -61,12 +80,31 @@ export function BestGroupVote({
                 headerClassName="bg-gradient-to-r from-amber-400 to-yellow-400 border-amber-200"
                 className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50"
             >
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
-                    <span className="text-2xl">🔒</span>
-                    <p className="mt-2 text-sm text-amber-800">
-                        Hanya ketua kelompok yang dapat memberikan vote untuk
-                        kelompok terbaik.
+                <div className="space-y-3">
+                    <p className="text-sm text-slate-700">
+                        Voting dibuka — hanya Ketua yang dapat memilih. Tampilan
+                        ini read-only untuk anggota.
                     </p>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {votableGroups.map((g) => (
+                            <div
+                                key={g.id}
+                                className="flex items-center gap-3 rounded-xl border-2 bg-white p-3"
+                            >
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 text-white">
+                                    {g.name.charAt(0)}
+                                </div>
+                                <div className="flex-1 text-sm">
+                                    <div className="font-bold text-slate-800">
+                                        {g.name}
+                                    </div>
+                                    <div className="text-xs text-slate-500">
+                                        {g.group_code}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </MissionCard>
         );

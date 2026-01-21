@@ -146,6 +146,14 @@ class MissionController extends Controller
                 ->first();
         }
 
+        $leaderRequirementsCompleted = false;
+        if ($groupMember) {
+            $leaderHasVoted = $this->voteService->hasVoted($groupMember->group_id, $mission->id);
+            $leaderGaveAllFeedback = is_array($unreviewedSubmissions) ? count($unreviewedSubmissions) === 0 : false;
+
+            $leaderRequirementsCompleted = $leaderHasVoted && $leaderGaveAllFeedback;
+        }
+
         return Inertia::render('student/mission/index', [
             'mission' => $mission,
             'currentStep' => $currentStep,
@@ -160,6 +168,7 @@ class MissionController extends Controller
             'unreviewedSubmissions' => $unreviewedSubmissions,
             'voteData' => $voteData,
             'collaborationLink' => $groupProgress?->collab_url ?? $mission->collab_url ?? null,
+            'leaderRequirementsCompleted' => $leaderRequirementsCompleted,
         ]);
     }
 

@@ -24,6 +24,7 @@ export default function Show({
     groupStatus,
     unreviewedSubmissions = [],
     voteData = null,
+    leaderRequirementsCompleted = false,
     collaborationLink: collaborationLinkProp = null,
 }) {
     const [activeTab, setActiveTab] = useState(currentStep);
@@ -54,6 +55,9 @@ export default function Show({
     const [isSubmittingPhase4, setIsSubmittingPhase4] = useState(false);
 
     const amILeader = currentUserRole === 'Leader';
+    const leaderRequirementsCompletedState = Boolean(
+        leaderRequirementsCompleted,
+    );
 
     useEffect(() => {
         if (!mission?.slug) return;
@@ -72,6 +76,7 @@ export default function Show({
                         'voteData',
                         'unreviewedSubmissions',
                         'groupStatus',
+                        'leaderRequirementsCompleted',
                     ],
                 },
             );
@@ -440,6 +445,9 @@ export default function Show({
                                                 unreviewedSubmissions
                                             }
                                             voteData={voteData}
+                                            leaderRequirementsCompleted={
+                                                leaderRequirementsCompletedState
+                                            }
                                         />
                                     )}
                                 </div>

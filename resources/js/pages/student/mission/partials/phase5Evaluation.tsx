@@ -56,6 +56,7 @@ interface Phase5EvaluationProps {
     amILeader?: boolean;
     unreviewedSubmissions?: Array<{ group_name: string; group_code: string }>;
     voteData?: VoteData | null;
+    leaderRequirementsCompleted?: boolean;
 }
 
 export default function Phase5Evaluation({
@@ -69,6 +70,7 @@ export default function Phase5Evaluation({
     amILeader = false,
     unreviewedSubmissions = [],
     voteData = null,
+    leaderRequirementsCompleted = false,
 }: Phase5EvaluationProps) {
     const isMobile = useIsMobile();
     const [selectedSubmission, setSelectedSubmission] =
@@ -95,9 +97,9 @@ export default function Phase5Evaluation({
         currentPage * itemsPerPage,
     );
 
-    // Cek apakah misi dapat diselesaikan
     const canCompleteMission =
-        voteData?.has_voted === true && unreviewedSubmissions.length === 0;
+        Boolean(leaderRequirementsCompleted) ||
+        (voteData?.has_voted === true && unreviewedSubmissions.length === 0);
 
     const handleLike = (submissionId: number) => {
         router.post(
@@ -188,6 +190,7 @@ export default function Phase5Evaluation({
                         'voteData',
                         'unreviewedSubmissions',
                         'groupStatus',
+                        'leaderRequirementsCompleted',
                     ],
                 },
             );
