@@ -71,6 +71,10 @@ export default function Show({
                     preserveState: true,
                     preserveScroll: true,
                     only: [
+                        'groupMembers',
+                        'currentUserRole',
+                        'currentStep',
+                        'unlockedStep',
                         'groupHasSubmitted',
                         'gallerySubmissions',
                         'voteData',
@@ -82,7 +86,13 @@ export default function Show({
             );
         };
 
-        if (activeTab === 4 || activeTab === 5 || reflectionLocked) {
+        if (
+            activeTab === 1 ||
+            activeTab === 2 ||
+            activeTab === 4 ||
+            activeTab === 5 ||
+            reflectionLocked
+        ) {
             fetchPartial();
             const id = setInterval(() => {
                 if (!mounted) return;
