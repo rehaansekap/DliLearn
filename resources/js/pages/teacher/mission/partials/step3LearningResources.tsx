@@ -31,8 +31,8 @@ export function Step3LearningResources({
             alert('Hanya file PDF yang diperbolehkan');
             return;
         }
-        if (file.size > 10 * 1024 * 1024) {
-            alert('Ukuran file maksimal 10MB');
+        if (file.size > 50 * 1024 * 1024) {
+            alert('Ukuran file maksimal 50MB');
             return;
         }
         onChange(type === 'material' ? 'material_pdf' : 'lkpd_pdf', file);

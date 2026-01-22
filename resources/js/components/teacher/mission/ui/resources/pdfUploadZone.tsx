@@ -106,7 +106,7 @@ export function PdfUploadZone({
                     </p>
                     <p className="text-sm text-slate-600">
                         Format: <strong>PDF</strong> • Maksimal:{' '}
-                        <strong>10MB</strong>
+                        <strong>50MB</strong>
                     </p>
                 </div>
             </div>
