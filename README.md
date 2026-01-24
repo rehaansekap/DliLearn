@@ -4,7 +4,7 @@ This document describes how to set up the DliLearn project locally (backend + fr
 
 ## Repository layout (high level)
 
-- Laravel PHP backend (app/, routes/, config/, bootstrap/, resources/views/
+- Laravel PHP backend (app/, routes/, config/, bootstrap/, resources/views/)
 - React + Inertia frontend (resources/js/, vite config)
 - Key files:
     - [resources/js/app.tsx](resources/js/app.tsx)
