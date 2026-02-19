@@ -75,9 +75,9 @@ export function MissionCard({ mission, onDelete }: MissionCardProps) {
                     <h3 className="mb-1 line-clamp-2 text-lg font-bold text-white">
                         {mission.title}
                     </h3>
-                    <p className="mb-4 line-clamp-2 text-sm text-indigo-100">
+                    {/* <p className="mb-4 line-clamp-2 text-sm text-indigo-100">
                         {mission.description}
-                    </p>
+                    </p> */}
                 </div>
 
                 {/* Level Badge */}
