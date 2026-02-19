@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { ChevronDown, MessageSquare } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface Reflection {
     user_id: number;
@@ -22,7 +22,30 @@ export function ReflectionAccordion({ reflections }: ReflectionAccordionProps) {
         'initial' | 'final' | null
     >('initial');
 
-    const initialReflections = reflections
+    // De-dupe reflections coming from backend JOINs (common cause of "double" items).
+    // Key ignores group_name, and we keep the version that has a group_name if available.
+    const dedupedReflections = useMemo(() => {
+        const map = new Map<string, Reflection>();
+
+        for (const r of reflections) {
+            const key = `${r.user_id}|${r.type}|${r.created_at}|${r.content}`;
+
+            const prev = map.get(key);
+            if (!prev) {
+                map.set(key, r);
+                continue;
+            }
+
+            // Prefer the row that contains group_name
+            if (!prev.group_name && r.group_name) {
+                map.set(key, { ...prev, group_name: r.group_name });
+            }
+        }
+
+        return Array.from(map.values());
+    }, [reflections]);
+
+    const initialReflections = dedupedReflections
         .filter((r) => r.type === 'initial')
         .sort(
             (a, b) =>
@@ -30,7 +53,7 @@ export function ReflectionAccordion({ reflections }: ReflectionAccordionProps) {
                 new Date(a.created_at).getTime(),
         );
 
-    const finalReflections = reflections
+    const finalReflections = dedupedReflections
         .filter((r) => r.type === 'final')
         .sort(
             (a, b) =>
@@ -62,9 +85,9 @@ export function ReflectionAccordion({ reflections }: ReflectionAccordionProps) {
 
         return (
             <div className="max-h-[400px] space-y-3 overflow-y-auto p-4">
-                {items.map((reflection, index) => (
+                {items.map((reflection) => (
                     <div
-                        key={`${reflection.user_id}-${reflection.type}-${index}`}
+                        key={`${reflection.user_id}-${reflection.type}-${reflection.created_at}`}
                         className={cn(
                             'rounded-xl border p-3 transition-all hover:shadow-md',
                             type === 'initial'
@@ -133,7 +156,7 @@ export function ReflectionAccordion({ reflections }: ReflectionAccordionProps) {
         );
     };
 
-    if (reflections.length === 0) {
+    if (dedupedReflections.length === 0) {
         return (
             <div className="overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg">
                 <div className="border-b-2 border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-3">
@@ -168,7 +191,7 @@ export function ReflectionAccordion({ reflections }: ReflectionAccordionProps) {
                         </h3>
                     </div>
                     <p className="text-xs text-slate-500">
-                        {reflections.length} total refleksi
+                        {dedupedReflections.length} total refleksi
                     </p>
                 </div>
             </div>
