@@ -137,7 +137,7 @@ export function CollaborationWorkspace({
                         rel="noopener noreferrer"
                     >
                         <MissionButton icon="🚀" size="lg">
-                            Buka FigJam/Miro Workspace
+                            Buka LKPD
                         </MissionButton>
                     </a>
                 </div>

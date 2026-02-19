@@ -91,14 +91,14 @@ export default function Phase4Submission({
             <MissionPageTitle
                 step={4}
                 title="Penyajian Hasil Karya"
-                subtitle="Upload flowchart dan source code final kelompokmu"
+                subtitle="Upload LKPD dan source code final kelompokmu"
                 icon="🎨"
                 color="rose"
             />
 
             {/* File Upload Section */}
             <MissionCard
-                title="Upload Flowchart"
+                title="Upload LKPD"
                 subtitle="Format: PDF, JPG, PNG (Max: 10MB)"
                 icon="📊"
                 headerClassName="bg-gradient-to-r from-indigo-500 to-purple-500 border-none"

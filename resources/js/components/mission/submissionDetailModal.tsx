@@ -140,10 +140,10 @@ export function SubmissionDetailModal({
                                 )}
                             </div>
                         </div>
-                        {/* Flowchart Preview */}
+                        {/* LKPD Submission Preview */}
                         <div>
                             <h4 className="mb-3 font-bold text-slate-800">
-                                📊 Flowchart/Dokumen
+                                📊 LKPD
                             </h4>
                             <div className="overflow-hidden rounded-xl border border-slate-200">
                                 {/\.(jpg|jpeg|png|gif)$/i.test(
@@ -154,7 +154,7 @@ export function SubmissionDetailModal({
                                             resolveFileUrl(filePath) ||
                                             undefined
                                         }
-                                        alt="Flowchart"
+                                        alt="LKPD Submission"
                                         className="w-full"
                                     />
                                 ) : /\.(pdf)$/i.test(filePath || '') ? (
