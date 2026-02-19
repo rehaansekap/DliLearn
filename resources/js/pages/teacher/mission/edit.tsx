@@ -66,7 +66,7 @@ export default function Edit({
         handleStepClick,
         validateStep,
         clearErrors,
-        put,
+        post,
     } = useMissionForm({
         initialData: {
             classroom_id: mission.classroom_id,
@@ -100,35 +100,33 @@ export default function Edit({
             return;
         }
 
+        const payload: Partial<typeof data> = { ...data };
+
+        if (!(payload.material_pdf instanceof File)) {
+            delete payload.material_pdf;
+        }
+
+        if (!(payload.lkpd_pdf instanceof File)) {
+            delete payload.lkpd_pdf;
+        }
+
         clearErrors('material_pdf');
         clearErrors('lkpd_pdf');
         setIsSubmitting(true);
 
-        put(route('teacher.missions.update', mission.id), {
-            forceFormData: true,
-            transform: (formData) => {
-                const next = { ...formData } as typeof formData & {
-                    material_pdf?: File | string | null;
-                    lkpd_pdf?: File | string | null;
-                };
-
-                if (!(next.material_pdf instanceof File)) {
-                    delete next.material_pdf;
-                }
-
-                if (!(next.lkpd_pdf instanceof File)) {
-                    delete next.lkpd_pdf;
-                }
-
-                return next;
+        post(
+            route('teacher.missions.update', mission.id),
+            payload as Record<string, unknown>,
+            {
+                forceFormData: true,
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
             },
-            onSuccess: () => {
-                setIsSubmitting(false);
-            },
-            onError: () => {
-                setIsSubmitting(false);
-            },
-        });
+        );
     };
 
     return (

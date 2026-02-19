@@ -45,7 +45,7 @@ Route::middleware(['auth', 'verified', 'teacher'])->prefix('teacher')->name('tea
     Route::get('/mission/create', [TeacherMissionController::class, 'create'])->name('missions.create');
     Route::post('/mission', [TeacherMissionController::class, 'store'])->name('missions.store');
     Route::get('/mission/{slug}/edit', [TeacherMissionController::class, 'edit'])->name('missions.edit');
-    Route::put('/mission/{mission}', [TeacherMissionController::class, 'update'])->name('missions.update');
+    Route::post('/mission/{mission}/update', [TeacherMissionController::class, 'update'])->name('missions.update');
     Route::delete('/mission/{mission}', [TeacherMissionController::class, 'destroy'])->name('missions.destroy');
     Route::get('/mission/{slug}', [TeacherMissionController::class, 'show'])->name('mission.show');
     Route::post('/mission/{mission}/attendance', [TeacherMissionController::class, 'saveAttendance'])->name('mission.attendance');

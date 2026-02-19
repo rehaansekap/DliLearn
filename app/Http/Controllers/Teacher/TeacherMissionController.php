@@ -173,7 +173,6 @@ class TeacherMissionController extends Controller
     {
         $user = Auth::user();
 
-
         if ($mission->teacher_id !== $user->id) {
             abort(403, 'Unauthorized');
         }
