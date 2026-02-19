@@ -13,7 +13,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { Save } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface GroupMember {
     id: number;
@@ -66,6 +66,27 @@ export function SubmissionDetailModal({
         submission?.grade?.teacher_notes ?? '',
     );
     const [isSaving, setIsSaving] = useState(false);
+
+    // Sync state when opening/changing submission (prevents stale grade state)
+    useEffect(() => {
+        setScore(submission?.grade?.score ?? 0);
+        setTeacherNotes(submission?.grade?.teacher_notes ?? '');
+    }, [submission?.grade?.score, submission?.grade?.teacher_notes]);
+
+    const dedupedFeedbacks = useMemo(() => {
+        const raw = submission?.feedbacks ?? [];
+        const map = new Map<number, Feedback>();
+
+        for (const f of raw) {
+            if (!map.has(f.id)) map.set(f.id, f);
+        }
+
+        return Array.from(map.values()).sort(
+            (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime(),
+        );
+    }, [submission?.feedbacks]);
 
     if (!isOpen || !submission) return null;
 
@@ -131,7 +152,6 @@ export function SubmissionDetailModal({
                         : 'max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl',
                 )}
             >
-                {/* Header */}
                 <SubmissionHeader
                     groupName={submission.group_name}
                     groupCode={submission.group_code}
@@ -141,7 +161,6 @@ export function SubmissionDetailModal({
                     isMobile={isMobile}
                 />
 
-                {/* Tabs */}
                 <SubmissionTabs
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
@@ -149,7 +168,6 @@ export function SubmissionDetailModal({
                     isMobile={isMobile}
                 />
 
-                {/* Content */}
                 <div
                     className={cn(
                         'overflow-y-auto',
@@ -166,36 +184,29 @@ export function SubmissionDetailModal({
                                 <EmptySubmission />
                             ) : (
                                 <>
-                                    {/* Members */}
                                     <MembersList
                                         members={submission.members}
                                         isMobile={isMobile}
                                     />
 
-                                    {/* Stats */}
                                     <StatsCards
                                         likesCount={submission.likes_count}
-                                        feedbacksCount={
-                                            submission.feedbacks?.length
-                                        }
+                                        feedbacksCount={dedupedFeedbacks.length}
                                         isMobile={isMobile}
                                     />
 
-                                    {/* File */}
                                     <FileDisplay
                                         filePath={submission.file_path}
                                         isMobile={isMobile}
                                     />
 
-                                    {/* Code */}
                                     <CodeViewer
                                         code={submission.code_answer}
                                         isMobile={isMobile}
                                     />
 
-                                    {/* Feedbacks */}
                                     <FeedbackList
-                                        feedbacks={submission.feedbacks || []}
+                                        feedbacks={dedupedFeedbacks}
                                         isMobile={isMobile}
                                     />
                                 </>
@@ -221,7 +232,6 @@ export function SubmissionDetailModal({
                     )}
                 </div>
 
-                {/* Mobile Sticky Save Button */}
                 {isMobile && activeTab === 'grade' && hasSubmission && (
                     <div className="fixed inset-x-0 bottom-0 z-50 bg-white/90 p-3 backdrop-blur-sm sm:hidden">
                         <div className="mx-auto max-w-3xl">
