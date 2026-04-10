@@ -2,6 +2,7 @@ import { CodeActionButtons } from '@/components/mission/codeActionButtons';
 import { CodeEditor } from '@/components/mission/codeEditor';
 import { CollaborationWorkspace } from '@/components/mission/collaborationWorkspace';
 import { InputModal } from '@/components/mission/inputModal';
+import { MaterialViewer } from '@/components/mission/materialViewer';
 import { Terminal } from '@/components/mission/terminal';
 import { MissionCard } from '@/components/mission/ui/missionCard';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
