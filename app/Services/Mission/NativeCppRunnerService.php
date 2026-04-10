@@ -31,8 +31,15 @@ class NativeCppRunnerService
         }
 
         // Compile (timeout 10s)
+        $timeout = '/usr/bin/timeout';
+        $compiler = '/usr/bin/g++';
+        $env = 'env -i PATH=/usr/bin:/bin';
+
         $compileCmd = sprintf(
-            'timeout 10 g++ -std=c++17 -O2 -Wall %s -o %s 2>&1',
+            '%s %s 10 %s -std=c++17 -O2 -Wall %s -o %s 2>&1',
+            $env,
+            $timeout,
+            $compiler,
             escapeshellarg($sourceFile),
             escapeshellarg($binaryFile)
         );
@@ -55,8 +62,8 @@ class NativeCppRunnerService
 
         // Execute (timeout 5s, dengan stdin jika ada)
         $runCmd = $stdin
-            ? sprintf('timeout 5 %s < %s 2>&1', escapeshellarg($binaryFile), escapeshellarg($stdinFile))
-            : sprintf('timeout 5 %s 2>&1', escapeshellarg($binaryFile));
+            ? sprintf('%s %s 5 %s < %s 2>&1', $env, $timeout, escapeshellarg($binaryFile), escapeshellarg($stdinFile))
+            : sprintf('%s %s 5 %s 2>&1', $env, $timeout, escapeshellarg($binaryFile));
 
         $start = microtime(true);
         $runOutput = [];
