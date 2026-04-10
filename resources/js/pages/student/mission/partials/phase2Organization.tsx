@@ -1,4 +1,4 @@
-import { MaterialViewer } from '@/components/mission/materialViewer';
+// import { MaterialViewer } from '@/components/mission/materialViewer';
 import { TeamMemberCard } from '@/components/mission/teamMemberCard';
 import { MissionButton } from '@/components/mission/ui/missionButton';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
@@ -52,7 +52,7 @@ const ROLE_COLORS = {
 };
 
 export default function Phase2Organization({
-    mission,
+    // mission,
     groupMembers,
     currentUserRole,
     amILeader,
@@ -117,16 +117,16 @@ export default function Phase2Organization({
             </div>
 
             {/* Material PDF Section */}
-            <MaterialViewer
+            {/* <MaterialViewer
                 materialUrl={mission?.material_pdf}
                 title="📚 Bahan Bacaan Siswa"
-            />
+            /> */}
 
             {/* LKPD PDF Section */}
-            <MaterialViewer
+            {/* <MaterialViewer
                 materialUrl={mission.lkpd_pdf}
                 title="📋 Lembar Kerja Peserta Didik (LKPD)"
-            />
+            /> */}
 
             {/* Action Buttons */}
             {amILeader && (

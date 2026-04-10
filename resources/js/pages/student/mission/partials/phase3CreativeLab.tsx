@@ -1,11 +1,11 @@
 import { CodeActionButtons } from '@/components/mission/codeActionButtons';
 import { CodeEditor } from '@/components/mission/codeEditor';
 import { CollaborationWorkspace } from '@/components/mission/collaborationWorkspace';
+import { InputModal } from '@/components/mission/inputModal';
 import { Terminal } from '@/components/mission/terminal';
 import { MissionCard } from '@/components/mission/ui/missionCard';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
 import { useState } from 'react';
-import { InputModal } from '@/components/mission/inputModal';
 
 interface Mission {
     material_pdf?: string | null;
@@ -135,6 +135,18 @@ export default function Phase3CreativeLab({
 
             {/* Collaboration Workspace */}
             <CollaborationWorkspace collaborationLink={collaborationLink} />
+
+            {/* Material PDF Section */}
+            <MaterialViewer
+                materialUrl={mission?.material_pdf}
+                title="📚 Bahan Bacaan Siswa"
+            />
+
+            {/* LKPD PDF Section */}
+            <MaterialViewer
+                materialUrl={mission.lkpd_pdf}
+                title="📋 Lembar Kerja Peserta Didik (LKPD)"
+            />
 
             {/* Code Editor Section */}
             <div>
