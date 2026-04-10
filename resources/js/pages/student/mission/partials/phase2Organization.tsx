@@ -119,7 +119,7 @@ export default function Phase2Organization({
             {/* Material PDF Section */}
             <MaterialViewer
                 materialUrl={mission?.material_pdf}
-                title="📚 Materi Pembelajaran"
+                title="📚 Bahan Bacaan Siswa"
             />
 
             {/* LKPD PDF Section */}

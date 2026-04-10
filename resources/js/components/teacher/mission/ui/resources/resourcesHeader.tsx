@@ -46,7 +46,7 @@ export function ResourcesHeader({ isMobile }: ResourcesHeaderProps) {
                             isMobile ? 'text-xs' : 'text-sm',
                         )}
                     >
-                        Upload materi pembelajaran dan link kolaborasi tim
+                        Upload bahan bacaan siswa dan link kolaborasi tim
                     </p>
                 </div>
             </div>

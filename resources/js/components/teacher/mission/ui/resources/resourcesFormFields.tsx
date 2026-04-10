@@ -47,7 +47,7 @@ export function ResourcesFormFields({
             {/* Materi PDF Upload Field */}
             <FormField>
                 <InputLabel
-                    value="Materi Pembelajaran (PDF)"
+                    value="Bahan Bacaan Siswa (PDF)"
                     icon="📄"
                     required
                     htmlFor="pdf-upload"

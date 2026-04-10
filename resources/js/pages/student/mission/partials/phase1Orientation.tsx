@@ -2,7 +2,6 @@ import { ReflectionStatusCard } from '@/components/mission/reflectionStatusCard'
 import { MissionButton } from '@/components/mission/ui/missionButton';
 import { MissionCard } from '@/components/mission/ui/missionCard';
 import { MissionPageTitle } from '@/components/mission/ui/missionPageTitle';
-import { VideoPlayer } from '@/components/mission/videoPlayer';
 import { cn } from '@/lib/utils';
 import { ChangeEvent, FormEvent, useState } from 'react';
 
@@ -68,7 +67,7 @@ export default function Phase1Orientation({
             </MissionCard>
 
             {/* Video Section */}
-            <VideoPlayer videoUrl={mission.video_url} />
+            {/* <VideoPlayer videoUrl={mission.video_url} /> */}
 
             {/* Tips Section */}
             <MissionCard

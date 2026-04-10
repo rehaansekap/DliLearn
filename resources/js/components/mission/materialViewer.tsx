@@ -7,7 +7,7 @@ interface MaterialViewerProps {
 
 export function MaterialViewer({
     materialUrl,
-    title = 'Materi Pembelajaran',
+    title = 'Bahan Bacaan Siswa',
 }: MaterialViewerProps) {
     const [showViewer, setShowViewer] = useState(false);
 

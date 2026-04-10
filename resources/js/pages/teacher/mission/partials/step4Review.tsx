@@ -198,7 +198,7 @@ export function Step4Review({ data, classrooms }: Step4ReviewProps) {
                     bgColor="bg-amber-50/30"
                 >
                     <div className="space-y-4">
-                        <ReviewItem label="Materi Pembelajaran (PDF)">
+                        <ReviewItem label="Bahan Bacaan Siswa (PDF)">
                             <FileBadge fileName={materialFileName} />
                         </ReviewItem>
 

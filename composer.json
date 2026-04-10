@@ -82,7 +82,7 @@
             "@php artisan migrate --graceful --ansi"
         ],
         "pre-autoload-dump": [
-            "mkdir -p bootstrap/cache"
+            "@php -r \"is_dir('bootstrap/cache') || mkdir('bootstrap/cache', 0755, true);\""
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
