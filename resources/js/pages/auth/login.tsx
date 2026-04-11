@@ -18,6 +18,26 @@ interface LoginProps {
 export default function Login({ status }: LoginProps) {
     const [showPassword, setShowPassword] = useState(false);
 
+    const downloadGuide = async () => {
+        try {
+            const response = await fetch('/storage/Guide.pdf');
+            if (!response.ok) {
+                throw new Error(`Failed to download guide: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Guide.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading guide:', error);
+        }
+    };
+
     return (
         <>
             <Head title="Login">
@@ -274,6 +294,32 @@ export default function Login({ status }: LoginProps) {
                                     );
                                 }}
                             </Form>
+                        </div>
+
+                        {/* Guide Download Section */}
+                        <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100">
+                                    <span className="text-xl">📖</span>
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-slate-800">
+                                        Panduan Penggunaan
+                                    </h3>
+                                    <p className="mt-1 text-sm text-slate-600">
+                                        Unduh panduan lengkap untuk memulai
+                                        menggunakan DliLearn sesuai dengan role
+                                        Anda (Siswa, Guru, Admin).
+                                    </p>
+                                    <button
+                                        onClick={() => downloadGuide()}
+                                        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2 text-sm font-semibold text-white transition hover:from-indigo-700 hover:to-purple-700"
+                                    >
+                                        <span>📥</span>
+                                        <span>Download Guide.pdf</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Footer */}
