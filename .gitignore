@@ -14,6 +14,9 @@
 deploy.zip
 .DS_Store
 *.bak
+*.sql
+seeded-users.txt
+
 .env
 .env.backup
 .env.production
