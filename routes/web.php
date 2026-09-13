@@ -81,6 +81,24 @@ if (file_exists(__DIR__ . '/auth.php')) {
 require __DIR__ . '/settings.php';
 
 // Health Check Endpoint (Untuk Monitoring & Supabase Keep-Alive)
+Route::get('/health', function () {
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'healthy',
+            'database' => 'connected',
+            'timestamp' => now()->toIso8601String(),
+        ], 200);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'unhealthy',
+            'database' => 'disconnected',
+            'error' => $e->getMessage(),
+            'timestamp' => now()->toIso8601String(),
+        ], 500);
+    }
+})->name('health.direct');
+
 Route::get('/api/health', function () {
     try {
         \Illuminate\Support\Facades\DB::connection()->getPdo();

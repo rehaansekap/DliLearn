@@ -79,16 +79,23 @@ jobs:
               CLEAN_URL="https://$CLEAN_URL"
             fi
 
-            echo "📡 Mem-ping health check di: $CLEAN_URL/api/health ..."
+            echo "📡 Mem-ping health check di: $CLEAN_URL/health ..."
             
             # Gunakan -L (--location) agar otomatis mengikuti HTTP 308/301 redirect dari Vercel
-            HTTP_RESPONSE=$(curl -s -L -o health.json -w "%{http_code}" "$CLEAN_URL/api/health")
-            echo "Final HTTP Status Code: $HTTP_RESPONSE"
+            HTTP_RESPONSE=$(curl -s -L -o health.json -w "%{http_code}" "$CLEAN_URL/health")
+            echo "Final HTTP Status Code (/health): $HTTP_RESPONSE"
             echo "Response Body: $(cat health.json)"
             
             if [ "$HTTP_RESPONSE" -eq 200 ]; then
               echo "✅ Database & App Vercel sehat dan terkoneksi!"
             else
-              echo "⚠️ Endpoint mengembalikan status code $HTTP_RESPONSE"
+              echo "📡 Mencoba fallback ke endpoint built-in: $CLEAN_URL/up ..."
+              UP_RESPONSE=$(curl -s -L -o up.json -w "%{http_code}" "$CLEAN_URL/up")
+              echo "Final HTTP Status Code (/up): $UP_RESPONSE"
+              if [ "$UP_RESPONSE" -eq 200 ]; then
+                echo "✅ App Vercel aktif dan merespons!"
+              else
+                echo "⚠️ Endpoint mengembalikan status code: $HTTP_RESPONSE (health) / $UP_RESPONSE (up)"
+              fi
             fi
           fi
