@@ -3,7 +3,7 @@ name: Keep Supabase Active (Anti-Pause)
 on:
   schedule:
     # Berjalan setiap 3 hari sekali pada pukul 00:00 UTC (07:00 WIB)
-    # Ini menjamin Supabase Free Tier tidak pernah mencapai batas 7 hari inaktivitas
+    # Menjamin Supabase Free Tier tidak pernah mencapai batas 7 hari inaktivitas
     - cron: '0 0 */3 * *'
   workflow_dispatch: # Memungkinkan tombol manual "Run workflow" di tab Actions GitHub
 
@@ -14,27 +14,54 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Ping Supabase REST API
+      - name: Ping Supabase API & Database
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "⚠️ [Peringatan]: SUPABASE_URL atau SUPABASE_ANON_KEY belum diisi di GitHub Secrets."
-            echo "Silakan tambahkan di Settings -> Secrets and variables -> Actions."
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "⚠️ [Peringatan]: SUPABASE_URL belum diisi di GitHub Secrets."
+            exit 1
+          fi
+
+          # Gunakan Service Role Key jika ada, jika tidak gunakan Anon Key
+          API_KEY="${SUPABASE_SERVICE_ROLE:-$SUPABASE_ANON_KEY}"
+
+          if [ -z "$API_KEY" ]; then
+            echo "⚠️ [Peringatan]: SUPABASE_ANON_KEY atau SUPABASE_SERVICE_ROLE belum diisi di GitHub Secrets."
+            exit 1
+          fi
+
+          # Bersihkan trailing slash
+          CLEAN_SUPABASE_URL="${SUPABASE_URL%/}"
+
+          echo "📡 [1/2] Mem-ping Supabase Auth Health API ($CLEAN_SUPABASE_URL/auth/v1/health)..."
+          AUTH_STATUS=$(curl -s -L -o auth_resp.json -w "%{http_code}" -X GET \
+            "$CLEAN_SUPABASE_URL/auth/v1/health" \
+            -H "apikey: $API_KEY" \
+            -H "Authorization: Bearer $API_KEY")
+
+          echo "Auth HTTP Status: $AUTH_STATUS"
+          echo "Auth Response: $(cat auth_resp.json)"
+
+          echo ""
+          echo "📡 [2/2] Mem-ping Supabase Database REST Query ($CLEAN_SUPABASE_URL/rest/v1/users?select=id&limit=1)..."
+          REST_STATUS=$(curl -s -L -o rest_resp.json -w "%{http_code}" -X GET \
+            "$CLEAN_SUPABASE_URL/rest/v1/users?select=id&limit=1" \
+            -H "apikey: $API_KEY" \
+            -H "Authorization: Bearer $API_KEY")
+
+          echo "REST HTTP Status: $REST_STATUS"
+          echo "REST Response: $(cat rest_resp.json)"
+
+          if [ "$AUTH_STATUS" -eq 200 ] || [ "$REST_STATUS" -eq 200 ]; then
+            echo ""
+            echo "✅ BERHASIL: Supabase aktif dan aktivitas database berhasil diperbarui!"
           else
-            echo "📡 Mem-ping Supabase REST API di: $SUPABASE_URL/rest/v1/ ..."
-            HTTP_RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X GET \
-              "$SUPABASE_URL/rest/v1/" \
-              -H "apikey: $SUPABASE_ANON_KEY" \
-              -H "Authorization: Bearer $SUPABASE_ANON_KEY")
-            
-            echo "HTTP Status Code: $HTTP_RESPONSE"
-            if [ "$HTTP_RESPONSE" -ge 200 ] && [ "$HTTP_RESPONSE" -lt 400 ]; then
-              echo "✅ Berhasil mem-ping Supabase REST API! Aktivitas database ter-reset."
-            else
-              echo "⚠️ Response code: $HTTP_RESPONSE (Detail: $(cat response.json))"
-            fi
+            echo ""
+            echo "❌ GAGAL: Tidak dapat mem-ping Supabase secara valid."
+            exit 1
           fi
 
       - name: Ping Vercel App Health Check Endpoint
@@ -42,14 +69,21 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
         run: |
           if [ -z "$APP_URL" ]; then
-            echo "ℹ️ APP_URL secret belum diisi (opsional). Jika diisi, endpoint /api/health akan di-ping untuk mengecek database."
+            echo "ℹ️ APP_URL secret belum diisi (opsional)."
           else
-            # Bersihkan trailing slash jika ada
+            # Bersihkan trailing slash
             CLEAN_URL="${APP_URL%/}"
+            
+            # Pastikan diawali dengan https:// jika user lupa mencantumkannya
+            if [[ ! "$CLEAN_URL" =~ ^https?:// ]]; then
+              CLEAN_URL="https://$CLEAN_URL"
+            fi
+
             echo "📡 Mem-ping health check di: $CLEAN_URL/api/health ..."
             
-            HTTP_RESPONSE=$(curl -s -o health.json -w "%{http_code}" -X GET "$CLEAN_URL/api/health")
-            echo "HTTP Status Code: $HTTP_RESPONSE"
+            # Gunakan -L (--location) agar otomatis mengikuti HTTP 308/301 redirect dari Vercel
+            HTTP_RESPONSE=$(curl -s -L -o health.json -w "%{http_code}" "$CLEAN_URL/api/health")
+            echo "Final HTTP Status Code: $HTTP_RESPONSE"
             echo "Response Body: $(cat health.json)"
             
             if [ "$HTTP_RESPONSE" -eq 200 ]; then
