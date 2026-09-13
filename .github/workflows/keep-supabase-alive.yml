@@ -1,0 +1,60 @@
+name: Keep Supabase Active (Anti-Pause)
+
+on:
+  schedule:
+    # Berjalan setiap 3 hari sekali pada pukul 00:00 UTC (07:00 WIB)
+    # Ini menjamin Supabase Free Tier tidak pernah mencapai batas 7 hari inaktivitas
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Memungkinkan tombol manual "Run workflow" di tab Actions GitHub
+
+jobs:
+  ping-supabase:
+    name: Ping Supabase & App Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "⚠️ [Peringatan]: SUPABASE_URL atau SUPABASE_ANON_KEY belum diisi di GitHub Secrets."
+            echo "Silakan tambahkan di Settings -> Secrets and variables -> Actions."
+          else
+            echo "📡 Mem-ping Supabase REST API di: $SUPABASE_URL/rest/v1/ ..."
+            HTTP_RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X GET \
+              "$SUPABASE_URL/rest/v1/" \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+            
+            echo "HTTP Status Code: $HTTP_RESPONSE"
+            if [ "$HTTP_RESPONSE" -ge 200 ] && [ "$HTTP_RESPONSE" -lt 400 ]; then
+              echo "✅ Berhasil mem-ping Supabase REST API! Aktivitas database ter-reset."
+            else
+              echo "⚠️ Response code: $HTTP_RESPONSE (Detail: $(cat response.json))"
+            fi
+          fi
+
+      - name: Ping Vercel App Health Check Endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "ℹ️ APP_URL secret belum diisi (opsional). Jika diisi, endpoint /api/health akan di-ping untuk mengecek database."
+          else
+            # Bersihkan trailing slash jika ada
+            CLEAN_URL="${APP_URL%/}"
+            echo "📡 Mem-ping health check di: $CLEAN_URL/api/health ..."
+            
+            HTTP_RESPONSE=$(curl -s -o health.json -w "%{http_code}" -X GET "$CLEAN_URL/api/health")
+            echo "HTTP Status Code: $HTTP_RESPONSE"
+            echo "Response Body: $(cat health.json)"
+            
+            if [ "$HTTP_RESPONSE" -eq 200 ]; then
+              echo "✅ Database & App Vercel sehat dan terkoneksi!"
+            else
+              echo "⚠️ Endpoint mengembalikan status code $HTTP_RESPONSE"
+            fi
+          fi

@@ -1,0 +1,15 @@
+/node_modules
+/vendor
+/.git
+/.github
+/tests
+/documentations
+/railway
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+phpunit.xml
+README.md
+*.log
+deploy.zip
