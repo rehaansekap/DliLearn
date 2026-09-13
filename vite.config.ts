@@ -6,7 +6,7 @@ import laravel from 'laravel-vite-plugin';
 
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -20,11 +20,16 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        // Hanya jalankan wayfinder di mode development lokal (dev server) jika bukan di build CI/Vercel
+        ...(command === 'serve' && !process.env.VERCEL
+            ? [
+                  wayfinder({
+                      formVariants: true,
+                  }),
+              ]
+            : []),
     ],
     esbuild: {
         jsx: 'automatic',
     },
-});
+}));
