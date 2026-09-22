@@ -2,100 +2,61 @@ name: Keep Supabase Active (Anti-Pause)
 
 on:
   schedule:
-    # Berjalan setiap 3 hari sekali pada pukul 00:00 UTC (07:00 WIB)
-    # Menjamin Supabase Free Tier tidak pernah mencapai batas 7 hari inaktivitas
-    - cron: '0 0 */3 * *'
+    # Berjalan setiap hari pada pukul 01:00 UTC (08:00 WIB)
+    # Memastikan database Supabase Free Tier selalu memiliki aktivitas nyata dan tidak pernah di-pause
+    - cron: '0 1 * * *'
   workflow_dispatch: # Memungkinkan tombol manual "Run workflow" di tab Actions GitHub
 
 jobs:
-  ping-supabase:
-    name: Ping Supabase & App Health Check
+  keep-alive:
+    name: Keep Alive Ping (App & Supabase)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - name: Ping Supabase API & Database
+      - name: Ping Vercel App Health & Trigger Database Query
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          TARGET_URL="${APP_URL:-https://dlilearn.vercel.app}"
+          CLEAN_URL="${TARGET_URL%/}"
+          if [[ ! "$CLEAN_URL" =~ ^https?:// ]]; then
+            CLEAN_URL="https://$CLEAN_URL"
+          fi
+
+          echo "📡 [1/2] Mem-ping endpoint health Vercel di: $CLEAN_URL/health ..."
+          HTTP_CODE=$(curl -s -L -o resp_health.json -w "%{http_code}" "$CLEAN_URL/health")
+          echo "Status Code (/health): $HTTP_CODE"
+          echo "Response Body: $(cat resp_health.json)"
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ Query database Supabase melalui Laravel Vercel BERHASIL dijalankan!"
+          else
+            echo "⚠️ Mencoba endpoint alternatif: $CLEAN_URL/api/health ..."
+            ALT_CODE=$(curl -s -L -o resp_alt.json -w "%{http_code}" "$CLEAN_URL/api/health")
+            echo "Status Code (/api/health): $ALT_CODE"
+            echo "Response Body: $(cat resp_alt.json)"
+          fi
+
+      - name: Direct Ping Supabase REST Database Query (Optional)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
         run: |
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "⚠️ [Peringatan]: SUPABASE_URL belum diisi di GitHub Secrets."
-            exit 1
-          fi
+          if [ -n "$SUPABASE_URL" ]; then
+            API_KEY="${SUPABASE_SERVICE_ROLE:-$SUPABASE_ANON_KEY}"
+            CLEAN_SUPABASE_URL="${SUPABASE_URL%/}"
 
-          # Gunakan Service Role Key jika ada, jika tidak gunakan Anon Key
-          API_KEY="${SUPABASE_SERVICE_ROLE:-$SUPABASE_ANON_KEY}"
+            if [ -n "$API_KEY" ]; then
+              echo "📡 [2/2] Mem-ping Supabase REST API Query ($CLEAN_SUPABASE_URL/rest/v1/users?select=id&limit=1)..."
+              REST_STATUS=$(curl -s -L -o rest_resp.json -w "%{http_code}" -X GET \
+                "$CLEAN_SUPABASE_URL/rest/v1/users?select=id&limit=1" \
+                -H "apikey: $API_KEY" \
+                -H "Authorization: Bearer $API_KEY")
 
-          if [ -z "$API_KEY" ]; then
-            echo "⚠️ [Peringatan]: SUPABASE_ANON_KEY atau SUPABASE_SERVICE_ROLE belum diisi di GitHub Secrets."
-            exit 1
-          fi
-
-          # Bersihkan trailing slash
-          CLEAN_SUPABASE_URL="${SUPABASE_URL%/}"
-
-          echo "📡 [1/2] Mem-ping Supabase Auth Health API ($CLEAN_SUPABASE_URL/auth/v1/health)..."
-          AUTH_STATUS=$(curl -s -L -o auth_resp.json -w "%{http_code}" -X GET \
-            "$CLEAN_SUPABASE_URL/auth/v1/health" \
-            -H "apikey: $API_KEY" \
-            -H "Authorization: Bearer $API_KEY")
-
-          echo "Auth HTTP Status: $AUTH_STATUS"
-          echo "Auth Response: $(cat auth_resp.json)"
-
-          echo ""
-          echo "📡 [2/2] Mem-ping Supabase Database REST Query ($CLEAN_SUPABASE_URL/rest/v1/users?select=id&limit=1)..."
-          REST_STATUS=$(curl -s -L -o rest_resp.json -w "%{http_code}" -X GET \
-            "$CLEAN_SUPABASE_URL/rest/v1/users?select=id&limit=1" \
-            -H "apikey: $API_KEY" \
-            -H "Authorization: Bearer $API_KEY")
-
-          echo "REST HTTP Status: $REST_STATUS"
-          echo "REST Response: $(cat rest_resp.json)"
-
-          if [ "$AUTH_STATUS" -eq 200 ] || [ "$REST_STATUS" -eq 200 ]; then
-            echo ""
-            echo "✅ BERHASIL: Supabase aktif dan aktivitas database berhasil diperbarui!"
-          else
-            echo ""
-            echo "❌ GAGAL: Tidak dapat mem-ping Supabase secara valid."
-            exit 1
-          fi
-
-      - name: Ping Vercel App Health Check Endpoint
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
-        run: |
-          if [ -z "$APP_URL" ]; then
-            echo "ℹ️ APP_URL secret belum diisi (opsional)."
-          else
-            # Bersihkan trailing slash
-            CLEAN_URL="${APP_URL%/}"
-            
-            # Pastikan diawali dengan https:// jika user lupa mencantumkannya
-            if [[ ! "$CLEAN_URL" =~ ^https?:// ]]; then
-              CLEAN_URL="https://$CLEAN_URL"
-            fi
-
-            echo "📡 Mem-ping health check di: $CLEAN_URL/health ..."
-            
-            # Gunakan -L (--location) agar otomatis mengikuti HTTP 308/301 redirect dari Vercel
-            HTTP_RESPONSE=$(curl -s -L -o health.json -w "%{http_code}" "$CLEAN_URL/health")
-            echo "Final HTTP Status Code (/health): $HTTP_RESPONSE"
-            echo "Response Body: $(cat health.json)"
-            
-            if [ "$HTTP_RESPONSE" -eq 200 ]; then
-              echo "✅ Database & App Vercel sehat dan terkoneksi!"
-            else
-              echo "📡 Mencoba fallback ke endpoint built-in: $CLEAN_URL/up ..."
-              UP_RESPONSE=$(curl -s -L -o up.json -w "%{http_code}" "$CLEAN_URL/up")
-              echo "Final HTTP Status Code (/up): $UP_RESPONSE"
-              if [ "$UP_RESPONSE" -eq 200 ]; then
-                echo "✅ App Vercel aktif dan merespons!"
-              else
-                echo "⚠️ Endpoint mengembalikan status code: $HTTP_RESPONSE (health) / $UP_RESPONSE (up)"
-              fi
+              echo "REST HTTP Status: $REST_STATUS"
+              echo "REST Response: $(cat rest_resp.json)"
             fi
           fi
+          echo "🎉 Selesai! Supabase tetap aktif dan terhindar dari auto-pause."

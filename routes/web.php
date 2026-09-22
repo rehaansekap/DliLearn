@@ -83,10 +83,11 @@ require __DIR__ . '/settings.php';
 // Health Check Endpoint (Untuk Monitoring & Supabase Keep-Alive)
 Route::get('/health', function () {
     try {
-        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $count = \Illuminate\Support\Facades\DB::table('users')->count();
         return response()->json([
             'status' => 'healthy',
             'database' => 'connected',
+            'user_count' => $count,
             'timestamp' => now()->toIso8601String(),
         ], 200);
     } catch (\Throwable $e) {
@@ -101,10 +102,11 @@ Route::get('/health', function () {
 
 Route::get('/api/health', function () {
     try {
-        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $count = \Illuminate\Support\Facades\DB::table('users')->count();
         return response()->json([
             'status' => 'healthy',
             'database' => 'connected',
+            'user_count' => $count,
             'timestamp' => now()->toIso8601String(),
         ], 200);
     } catch (\Throwable $e) {
